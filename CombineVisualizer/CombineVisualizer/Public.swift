@@ -14,7 +14,7 @@ extension Publishers {
     /// A publisher that uses a subject to deliver elements to multiple subscribers.
     ///
     /// Use a multicast publisher when you have multiple downstream subscribers, but you want upstream publishers to only process one ``Subscriber/receive(_:)`` call per event.
-    final public class Multicast<Upstream, SubjectType> : ConnectablePublisher where Upstream : Publisher, SubjectType : Subject, Upstream.Failure == SubjectType.Failure, Upstream.Output == SubjectType.Output {
+    final public class CZMulticast<Upstream, SubjectType> : CZPublisher where Upstream : Publisher, SubjectType : Subject, Upstream.Failure == SubjectType.Failure, Upstream.Output == SubjectType.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -31,25 +31,24 @@ extension Publishers {
 
         /// A closure that returns a subject each time a subscriber attaches to the multicast publisher.
         final public let createSubject: () -> SubjectType
-
-        /// Creates a multicast publisher that applies a closure to create a subject that delivers elements to subscribers.
-        ///
-        /// - Parameter createSubject: A closure that returns a ``Subject`` each time a subscriber attaches to the multicast publisher.
-        public init(upstream: Upstream, createSubject: @escaping () -> SubjectType)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        final public func receive<S>(subscriber: S) where S : Subscriber, SubjectType.Failure == S.Failure, SubjectType.Output == S.Input
-
+        
+        public let inner: Multicast<Upstream, SubjectType>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Multicast<Upstream, SubjectType>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.createSubject = inner.createSubject
+            self.inner = inner
+            self.uuid = uuid
+        }
+        
         /// Connects to the publisher, allowing it to produce elements, and returns an instance with which to cancel publishing.
         ///
         /// - Returns: A ``Cancellable`` instance that you use to cancel publishing.
-        final public func connect() -> Cancellable
+        final public func connect() -> Cancellable {
+            self.visualize()
+            return inner.connect()
+        }
     }
 }
 
@@ -57,7 +56,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that receives elements from an upstream publisher on a specific scheduler.
-    public struct SubscribeOn<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZSubscribeOn<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -77,22 +76,17 @@ extension Publishers {
 
         /// Scheduler options that customize the delivery of elements.
         public let options: Context.SchedulerOptions?
+        
+        public let inner: SubscribeOn<Upstream, Context>
+        public let uuid: UUID
 
-        /// Creates a publisher that receives elements from an upstream publisher on a specific scheduler.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - scheduler: The scheduler the publisher should use to receive elements.
-        ///   - options: Scheduler options that customize the delivery of elements.
-        public init(upstream: Upstream, scheduler: Context, options: Context.SchedulerOptions?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: SubscribeOn<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.scheduler = inner.scheduler
+            self.options = inner.options
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -100,7 +94,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that measures and emits the time interval between events received from an upstream publisher.
-    public struct MeasureInterval<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZMeasureInterval<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -117,22 +111,16 @@ extension Publishers {
 
         /// The scheduler used for tracking the timing of events.
         public let scheduler: Context
+        
+        public let inner: MeasureInterval<Upstream, Context>
+        public let uuid: UUID
 
-        /// Creates a publisher that measures and emits the time interval between events received from an upstream publisher.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - scheduler: A scheduler to use for tracking the timing of events.
-        public init(upstream: Upstream, scheduler: Context)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Context.SchedulerTimeType.Stride
+        public init(inner: MeasureInterval<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.scheduler = inner.scheduler
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -140,7 +128,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that omits elements from an upstream publisher until a given closure returns false.
-    public struct DropWhile<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZDropWhile<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -157,25 +145,20 @@ extension Publishers {
 
         /// The closure that indicates whether to drop the element.
         public let predicate: (Publishers.DropWhile<Upstream>.Output) -> Bool
+        
+        public let inner: DropWhile<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that omits elements from an upstream publisher until a given closure returns false.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The closure that indicates whether to drop the element.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.DropWhile<Upstream>.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: DropWhile<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that omits elements from an upstream publisher until a given error-throwing closure returns false.
-    public struct TryDropWhile<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryDropWhile<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -192,21 +175,16 @@ extension Publishers {
 
         /// The error-throwing closure that indicates whether to drop the element.
         public let predicate: (Publishers.TryDropWhile<Upstream>.Output) throws -> Bool
+        
+        public let inner: TryDropWhile<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that omits elements from an upstream publisher until a given error-throwing closure returns false.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The error-throwing closure that indicates whether to drop the element.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.TryDropWhile<Upstream>.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        public init(inner: TryDropWhile<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -214,7 +192,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that republishes all elements that match a provided closure.
-    public struct Filter<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZFilter<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -231,25 +209,20 @@ extension Publishers {
 
         /// A closure that indicates whether to republish an element.
         public let isIncluded: (Upstream.Output) -> Bool
+        
+        public let inner: Filter<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes all elements that match a provided closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - isIncluded: A closure that indicates whether to republish an element.
-        public init(upstream: Upstream, isIncluded: @escaping (Upstream.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: Filter<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.isIncluded = inner.isIncluded
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that republishes all elements that match a provided error-throwing closure.
-    public struct TryFilter<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryFilter<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -266,21 +239,16 @@ extension Publishers {
 
         /// An error-throwing closure that indicates whether this filter should republish an element.
         public let isIncluded: (Upstream.Output) throws -> Bool
+        
+        public let inner: TryFilter<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes all elements that match a provided error-throwing closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - isIncluded: An error-throwing closure that indicates whether this filter should republish an element.
-        public init(upstream: Upstream, isIncluded: @escaping (Upstream.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        public init(inner: TryFilter<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.isIncluded = inner.isIncluded
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -291,7 +259,7 @@ extension Publishers {
     ///
     /// When any of the provided closures returns `true`, this publisher raises the `SIGTRAP` signal to stop the process in the debugger.
     /// Otherwise, this publisher passes through values and completions as-is.
-    public struct Breakpoint<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZBreakpoint<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -314,24 +282,18 @@ extension Publishers {
 
         /// A closure that executes when the publisher receives completion, and can raise a debugger signal by returning a true Boolean value.
         public let receiveCompletion: ((Subscribers.Completion<Publishers.Breakpoint<Upstream>.Failure>) -> Bool)?
+        
+        public let inner: Breakpoint<Upstream>
+        public let uuid: UUID
 
-        /// Creates a breakpoint publisher with the provided upstream publisher and breakpoint-raising closures.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - receiveSubscription: A closure that executes when the publisher receives a subscription, and can raise a debugger signal by returning a true Boolean value.
-        ///   - receiveOutput: A closure that executes when the publisher receives output from the upstream publisher, and can raise a debugger signal by returning a true Boolean value.
-        ///   - receiveCompletion: A closure that executes when the publisher receives completion, and can raise a debugger signal by returning a true Boolean value.
-        public init(upstream: Upstream, receiveSubscription: ((Subscription) -> Bool)? = nil, receiveOutput: ((Upstream.Output) -> Bool)? = nil, receiveCompletion: ((Subscribers.Completion<Publishers.Breakpoint<Upstream>.Failure>) -> Bool)? = nil)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: Breakpoint<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.receiveSubscription = inner.receiveSubscription
+            self.receiveOutput = inner.receiveOutput
+            self.receiveCompletion = inner.receiveCompletion
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -339,7 +301,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes a single Boolean value that indicates whether all received elements pass a given predicate.
-    public struct AllSatisfy<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZAllSatisfy<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -358,25 +320,20 @@ extension Publishers {
         ///
         /// Return `true` to continue, or `false` to cancel the upstream and finish.
         public let predicate: (Upstream.Output) -> Bool
+        
+        public let inner: AllSatisfy<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that publishes a single Boolean value that indicates whether all received elements pass a given predicate.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: A closure that evaluates each received element.
-        public init(upstream: Upstream, predicate: @escaping (Upstream.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Bool
+        public init(inner: AllSatisfy<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that publishes a single Boolean value that indicates whether all received elements pass a given error-throwing predicate.
-    public struct TryAllSatisfy<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryAllSatisfy<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -395,21 +352,16 @@ extension Publishers {
         ///
         /// Return `true` to continue, or `false` to cancel the upstream and complete. The closure may throw, in which case the publisher cancels the upstream publisher and fails with the thrown error.
         public let predicate: (Upstream.Output) throws -> Bool
+        
+        public let inner: TryAllSatisfy<Upstream>
+        public let uuid: UUID
 
-        /// Returns a publisher that publishes a single Boolean value that indicates whether all received elements pass a given error-throwing predicate.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: A closure that evaluates each received element.
-        public init(upstream: Upstream, predicate: @escaping (Upstream.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, S.Failure == Error, S.Input == Bool
+        public init(inner: TryAllSatisfy<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -417,7 +369,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes only elements that don’t match the previous element.
-    public struct RemoveDuplicates<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZRemoveDuplicates<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -434,24 +386,20 @@ extension Publishers {
 
         /// The predicate closure used to evaluate whether two elements are duplicates.
         public let predicate: (Publishers.RemoveDuplicates<Upstream>.Output, Publishers.RemoveDuplicates<Upstream>.Output) -> Bool
+        
+        public let inner: RemoveDuplicates<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that publishes only elements that don’t match the previous element, as evaluated by a provided closure.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        /// - Parameter predicate: A closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.RemoveDuplicates<Upstream>.Output, Publishers.RemoveDuplicates<Upstream>.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: RemoveDuplicates<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that publishes only elements that don’t match the previous element, as evaluated by a provided error-throwing closure.
-    public struct TryRemoveDuplicates<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryRemoveDuplicates<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         public typealias Output = Upstream.Output
@@ -466,20 +414,16 @@ extension Publishers {
 
         /// An error-throwing closure to evaluate whether two elements are equivalent, for purposes of filtering.
         public let predicate: (Publishers.TryRemoveDuplicates<Upstream>.Output, Publishers.TryRemoveDuplicates<Upstream>.Output) throws -> Bool
+        
+        public let inner: TryRemoveDuplicates<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that publishes only elements that don’t match the previous element, as evaluated by a provided error-throwing closure.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        /// - Parameter predicate: An error-throwing closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first. If this closure throws an error, the publisher terminates with the thrown error.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.TryRemoveDuplicates<Upstream>.Output, Publishers.TryRemoveDuplicates<Upstream>.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        public init(inner: TryRemoveDuplicates<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -487,7 +431,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that decodes elements received from an upstream publisher, using a given decoder.
-    public struct Decode<Upstream, Output, Coder> : Publisher where Upstream : Publisher, Output : Decodable, Coder : TopLevelDecoder, Upstream.Output == Coder.Input {
+    public struct CZDecode<Upstream, Output, Coder> : CZPublisher where Upstream : Publisher, Output : Decodable, Coder : TopLevelDecoder, Upstream.Output == Coder.Input {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -495,25 +439,18 @@ extension Publishers {
         public typealias Failure = Error
 
         public let upstream: Upstream
+        public let inner: Decode<Upstream, Output, Coder>
+        public let uuid: UUID
 
-        /// Creates a publisher that decodes elements received from an upstream publisher, using a given decoder.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - decoder: The decoder that decodes elements received from the upstream publisher.
-        public init(upstream: Upstream, decoder: Coder)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Error
+        public init(inner: Decode<Upstream, Output, Coder>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that encodes elements received from an upstream publisher, using a given encoder.
-    public struct Encode<Upstream, Coder> : Publisher where Upstream : Publisher, Coder : TopLevelEncoder, Upstream.Output : Encodable {
+    public struct CZEncode<Upstream, Coder> : CZPublisher where Upstream : Publisher, Coder : TopLevelEncoder, Upstream.Output : Encodable {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -526,21 +463,14 @@ extension Publishers {
         public typealias Output = Coder.Output
 
         public let upstream: Upstream
+        public let inner: Encode<Upstream, Coder>
+        public let uuid: UUID
 
-        /// Creates a publisher that decodes elements received from an upstream publisher, using a given decoder.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - encoder: The encoder that decodes elements received from the upstream publisher.
-        public init(upstream: Upstream, encoder: Coder)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Coder.Output == S.Input, S.Failure == Error
+        public init(inner: Encode<Upstream, Coder>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -548,7 +478,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that emits a Boolean value when it receives a specific element from its upstream publisher.
-    public struct Contains<Upstream> : Publisher where Upstream : Publisher, Upstream.Output : Equatable {
+    public struct CZContains<Upstream> : CZPublisher where Upstream : Publisher, Upstream.Output : Equatable {
 
         /// The kind of values published by this publisher.
         ///
@@ -565,21 +495,16 @@ extension Publishers {
 
         /// The element to match in the upstream publisher.
         public let output: Upstream.Output
+        
+        public let inner: Contains<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that emits a Boolean value when it receives a specific element from its upstream publisher.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - output: The element to match in the upstream publisher.
-        public init(upstream: Upstream, output: Upstream.Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Bool
+        public init(inner: Contains<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.output = inner.output
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -587,7 +512,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that receives and combines the latest elements from two publishers.
-    public struct CombineLatest<A, B> : Publisher where A : Publisher, B : Publisher, A.Failure == B.Failure {
+    public struct CZCombineLatest<A, B> : CZPublisher where A : Publisher, B : Publisher, A.Failure == B.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -602,25 +527,20 @@ extension Publishers {
         public let a: A
 
         public let b: B
+        
+        public let inner: CombineLatest<A, B>
+        public let uuid: UUID
 
-        /// Creates a publisher that receives and combines the latest elements from two publishers.
-        /// - Parameters:
-        ///   - a: The first upstream publisher.
-        ///   - b: The second upstream publisher.
-        public init(_ a: A, _ b: B)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, B.Failure == S.Failure, S.Input == (A.Output, B.Output)
+        public init(inner: CombineLatest<A, B>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that receives and combines the latest elements from three publishers.
-    public struct CombineLatest3<A, B, C> : Publisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, B.Failure == C.Failure {
+    public struct CZCombineLatest3<A, B, C> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, B.Failure == C.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -637,21 +557,21 @@ extension Publishers {
         public let b: B
 
         public let c: C
+        
+        public let inner: CombineLatest3<A, B, C>
+        public let uuid: UUID
 
-        public init(_ a: A, _ b: B, _ c: C)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, C.Failure == S.Failure, S.Input == (A.Output, B.Output, C.Output)
+        public init(inner: CombineLatest3<A, B, C>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that receives and combines the latest elements from four publishers.
-    public struct CombineLatest4<A, B, C, D> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, B.Failure == C.Failure, C.Failure == D.Failure {
+    public struct CZCombineLatest4<A, B, C, D> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, B.Failure == C.Failure, C.Failure == D.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -671,16 +591,17 @@ extension Publishers {
 
         public let d: D
 
-        public init(_ a: A, _ b: B, _ c: C, _ d: D)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, D.Failure == S.Failure, S.Input == (A.Output, B.Output, C.Output, D.Output)
+        public let inner: CombineLatest4<A, B, C, D>
+        public let uuid: UUID
+        
+        public init(inner: CombineLatest4<A, B, C, D>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -690,7 +611,7 @@ extension Publishers {
     /// A publisher that automatically connects to an upstream connectable publisher.
     ///
     /// This publisher calls ``ConnectablePublisher/connect()`` on the upstream ``ConnectablePublisher`` when first attached to by a subscriber.
-    public class Autoconnect<Upstream> : Publisher where Upstream : ConnectablePublisher {
+    public class CZAutoconnect<Upstream> : CZPublisher where Upstream : ConnectablePublisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -704,19 +625,15 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         final public let upstream: Upstream
-
-        /// Creates a publisher that automatically connects to an upstream connectable publisher.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Autoconnect<Upstream>
+        public let uuid: UUID
+        
+        required public init(inner: Autoconnect<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -732,7 +649,7 @@ extension Publishers {
     /// - normal completion
     /// - failure
     /// - cancellation
-    public struct Print<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZPrint<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -751,22 +668,17 @@ extension Publishers {
         public let upstream: Upstream
 
         public let stream: TextOutputStream?
+        
+        public let inner: Print<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that prints log messages for all publishing events.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - prefix: A string with which to prefix all log messages.
-        public init(upstream: Upstream, prefix: String, to stream: TextOutputStream? = nil)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: Print<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.prefix = inner.prefix
+            self.stream = inner.stream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -774,7 +686,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that republishes elements while a predicate closure indicates publishing should continue.
-    public struct PrefixWhile<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZPrefixWhile<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -791,25 +703,20 @@ extension Publishers {
 
         /// The closure that determines whether publishing should continue.
         public let predicate: (Publishers.PrefixWhile<Upstream>.Output) -> Bool
+        
+        public let inner: PrefixWhile<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes elements while a predicate closure indicates publishing should continue.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The closure that determines whether publishing should continue.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.PrefixWhile<Upstream>.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: PrefixWhile<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that republishes elements while an error-throwing predicate closure indicates publishing should continue.
-    public struct TryPrefixWhile<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryPrefixWhile<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -826,21 +733,16 @@ extension Publishers {
 
         /// The error-throwing closure that determines whether publishing should continue.
         public let predicate: (Publishers.TryPrefixWhile<Upstream>.Output) throws -> Bool
+        
+        public let inner: TryPrefixWhile<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes elements while an error-throwing predicate closure indicates publishing should continue.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The error-throwing closure that determines whether publishing should continue.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.TryPrefixWhile<Upstream>.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        public init(inner: TryPrefixWhile<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -850,7 +752,7 @@ extension Publishers {
     /// A publisher that appears to send a specified failure type.
     ///
     /// The publisher can't actually fail with the specified type and finishes normally. Use this publisher type when you need to match the error types for two mismatched publishers.
-    public struct SetFailureType<Upstream, Failure> : Publisher where Upstream : Publisher, Failure : Error, Upstream.Failure == Never {
+    public struct CZSetFailureType<Upstream, Failure> : CZPublisher where Upstream : Publisher, Failure : Error, Upstream.Failure == Never {
 
         /// The kind of values published by this publisher.
         ///
@@ -859,22 +761,20 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
+        
+        public let inner: SetFailureType<Upstream, Failure>
+        public let uuid: UUID
+        
+        public init(inner: SetFailureType<Upstream, Failure>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Creates a publisher that appears to send a specified failure type.
-        ///
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Failure == S.Failure, S : Subscriber, Upstream.Output == S.Input
-
-        public func setFailureType<E>(to failure: E.Type) -> Publishers.SetFailureType<Upstream, E> where E : Error
+        public func setFailureType<E>(to failure: E.Type) -> Publishers.CZSetFailureType<Upstream, E> where E : Error {
+            self.visualize()
+            return Publishers.CZSetFailureType(inner: self.inner.setFailureType(to: failure), uuid: self.uuid)
+        }
     }
 }
 
@@ -882,7 +782,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that emits a Boolean value upon receiving an element that satisfies the predicate closure.
-    public struct ContainsWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZContainsWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -899,25 +799,20 @@ extension Publishers {
 
         /// The closure that determines whether the publisher should consider an element as a match.
         public let predicate: (Upstream.Output) -> Bool
+        
+        public let inner: ContainsWhere<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that emits a Boolean value upon receiving an element that satisfies the predicate closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The closure that determines whether the publisher should consider an element as a match.
-        public init(upstream: Upstream, predicate: @escaping (Upstream.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Bool
+        public init(inner: ContainsWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that emits a Boolean value upon receiving an element that satisfies the throwing predicate closure.
-    public struct TryContainsWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryContainsWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -934,21 +829,16 @@ extension Publishers {
 
         /// The error-throwing closure that determines whether this publisher should emit a Boolean true element.
         public let predicate: (Upstream.Output) throws -> Bool
+        
+        public let inner: TryContainsWhere<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that emits a Boolean value upon receiving an element that satisfies the throwing predicate closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The error-throwing closure that determines whether this publisher should emit a Boolean true element.
-        public init(upstream: Upstream, predicate: @escaping (Upstream.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, S.Failure == Error, S.Input == Bool
+        public init(inner: TryContainsWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -960,7 +850,7 @@ extension Publishers {
     /// ``Publishers/MakeConnectable`` is a ``ConnectablePublisher``, which allows you to perform configuration before publishing any elements. Call ``ConnectablePublisher/connect()`` on this publisher when you want to attach to its upstream publisher and start producing elements.
     ///
     /// Use the ``Publisher/makeConnectable()`` operator to wrap an upstream publisher with an instance of this publisher.
-    public struct MakeConnectable<Upstream> : ConnectablePublisher where Upstream : Publisher {
+    public struct CZMakeConnectable<Upstream> : CZConnectablePublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -971,43 +861,22 @@ extension Publishers {
         ///
         /// This publisher uses its upstream publisher's failure type.
         public typealias Failure = Upstream.Failure
+        
+        public let inner: MakeConnectable<Upstream>
+        public let uuid: UUID
 
-        /// Creates a connectable publisher, attached to the provide upstream publisher.
-        ///
-        /// - Parameter upstream: The publisher from which to receive elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
-
-        /// Connects to the publisher, allowing it to produce elements, and returns an instance with which to cancel publishing.
-        ///
-        /// - Returns: A ``Cancellable`` instance that you use to cancel publishing.
-        public func connect() -> Cancellable
+        public init(inner: MakeConnectable<Upstream>, uuid: UUID) {
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Publishers {
 
-    /// A strategy for collecting received elements.
-    public enum TimeGroupingStrategy<Context> where Context : Scheduler {
-
-        /// A grouping that collects and periodically publishes items.
-        case byTime(Context, Context.SchedulerTimeType.Stride)
-
-        /// A grouping that collects and publishes items periodically or when a buffer reaches a maximum size.
-        case byTimeOrCount(Context, Context.SchedulerTimeType.Stride, Int)
-    }
-
     /// A publisher that buffers and periodically publishes its items.
-    public struct CollectByTime<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZCollectByTime<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -1027,26 +896,21 @@ extension Publishers {
 
         /// Scheduler options to use for the strategy.
         public let options: Context.SchedulerOptions?
+        
+        public let inner: CollectByTime<Upstream, Context>
+        public let uuid: UUID
 
-        /// Creates a publisher that buffers and periodically publishes its items.
-        /// - Parameters:
-        ///   - upstream: The publisher that this publisher receives elements from.
-        ///   - strategy: The strategy with which to collect and publish elements.
-        ///   - options: `Scheduler` options to use for the strategy.
-        public init(upstream: Upstream, strategy: Publishers.TimeGroupingStrategy<Context>, options: Context.SchedulerOptions?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == [Upstream.Output]
+        public init(inner: CollectByTime<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.strategy = inner.strategy
+            self.options = inner.options
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that buffers items.
-    public struct Collect<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZCollect<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1060,23 +924,19 @@ extension Publishers {
 
         /// The publisher that this publisher receives elements from.
         public let upstream: Upstream
+        
+        public let inner: Collect<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that buffers items.
-        /// - Parameter upstream: The publisher that this publisher receives elements from.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == [Upstream.Output]
+        public init(inner: Collect<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that buffers a maximum number of items.
-    public struct CollectByCount<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZCollectByCount<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1093,21 +953,16 @@ extension Publishers {
 
         /// The maximum number of received elements to buffer before publishing.
         public let count: Int
+        
+        public let inner: CollectByCount<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that buffers a maximum number of items.
-        /// - Parameters:
-        ///   - upstream: The publisher that this publisher receives elements from.
-        ///   - count: The maximum number of received elements to buffer before publishing.
-        public init(upstream: Upstream, count: Int)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == [Upstream.Output]
+        public init(inner: CollectByCount<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.count = inner.count
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1115,7 +970,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that delivers elements to its downstream subscriber on a specific scheduler.
-    public struct ReceiveOn<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZReceiveOn<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -1135,22 +990,17 @@ extension Publishers {
 
         /// Scheduler options used to customize element delivery.
         public let options: Context.SchedulerOptions?
+        
+        public let inner: ReceiveOn<Upstream, Context>
+        public let uuid: UUID
 
-        /// Creates a publisher that delivers elements to its downstream subscriber on a specific scheduler.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - scheduler: The scheduler the publisher uses to deliver elements.
-        ///   - options: Scheduler options used to customize element delivery.
-        public init(upstream: Upstream, scheduler: Context, options: Context.SchedulerOptions?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: ReceiveOn<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.scheduler = inner.scheduler
+            self.options = inner.options
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1158,7 +1008,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes the value of a key path.
-    public struct MapKeyPath<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZMapKeyPath<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1170,19 +1020,20 @@ extension Publishers {
 
         /// The key path of a property to publish.
         public let keyPath: KeyPath<Upstream.Output, Output>
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, Upstream.Failure == S.Failure
+        
+        public let inner: MapKeyPath<Upstream, Output>
+        public let uuid: UUID
+        
+        public init(inner: MapKeyPath<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.keyPath = inner.keyPath
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that publishes the values of two key paths as a tuple.
-    public struct MapKeyPath2<Upstream, Output0, Output1> : Publisher where Upstream : Publisher {
+    public struct CZMapKeyPath2<Upstream, Output0, Output1> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1202,19 +1053,21 @@ extension Publishers {
 
         /// The key path of a second property to publish.
         public let keyPath1: KeyPath<Upstream.Output, Output1>
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == (Output0, Output1)
+        
+        public let inner: MapKeyPath2<Upstream, Output0, Output1>
+        public let uuid: UUID
+        
+        public init(inner: MapKeyPath2<Upstream, Output0, Output1>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.keyPath0 = inner.keyPath0
+            self.keyPath1 = inner.keyPath1
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that publishes the values of three key paths as a tuple.
-    public struct MapKeyPath3<Upstream, Output0, Output1, Output2> : Publisher where Upstream : Publisher {
+    public struct CZMapKeyPath3<Upstream, Output0, Output1, Output2> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1237,15 +1090,18 @@ extension Publishers {
 
         /// The key path of a third property to publish.
         public let keyPath2: KeyPath<Upstream.Output, Output2>
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == (Output0, Output1, Output2)
+        
+        public let inner: MapKeyPath3<Upstream, Output0, Output1, Output2>
+        public let uuid: UUID
+        
+        public init(inner: MapKeyPath3<Upstream, Output0, Output1, Output2>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.keyPath0 = inner.keyPath0
+            self.keyPath1 = inner.keyPath1
+            self.keyPath2 = inner.keyPath2
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1253,7 +1109,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that republishes elements until another publisher emits an element.
-    public struct PrefixUntilOutput<Upstream, Other> : Publisher where Upstream : Publisher, Other : Publisher {
+    public struct CZPrefixUntilOutput<Upstream, Other> : CZPublisher where Upstream : Publisher, Other : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1270,21 +1126,16 @@ extension Publishers {
 
         /// Another publisher, whose first output causes this publisher to finish.
         public let other: Other
+        
+        public let inner: PrefixUntilOutput<Upstream, Other>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes elements until another publisher emits an element.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - other: Another publisher, the first output from which causes this publisher to finish.
-        public init(upstream: Upstream, other: Other)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: PrefixUntilOutput<Upstream, Other>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.other = inner.other
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1292,7 +1143,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that applies a closure to all received elements and produces an accumulated value when the upstream publisher finishes.
-    public struct Reduce<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZReduce<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1307,26 +1158,21 @@ extension Publishers {
 
         /// A closure that takes the previously-accumulated value and the next element from the upstream publisher to produce a new value.
         public let nextPartialResult: (Output, Upstream.Output) -> Output
+        
+        public let inner: Reduce<Upstream, Output>
+        public let uuid: UUID
 
-        /// Creates a publisher that applies a closure to all received elements and produces an accumulated value when the upstream publisher finishes.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - initial: The initial value provided on the first invocation of the closure.
-        ///   - nextPartialResult: A closure that takes the previously-accumulated value and the next element from the upstream publisher to produce a new value.
-        public init(upstream: Upstream, initial: Output, nextPartialResult: @escaping (Output, Upstream.Output) -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, Upstream.Failure == S.Failure
+        public init(inner: Reduce<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.initial = inner.initial
+            self.nextPartialResult = inner.nextPartialResult
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that applies an error-throwing closure to all received elements and produces an accumulated value when the upstream publisher finishes.
-    public struct TryReduce<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZTryReduce<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1343,22 +1189,17 @@ extension Publishers {
         ///
         /// If this closure throws an error, the publisher fails and passes the error to its subscriber.
         public let nextPartialResult: (Output, Upstream.Output) throws -> Output
+        
+        public let inner: TryReduce<Upstream, Output>
+        public let uuid: UUID
 
-        /// Creates a publisher that applies an error-throwing closure to all received elements and produces an accumulated value when the upstream publisher finishes.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - initial: The initial value provided on the first-use of the closure.
-        ///   - nextPartialResult: An error-throwing closure that takes the previously-accumulated value and the next element from the upstream to produce a new value. If this closure throws an error, the publisher fails and passes the error to its subscriber.
-        public init(upstream: Upstream, initial: Output, nextPartialResult: @escaping (Output, Upstream.Output) throws -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Error
+        public init(inner: TryReduce<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.initial = inner.initial
+            self.nextPartialResult = inner.nextPartialResult
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1366,7 +1207,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that republishes all non-nil results of calling a closure with each received element.
-    public struct CompactMap<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZCompactMap<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1378,25 +1219,20 @@ extension Publishers {
 
         /// A closure that receives values from the upstream publisher and returns optional values.
         public let transform: (Upstream.Output) -> Output?
+        
+        public let inner: CompactMap<Upstream, Output>
+        public let uuid: UUID
 
-        /// Creates a publisher that republishes all non-`nil` results of calling a closure with each received element.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - transform: A closure that receives values from the upstream publisher and returns optional values.
-        public init(upstream: Upstream, transform: @escaping (Upstream.Output) -> Output?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, Upstream.Failure == S.Failure
+        public init(inner: CompactMap<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that republishes all non-nil results of calling an error-throwing closure with each received element.
-    public struct TryCompactMap<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZTryCompactMap<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1410,17 +1246,16 @@ extension Publishers {
         ///
         /// If this closure throws an error, the publisher fails.
         public let transform: (Upstream.Output) throws -> Output?
+        
+        public let inner: TryCompactMap<Upstream, Output>
+        public let uuid: UUID
 
-        public init(upstream: Upstream, transform: @escaping (Upstream.Output) throws -> Output?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Error
+        public init(inner: TryCompactMap<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1428,7 +1263,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher created by applying the merge function to two upstream publishers.
-    public struct Merge<A, B> : Publisher where A : Publisher, B : Publisher, A.Failure == B.Failure, A.Output == B.Output {
+    public struct CZMerge<A, B> : CZPublisher where A : Publisher, B : Publisher, A.Failure == B.Failure, A.Output == B.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1445,37 +1280,50 @@ extension Publishers {
 
         /// A second publisher to merge.
         public let b: B
+        
+        public let inner: Merge<A, B>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to two upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        public init(_ a: A, _ b: B)
+        public init(inner: Merge<A, B>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, B.Failure == S.Failure, B.Output == S.Input
+        public func merge<P>(with other: P) -> Publishers.CZMerge3<A, B, P> where P : Publisher, B.Failure == P.Failure, B.Output == P.Output {
+            self.visualize()
+            return CZMerge3(inner: inner.merge(with: other), uuid: self.uuid)
+        }
 
-        public func merge<P>(with other: P) -> Publishers.Merge3<A, B, P> where P : Publisher, B.Failure == P.Failure, B.Output == P.Output
+        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge4<A, B, Z, Y> where Z : Publisher, Y : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
+            self.visualize()
+            return CZMerge4(inner: inner.merge(with: z, y), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.Merge4<A, B, Z, Y> where Z : Publisher, Y : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output
+        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge5<A, B, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
+            self.visualize()
+            return CZMerge5(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.Merge5<A, B, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output
+        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge6<A, B, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
+            self.visualize()
+            return CZMerge6(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.Merge6<A, B, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output
+        public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge7<A, B, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
+            self.visualize()
+            return CZMerge7(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.Merge7<A, B, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output
-
-        public func merge<Z, Y, X, W, V, U>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V, _ u: U) -> Publishers.Merge8<A, B, Z, Y, X, W, V, U> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, U : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output, V.Failure == U.Failure, V.Output == U.Output
+        public func merge<Z, Y, X, W, V, U>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V, _ u: U) -> Publishers.CZMerge8<A, B, Z, Y, X, W, V, U> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, U : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output, V.Failure == U.Failure, V.Output == U.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: z, y, x, w, v, u), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to three upstream publishers.
-    public struct Merge3<A, B, C> : Publisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output {
+    public struct CZMerge3<A, B, C> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1495,36 +1343,46 @@ extension Publishers {
 
         /// A third publisher to merge.
         public let c: C
+        
+        public let inner: Merge3<A, B, C>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to three upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C)
+        public init(inner: Merge3<A, B, C>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.inner = inner
+            self.uuid = uuid
+        }
+        
+        public func merge<P>(with other: P) -> Publishers.CZMerge4<A, B, C, P> where P : Publisher, C.Failure == P.Failure, C.Output == P.Output {
+            self.visualize()
+            return CZMerge4(inner: inner.merge(with: other), uuid: self.uuid)
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, C.Failure == S.Failure, C.Output == S.Input
+        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge5<A, B, C, Z, Y> where Z : Publisher, Y : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
+            self.visualize()
+            return CZMerge5(inner: inner.merge(with: z, y), uuid: self.uuid)
+        }
 
-        public func merge<P>(with other: P) -> Publishers.Merge4<A, B, C, P> where P : Publisher, C.Failure == P.Failure, C.Output == P.Output
+        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge6<A, B, C, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
+            self.visualize()
+            return CZMerge6(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.Merge5<A, B, C, Z, Y> where Z : Publisher, Y : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output
+        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge7<A, B, C, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
+            self.visualize()
+            return CZMerge7(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.Merge6<A, B, C, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output
-
-        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.Merge7<A, B, C, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output
-
-        public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.Merge8<A, B, C, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output
+        public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge8<A, B, C, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to four upstream publishers.
-    public struct Merge4<A, B, C, D> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output {
+    public struct CZMerge4<A, B, C, D> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1547,35 +1405,42 @@ extension Publishers {
 
         /// A fourth publisher to merge.
         public let d: D
+        
+        public let inner: Merge4<A, B, C, D>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to four upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        ///   - d: A fourth publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D)
+        public init(inner: Merge4<A, B, C, D>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, D.Failure == S.Failure, D.Output == S.Input
+        public func merge<P>(with other: P) -> Publishers.CZMerge5<A, B, C, D, P> where P : Publisher, D.Failure == P.Failure, D.Output == P.Output {
+            self.visualize()
+            return CZMerge5(inner: inner.merge(with: other), uuid: self.uuid)
+        }
 
-        public func merge<P>(with other: P) -> Publishers.Merge5<A, B, C, D, P> where P : Publisher, D.Failure == P.Failure, D.Output == P.Output
+        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge6<A, B, C, D, Z, Y> where Z : Publisher, Y : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
+            self.visualize()
+            return CZMerge6(inner: inner.merge(with: z, y), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.Merge6<A, B, C, D, Z, Y> where Z : Publisher, Y : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output
+        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge7<A, B, C, D, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
+            self.visualize()
+            return CZMerge7(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.Merge7<A, B, C, D, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output
-
-        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.Merge8<A, B, C, D, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output
+        public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge8<A, B, C, D, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to five upstream publishers.
-    public struct Merge5<A, B, C, D, E> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output {
+    public struct CZMerge5<A, B, C, D, E> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1601,34 +1466,38 @@ extension Publishers {
 
         /// A fifth publisher to merge.
         public let e: E
+        
+        public let inner: Merge5<A, B, C, D, E>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to five upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        ///   - d: A fourth publisher to merge.
-        ///   - e: A fifth publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E)
+        public init(inner: Merge5<A, B, C, D, E>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.e = inner.e
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, E.Failure == S.Failure, E.Output == S.Input
+        public func merge<P>(with other: P) -> Publishers.CZMerge6<A, B, C, D, E, P> where P : Publisher, E.Failure == P.Failure, E.Output == P.Output {
+            self.visualize()
+            return CZMerge6(inner: inner.merge(with: other), uuid: self.uuid)
+        }
 
-        public func merge<P>(with other: P) -> Publishers.Merge6<A, B, C, D, E, P> where P : Publisher, E.Failure == P.Failure, E.Output == P.Output
+        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge7<A, B, C, D, E, Z, Y> where Z : Publisher, Y : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
+            self.visualize()
+            return CZMerge7(inner: inner.merge(with: z, y), uuid: self.uuid)
+        }
 
-        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.Merge7<A, B, C, D, E, Z, Y> where Z : Publisher, Y : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output
-
-        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.Merge8<A, B, C, D, E, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output
+        public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge8<A, B, C, D, E, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to six upstream publishers.
-    public struct Merge6<A, B, C, D, E, F> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output {
+    public struct CZMerge6<A, B, C, D, E, F> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1657,33 +1526,34 @@ extension Publishers {
 
         /// A sixth publisher to merge.
         public let f: F
+        
+        public let inner: Merge6<A, B, C, D, E, F>
+        public let uuid: UUID
 
-        /// publisher created by applying the merge function to six upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        ///   - d: A fourth publisher to merge.
-        ///   - e: A fifth publisher to merge.
-        ///   - f: A sixth publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F)
+        public init(inner: Merge6<A, B, C, D, E, F>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.e = inner.e
+            self.f = inner.f
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, F.Failure == S.Failure, F.Output == S.Input
+        public func merge<P>(with other: P) -> Publishers.CZMerge7<A, B, C, D, E, F, P> where P : Publisher, F.Failure == P.Failure, F.Output == P.Output {
+            self.visualize()
+            return CZMerge7(inner: inner.merge(with: other), uuid: self.uuid)
+        }
 
-        public func merge<P>(with other: P) -> Publishers.Merge7<A, B, C, D, E, F, P> where P : Publisher, F.Failure == P.Failure, F.Output == P.Output
-
-        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.Merge8<A, B, C, D, E, F, Z, Y> where Z : Publisher, Y : Publisher, F.Failure == Z.Failure, F.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output
+        public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge8<A, B, C, D, E, F, Z, Y> where Z : Publisher, Y : Publisher, F.Failure == Z.Failure, F.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: z, y), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to seven upstream publishers.
-    public struct Merge7<A, B, C, D, E, F, G> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output {
+    public struct CZMerge7<A, B, C, D, E, F, G> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1715,32 +1585,30 @@ extension Publishers {
 
         /// An seventh publisher to merge.
         public let g: G
+        
+        public let inner: Merge7<A, B, C, D, E, F, G>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to seven upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        ///   - d: A fourth publisher to merge.
-        ///   - e: A fifth publisher to merge.
-        ///   - f: A sixth publisher to merge.
-        ///   - g: An seventh publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G)
+        public init(inner: Merge7<A, B, C, D, E, F, G>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.e = inner.e
+            self.f = inner.f
+            self.g = inner.g
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, G.Failure == S.Failure, G.Output == S.Input
-
-        public func merge<P>(with other: P) -> Publishers.Merge8<A, B, C, D, E, F, G, P> where P : Publisher, G.Failure == P.Failure, G.Output == P.Output
+        public func merge<P>(with other: P) -> Publishers.CZMerge8<A, B, C, D, E, F, G, P> where P : Publisher, G.Failure == P.Failure, G.Output == P.Output {
+            self.visualize()
+            return CZMerge8(inner: inner.merge(with: other), uuid: self.uuid)
+        }
     }
 
     /// A publisher created by applying the merge function to eight upstream publishers.
-    public struct Merge8<A, B, C, D, E, F, G, H> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, H : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output, G.Failure == H.Failure, G.Output == H.Output {
+    public struct CZMerge8<A, B, C, D, E, F, G, H> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, H : Publisher, A.Failure == B.Failure, A.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output, G.Failure == H.Failure, G.Output == H.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -1775,31 +1643,26 @@ extension Publishers {
 
         /// A eighth publisher to merge.
         public let h: H
+        
+        public let inner: Merge8<A, B, C, D, E, F, G, H>
+        public let uuid: UUID
 
-        /// Creates a publisher created by applying the merge function to eight upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to merge
-        ///   - b: A second publisher to merge.
-        ///   - c: A third publisher to merge.
-        ///   - d: A fourth publisher to merge.
-        ///   - e: A fifth publisher to merge.
-        ///   - f: A sixth publisher to merge.
-        ///   - g: An seventh publisher to merge.
-        ///   - h: An eighth publisher to merge.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, H.Failure == S.Failure, H.Output == S.Input
+        public init(inner: Merge8<A, B, C, D, E, F, G, H>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.e = inner.e
+            self.f = inner.f
+            self.g = inner.g
+            self.h = inner.h
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher created by applying the merge function to an arbitrary number of upstream publishers.
-    public struct MergeMany<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZMergeMany<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1813,25 +1676,20 @@ extension Publishers {
 
         /// The array of upstream publishers that this publisher merges together.
         public let publishers: [Upstream]
+        
+        public let inner: MergeMany<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: MergeMany<Upstream>, uuid: UUID) {
+            self.publishers = inner.publishers
+            self.inner = inner
+            self.uuid = uuid
+        }
 
-        /// Creates a publisher created by applying the merge function to an arbitrary number of upstream publishers.
-        /// - Parameter upstream: A variadic parameter containing zero or more publishers to merge with this publisher.
-        public init(_ upstream: Upstream...)
-
-        /// Creates a publisher created by applying the merge function to a sequence of upstream publishers.
-        /// - Parameter upstream: A sequence containing zero or more publishers to merge with this publisher.
-        public init<S>(_ upstream: S) where Upstream == S.Element, S : Sequence
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
-
-        public func merge(with other: Upstream) -> Publishers.MergeMany<Upstream>
+        public func merge(with other: Upstream) -> Publishers.CZMergeMany<Upstream> {
+            self.visualize()
+            return CZMergeMany(inner: inner.merge(with: other), uuid: self.uuid)
+        }
     }
 }
 
@@ -1839,7 +1697,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that transforms elements from the upstream publisher by providing the current element to a closure along with the last value returned by the closure.
-    public struct Scan<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZScan<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1854,26 +1712,21 @@ extension Publishers {
 
         ///  An error-throwing closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
         public let nextPartialResult: (Output, Upstream.Output) -> Output
-
-        /// Creates a publisher that transforms elements from the upstream publisher by providing the current element to a closure along with the last value returned by the closure.
-        /// - Parameters:
-        ///   - upstream: The publisher that this publisher receives elements from.
-        ///   - initialResult: The previous result returned by the `nextPartialResult` closure.
-        ///   - nextPartialResult: A closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
-        public init(upstream: Upstream, initialResult: Output, nextPartialResult: @escaping (Output, Upstream.Output) -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, Upstream.Failure == S.Failure
+        
+        public let inner: Scan<Upstream, Output>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Scan<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.initialResult = inner.initialResult
+            self.nextPartialResult = inner.nextPartialResult
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that transforms elements from the upstream publisher by providing the current element to a failable closure along with the last value returned by the closure.
-    public struct TryScan<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZTryScan<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -1888,22 +1741,17 @@ extension Publishers {
 
         /// An error-throwing closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
         public let nextPartialResult: (Output, Upstream.Output) throws -> Output
-
-        /// Creates a publisher that transforms elements from the upstream publisher by providing the current element to a failable closure along with the last value returned by the closure.
-        /// - Parameters:
-        ///   - upstream: The publisher that this publisher receives elements from.
-        ///   - initialResult: The previous result returned by the `nextPartialResult` closure.
-        ///   - nextPartialResult: An error-throwing closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
-        public init(upstream: Upstream, initialResult: Output, nextPartialResult: @escaping (Output, Upstream.Output) throws -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Error
+        
+        public let inner: TryScan<Upstream, Output>
+        public let uuid: UUID
+        
+        public init(inner: TryScan<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.initialResult = inner.initialResult
+            self.nextPartialResult = inner.nextPartialResult
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1911,7 +1759,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes the number of elements received from the upstream publisher.
-    public struct Count<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZCount<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1925,19 +1773,15 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
+        
+        public let inner: Count<Upstream>
+        public let uuid: UUID
 
-        /// Creates a publisher that publishes the number of elements received from the upstream publisher.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Int
+        public init(inner: Count<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -1945,7 +1789,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that waits until after the stream finishes and then publishes the last element of the stream that satisfies a predicate closure.
-    public struct LastWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZLastWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1962,25 +1806,20 @@ extension Publishers {
 
         /// The closure that determines whether to publish an element.
         public let predicate: (Publishers.LastWhere<Upstream>.Output) -> Bool
-
-        /// Creates a publisher that waits until after the stream finishes and then publishes the last element of the stream that satisfies a predicate closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The closure that determines whether to publish an element.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.LastWhere<Upstream>.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: LastWhere<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.LastWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that waits until after the stream finishes and then publishes the last element of the stream that satisfies an error-throwing predicate closure.
-    public struct TryLastWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryLastWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -1997,21 +1836,16 @@ extension Publishers {
 
         /// The error-throwing closure that determines whether to publish an element.
         public let predicate: (Publishers.TryLastWhere<Upstream>.Output) throws -> Bool
-
-        /// Creates a publisher that waits until after the stream finishes and then publishes the last element of the stream that satisfies an error-throwing predicate closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - predicate: The error-throwing closure that determines whether to publish an element.
-        public init(upstream: Upstream, predicate: @escaping (Publishers.TryLastWhere<Upstream>.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        
+        public let inner: TryLastWhere<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.TryLastWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2019,7 +1853,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that ignores all upstream elements, but passes along the upstream publisher's completion state (finished or failed).
-    public struct IgnoreOutput<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZIgnoreOutput<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2033,19 +1867,15 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that ignores all upstream elements, but passes along the upstream publisher's completion state (finish or failed).
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, S.Input == Never
+        
+        public let inner: IgnoreOutput<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.IgnoreOutput<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2058,7 +1888,7 @@ extension Publishers {
     /// NSError>`, calling ``Publisher/switchToLatest()`` results in the type `SwitchToLatest<(Data, URLResponse), URLError>`. The downstream subscriber sees a continuous stream of `(Data, URLResponse)` elements from what looks like a single <doc://com.apple.documentation/documentation/Foundation/URLSession/DataTaskPublisher> even though the elements are coming from different upstream publishers.
     ///
     /// When ``Publishers/SwitchToLatest`` receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently-updating user interface publishers.
-    public struct SwitchToLatest<P, Upstream> : Publisher where P : Publisher, P == Upstream.Output, Upstream : Publisher, P.Failure == Upstream.Failure {
+    public struct CZSwitchToLatest<P, Upstream> : CZPublisher where P : Publisher, P == Upstream.Output, Upstream : Publisher, P.Failure == Upstream.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -2072,20 +1902,15 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that “flattens” nested publishers.
-        ///
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, P.Output == S.Input, Upstream.Failure == S.Failure
+        
+        public let inner: SwitchToLatest<P, Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.SwitchToLatest<P, Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2093,7 +1918,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that attempts to recreate its subscription to a failed upstream publisher.
-    public struct Retry<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZRetry<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2112,22 +1937,16 @@ extension Publishers {
         ///
         /// If `nil`, this publisher attempts to reconnect with the upstream publisher an unlimited number of times.
         public let retries: Int?
-
-        /// Creates a publisher that attempts to recreate its subscription to a failed upstream publisher.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - retries: The maximum number of retry attempts to perform. If `nil`, this publisher attempts to reconnect with the upstream publisher an unlimited number of times.
-        public init(upstream: Upstream, retries: Int?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Retry<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Retry<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.retries = inner.retries
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2135,7 +1954,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that converts any failure from the upstream publisher into a new error.
-    public struct MapError<Upstream, Failure> : Publisher where Upstream : Publisher, Failure : Error {
+    public struct CZMapError<Upstream, Failure> : CZPublisher where Upstream : Publisher, Failure : Error {
 
         /// The kind of values published by this publisher.
         ///
@@ -2147,23 +1966,16 @@ extension Publishers {
 
         /// The closure that converts the upstream failure into a new error.
         public let transform: (Upstream.Failure) -> Failure
-
-        /// Creates a publisher that converts any failure from the upstream publisher into a new error.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - transform: The closure that converts the upstream failure into a new error.
-        public init(upstream: Upstream, transform: @escaping (Upstream.Failure) -> Failure)
-
-        public init(upstream: Upstream, _ map: @escaping (Upstream.Failure) -> Failure)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Failure == S.Failure, S : Subscriber, Upstream.Output == S.Input
+        
+        public let inner: MapError<Upstream, Failure>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.MapError<Upstream, Failure>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2171,7 +1983,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes either the most-recent or first element published by the upstream publisher in a specified time interval.
-    public struct Throttle<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZThrottle<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -2196,23 +2008,18 @@ extension Publishers {
         ///
         /// If `false`, the publisher emits the first element received during the interval.
         public let latest: Bool
-
-        /// Creates a publisher that publishes either the most-recent or first element published by the upstream publisher in a specified time interval.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - interval: The interval in which to find and emit the most recent element.
-        ///   - scheduler: The scheduler on which to publish elements.
-        ///   - latest: A Boolean value indicating whether to publish the most recent element. If `false`, the publisher emits the first element received during the interval.
-        public init(upstream: Upstream, interval: Context.SchedulerTimeType.Stride, scheduler: Context, latest: Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Throttle<Upstream, Context>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Throttle<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.interval = inner.interval
+            self.scheduler = inner.scheduler
+            self.latest = inner.latest
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2226,7 +2033,7 @@ extension Publishers {
     ///  > Tip: ``Publishers/Share`` is effectively a combination of the ``Publishers/Multicast`` and ``PassthroughSubject`` publishers, with an implicit ``ConnectablePublisher/autoconnect()``.
     ///
     /// Be aware that ``Publishers/Share`` is a class rather than a structure like most other publishers. Use this type when you need a publisher instance that uses reference semantics.
-    final public class Share<Upstream> : Publisher, Equatable where Upstream : Publisher {
+    final public class CZShare<Upstream> : CZPublisher, Equatable where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2240,26 +2047,27 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         final public let upstream: Upstream
-
-        /// Creates a publisher that shares the output of an upstream publisher with multiple subscribers.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        final public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Share<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Share<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
 
         /// Returns a Boolean value that indicates whether two publishers are equivalent.
         /// - Parameters:
         ///   - lhs: A `Share` publisher to compare for equality.
         ///   - rhs: Another `Share` publisher to compare for equality.
         /// - Returns: `true` if the publishers have reference equality (`===`); otherwise `false`.
-        public static func == (lhs: Publishers.Share<Upstream>, rhs: Publishers.Share<Upstream>) -> Bool
+        public static func == (lhs: Publishers.CZShare<Upstream>, rhs: Publishers.CZShare<Upstream>) -> Bool {
+            guard lhs.uuid == rhs.uuid else {
+                return false
+            }
+            return lhs.inner == rhs.inner
+        }
     }
 }
 
@@ -2267,7 +2075,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that republishes items from another publisher only if each new item is in increasing order from the previously-published item.
-    public struct Comparison<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZComparison<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2284,25 +2092,20 @@ extension Publishers {
 
         /// A closure that receives two elements and returns true if they are in increasing order.
         public let areInIncreasingOrder: (Upstream.Output, Upstream.Output) -> Bool
-
-        /// Creates a publisher that republishes items from another publisher only if each new item is in increasing order from the previously-published item.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - areInIncreasingOrder: A closure that receives two elements and returns true if they are in increasing order.
-        public init(upstream: Upstream, areInIncreasingOrder: @escaping (Upstream.Output, Upstream.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Comparison<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Comparison<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.areInIncreasingOrder = inner.areInIncreasingOrder
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that republishes items from another publisher only if each new item is in increasing order from the previously-published item, and fails if the ordering logic throws an error.
-    public struct TryComparison<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryComparison<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2319,21 +2122,16 @@ extension Publishers {
 
         /// A closure that receives two elements and returns true if they are in increasing order.
         public let areInIncreasingOrder: (Upstream.Output, Upstream.Output) throws -> Bool
-
-        /// Creates a publisher that republishes items from another publisher only if each new item is in increasing order from the previously-published item, and fails if the ordering logic throws an error.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - areInIncreasingOrder: A closure that receives two elements and returns true if they are in increasing order.
-        public init(upstream: Upstream, areInIncreasingOrder: @escaping (Upstream.Output, Upstream.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        
+        public let inner: TryComparison<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.TryComparison<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.areInIncreasingOrder = inner.areInIncreasingOrder
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2341,7 +2139,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that replaces an empty stream with a provided element.
-    public struct ReplaceEmpty<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZReplaceEmpty<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2358,25 +2156,20 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that replaces an empty stream with a provided element.
-        /// - Parameters:
-        ///   - upstream: The element to deliver when the upstream publisher finishes without delivering any elements.
-        ///   - output: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream, output: Publishers.ReplaceEmpty<Upstream>.Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: ReplaceEmpty<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.ReplaceEmpty<Upstream>, uuid: UUID) {
+            self.output = inner.output
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that replaces any errors in the stream with a provided element.
-    public struct ReplaceError<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZReplaceError<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2393,21 +2186,16 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that replaces any errors in the stream with a provided element.
-        /// - Parameters:
-        ///   - upstream: The element with which to replace errors from the upstream publisher.
-        ///   - output: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream, output: Publishers.ReplaceError<Upstream>.Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Never
+        
+        public let inner: ReplaceError<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.ReplaceError<Upstream>, uuid: UUID) {
+            self.output = inner.output
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2417,7 +2205,7 @@ extension Publishers {
     /// A publisher that raises a fatal error upon receiving any failure, and otherwise republishes all received input.
     ///
     /// Use this function for internal integrity checks that are active during testing but don't affect performance of shipping code.
-    public struct AssertNoFailure<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZAssertNoFailure<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2440,23 +2228,18 @@ extension Publishers {
 
         /// The line number used in the error message.
         public let line: UInt
-
-        /// Creates a publisher that raises a fatal error upon receiving any failure, and otherwise republishes all received input.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - prefix: The string used at the beginning of the fatal error message.
-        ///   - file: The filename used in the error message.
-        ///   - line: The line number used in the error message.
-        public init(upstream: Upstream, prefix: String, file: StaticString, line: UInt)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Never
+        
+        public let inner: AssertNoFailure<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.AssertNoFailure<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.prefix = inner.prefix
+            self.file = inner.file
+            self.line = inner.line
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2464,7 +2247,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that ignores elements from the upstream publisher until it receives an element from second publisher.
-    public struct DropUntilOutput<Upstream, Other> : Publisher where Upstream : Publisher, Other : Publisher, Upstream.Failure == Other.Failure {
+    public struct CZDropUntilOutput<Upstream, Other> : CZPublisher where Upstream : Publisher, Other : Publisher, Upstream.Failure == Other.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -2481,22 +2264,16 @@ extension Publishers {
 
         /// A publisher to monitor for its first emitted element.
         public let other: Other
-
-        /// Creates a publisher that ignores elements from the upstream publisher until it receives an element from another publisher.
-        ///
-        /// - Parameters:
-        ///   - upstream: A publisher to drop elements from while waiting for another publisher to emit elements.
-        ///   - other: A publisher to monitor for its first emitted element.
-        public init(upstream: Upstream, other: Other)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, Other.Failure == S.Failure
+        
+        public let inner: DropUntilOutput<Upstream, Other>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.DropUntilOutput<Upstream, Other>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.other = inner.other
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2504,7 +2281,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that performs the specified closures when publisher events occur.
-    public struct HandleEvents<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZHandleEvents<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2533,25 +2310,20 @@ extension Publishers {
 
         /// A closure that executes when the publisher receives a request for more elements.
         public var receiveRequest: ((Subscribers.Demand) -> Void)?
-
-        /// Creates a publisher that performs the specified closures when publisher events occur.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - receiveSubscription: A closure that executes when the publisher receives the subscription from the upstream publisher.
-        ///   - receiveOutput: A closure that executes when the publisher receives a value from the upstream publisher.
-        ///   - receiveCompletion: A closure that executes when the publisher receives the completion from the upstream publisher.
-        ///   - receiveCancel: A closure that executes when the downstream receiver cancels publishing.
-        ///   - receiveRequest: A closure that executes when the publisher receives a request for more elements.
-        public init(upstream: Upstream, receiveSubscription: ((Subscription) -> Void)? = nil, receiveOutput: ((Publishers.HandleEvents<Upstream>.Output) -> Void)? = nil, receiveCompletion: ((Subscribers.Completion<Publishers.HandleEvents<Upstream>.Failure>) -> Void)? = nil, receiveCancel: (() -> Void)? = nil, receiveRequest: ((Subscribers.Demand) -> Void)?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: HandleEvents<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.HandleEvents<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.receiveSubscription = inner.receiveSubscription
+            self.receiveOutput = inner.receiveOutput
+            self.receiveCompletion = inner.receiveCompletion
+            self.receiveCancel = inner.receiveCancel
+            self.receiveRequest = inner.receiveRequest
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2559,7 +2331,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that emits all of one publisher’s elements before those from another publisher.
-    public struct Concatenate<Prefix, Suffix> : Publisher where Prefix : Publisher, Suffix : Publisher, Prefix.Failure == Suffix.Failure, Prefix.Output == Suffix.Output {
+    public struct CZConcatenate<Prefix, Suffix> : CZPublisher where Prefix : Publisher, Suffix : Publisher, Prefix.Failure == Suffix.Failure, Prefix.Output == Suffix.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -2576,21 +2348,16 @@ extension Publishers {
 
         /// The publisher to republish only after `prefix` finishes.
         public let suffix: Suffix
-
-        /// Creates a publisher that emits all of one publisher’s elements before those from another publisher.
-        /// - Parameters:
-        ///   - prefix: The publisher to republish, in its entirety, before republishing elements from `suffix`.
-        ///   - suffix: The publisher to republish only after `prefix` finishes.
-        public init(prefix: Prefix, suffix: Suffix)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Suffix.Failure == S.Failure, Suffix.Output == S.Input
+        
+        public let inner: Concatenate<Prefix, Suffix>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Concatenate<Prefix, Suffix>, uuid: UUID) {
+            self.prefix = inner.prefix
+            self.suffix = inner.suffix
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2598,7 +2365,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes elements only after a specified time interval elapses between events.
-    public struct Debounce<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZDebounce<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -2621,23 +2388,18 @@ extension Publishers {
 
         /// Scheduler options that customize this publisher’s delivery of elements.
         public let options: Context.SchedulerOptions?
+        
+        public let inner: Debounce<Upstream, Context>
+        public let uuid: UUID
 
-        /// Creates a publisher that publishes elements only after a specified time interval elapses between events.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - dueTime: The amount of time the publisher should wait before publishing an element.
-        ///   - scheduler: The scheduler on which this publisher delivers elements.
-        ///   - options: Scheduler options that customize this publisher’s delivery of elements.
-        public init(upstream: Upstream, dueTime: Context.SchedulerTimeType.Stride, scheduler: Context, options: Context.SchedulerOptions?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        public init(inner: Publishers.Debounce<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.dueTime = inner.dueTime
+            self.scheduler = inner.scheduler
+            self.options = inner.options
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2645,7 +2407,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that waits until after the stream finishes, and then publishes the last element of the stream.
-    public struct Last<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZLast<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2659,19 +2421,15 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that waits until after the stream finishes and then publishes the last element of the stream.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Last<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Last<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2679,7 +2437,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that transforms all elements from the upstream publisher with a provided closure.
-    public struct Map<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZMap<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -2691,25 +2449,20 @@ extension Publishers {
 
         /// The closure that transforms elements from the upstream publisher.
         public let transform: (Upstream.Output) -> Output
-
-        /// Creates a publisher that transforms all elements from the upstream publisher with a provided closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - transform: The closure that transforms elements from the upstream publisher.
-        public init(upstream: Upstream, transform: @escaping (Upstream.Output) -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, Upstream.Failure == S.Failure
+        
+        public let inner: Map<Upstream, Output>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Map<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that transforms all elements from the upstream publisher with a provided error-throwing closure.
-    public struct TryMap<Upstream, Output> : Publisher where Upstream : Publisher {
+    public struct CZTryMap<Upstream, Output> : CZPublisher where Upstream : Publisher {
 
         /// The kind of errors this publisher might publish.
         ///
@@ -2721,21 +2474,16 @@ extension Publishers {
 
         /// The error-throwing closure that transforms elements from the upstream publisher.
         public let transform: (Upstream.Output) throws -> Output
-
-        /// Creates a publisher that transforms all elements from the upstream publisher with a provided error-throwing closure.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - transform: The error-throwing closure that transforms elements from the upstream publisher.
-        public init(upstream: Upstream, transform: @escaping (Upstream.Output) throws -> Output)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Error
+        
+        public let inner: TryMap<Upstream, Output>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.TryMap<Upstream, Output>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2743,7 +2491,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that terminates publishing if the upstream publisher exceeds a specified time interval without producing an element.
-    public struct Timeout<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZTimeout<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -2769,93 +2517,27 @@ extension Publishers {
 
         /// A closure that executes if the publisher times out. The publisher sends the failure returned by this closure to the subscriber as the reason for termination.
         public let customError: (() -> Publishers.Timeout<Upstream, Context>.Failure)?
-
-        /// Creates a publisher that terminates publishing if the upstream publisher exceeds the specified time interval without producing an element.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - interval: The maximum time interval the publisher can go without emitting an element, expressed in the time system of the scheduler.
-        ///   - scheduler: The scheduler on which to deliver events.
-        ///   - options: Scheduler options that customize the delivery of elements.
-        ///   - customError: A closure that executes if the publisher times out. The publisher sends the failure returned by this closure to the subscriber as the reason for termination.
-        public init(upstream: Upstream, interval: Context.SchedulerTimeType.Stride, scheduler: Context, options: Context.SchedulerOptions?, customError: (() -> Publishers.Timeout<Upstream, Context>.Failure)?)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Timeout<Upstream, Context>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Timeout<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.interval = inner.interval
+            self.scheduler = inner.scheduler
+            self.options = inner.options
+            self.customError = inner.customError
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Publishers {
 
-    /// A strategy for filling a buffer.
-    public enum PrefetchStrategy {
-
-        /// A strategy to fill the buffer at subscription time, and keep it full thereafter.
-        ///
-        /// This strategy starts by making a demand equal to the buffer’s size from the upstream when the subscriber first connects. Afterwards, it continues to demand elements from the upstream to try to keep the buffer full.
-        case keepFull
-
-        /// A strategy that avoids prefetching and instead performs requests on demand.
-        ///
-        /// This strategy just forwards the downstream’s requests to the upstream publisher.
-        case byRequest
-
-        /// Returns a Boolean value indicating whether two values are equal.
-        ///
-        /// Equality is the inverse of inequality. For any values `a` and `b`,
-        /// `a == b` implies that `a != b` is `false`.
-        ///
-        /// - Parameters:
-        ///   - lhs: A value to compare.
-        ///   - rhs: Another value to compare.
-        public static func == (a: Publishers.PrefetchStrategy, b: Publishers.PrefetchStrategy) -> Bool
-
-        /// Hashes the essential components of this value by feeding them into the
-        /// given hasher.
-        ///
-        /// Implement this method to conform to the `Hashable` protocol. The
-        /// components used for hashing must be the same as the components compared
-        /// in your type's `==` operator implementation. Call `hasher.combine(_:)`
-        /// with each of these components.
-        ///
-        /// - Important: Never call `finalize()` on `hasher`. Doing so may become a
-        ///   compile-time error in the future.
-        ///
-        /// - Parameter hasher: The hasher to use when combining the components
-        ///   of this instance.
-        public func hash(into hasher: inout Hasher)
-
-        /// The hash value.
-        ///
-        /// Hash values are not guaranteed to be equal across different executions of
-        /// your program. Do not save hash values to use during a future execution.
-        ///
-        /// - Important: `hashValue` is deprecated as a `Hashable` requirement. To
-        ///   conform to `Hashable`, implement the `hash(into:)` requirement instead.
-        public var hashValue: Int { get }
-    }
-
-    /// A strategy that handles exhaustion of a buffer’s capacity.
-    public enum BufferingStrategy<Failure> where Failure : Error {
-
-        /// When the buffer is full, discard the newly received element.
-        case dropNewest
-
-        /// When the buffer is full, discard the oldest element in the buffer.
-        case dropOldest
-
-        /// When the buffer is full, execute the closure to provide a custom error.
-        case customError(() -> Failure)
-    }
-
     /// A publisher that buffers elements from an upstream publisher.
-    public struct Buffer<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZBuffer<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -2878,22 +2560,18 @@ extension Publishers {
 
         /// The action to take when the buffer becomes full.
         public let whenFull: Publishers.BufferingStrategy<Publishers.Buffer<Upstream>.Failure>
-
-        /// Creates a publisher that buffers elements received from an upstream publisher.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        /// - Parameter size: The maximum number of elements to store.
-        /// - Parameter prefetch: The strategy for initially populating the buffer.
-        /// - Parameter whenFull: The action to take when the buffer becomes full.
-        public init(upstream: Upstream, size: Int, prefetch: Publishers.PrefetchStrategy, whenFull: Publishers.BufferingStrategy<Publishers.Buffer<Upstream>.Failure>)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Buffer<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Buffer<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.size = inner.size
+            self.prefetch = inner.prefetch
+            self.whenFull = inner.whenFull
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2903,27 +2581,22 @@ extension Publishers {
     /// A publisher that publishes a given sequence of elements.
     ///
     /// When the publisher exhausts the elements in the sequence, the next request causes the publisher to finish.
-    public struct Sequence<Elements, Failure> : Publisher where Elements : Sequence, Failure : Error {
+    public struct CZSequence<Elements, Failure> : CZPublisher where Elements : Swift.Sequence, Failure : Error {
 
         /// The kind of values published by this publisher.
         public typealias Output = Elements.Element
 
         /// The sequence of elements to publish.
         public let sequence: Elements
-
-        /// Creates a publisher for a sequence of elements.
-        ///
-        /// - Parameter sequence: The sequence of elements to publish.
-        public init(sequence: Elements)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Failure == S.Failure, S : Subscriber, Elements.Element == S.Input
+        
+        public let inner: Sequence<Elements, Failure>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Sequence<Elements, Failure>, uuid: UUID) {
+            self.sequence = inner.sequence
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -2937,7 +2610,7 @@ extension Publishers {
     /// Much like a zipper or zip fastener on a piece of clothing pulls together rows of teeth to link the two sides, `Publishers.Zip` combines streams from two different publishers by linking pairs of elements from each side.
     ///
     /// If either upstream publisher finishes successfully or fails with an error, so too does the zipped publisher.
-    public struct Zip<A, B> : Publisher where A : Publisher, B : Publisher, A.Failure == B.Failure {
+    public struct CZZip<A, B> : CZPublisher where A : Publisher, B : Publisher, A.Failure == B.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -2954,21 +2627,16 @@ extension Publishers {
 
         /// Another publisher to zip.
         public let b: B
-
-        /// Creates a publisher that applies the zip function to two upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to zip.
-        ///   - b: Another publisher to zip.
-        public init(_ a: A, _ b: B)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, B.Failure == S.Failure, S.Input == (A.Output, B.Output)
+        
+        public let inner: Zip<A, B>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Zip<A, B>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher created by applying the zip function to three upstream publishers.
@@ -2976,7 +2644,7 @@ extension Publishers {
     /// Use a `Publishers.Zip3` to combine the latest elements from three publishers and emit a tuple to the downstream. The returned publisher waits until all three publishers have emitted an event, then delivers the oldest unconsumed event from each publisher as a tuple to the subscriber.
     ///
     /// If any upstream publisher finishes successfully or fails with an error, so too does the zipped publisher.
-    public struct Zip3<A, B, C> : Publisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, B.Failure == C.Failure {
+    public struct CZZip3<A, B, C> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, A.Failure == B.Failure, B.Failure == C.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -2996,22 +2664,17 @@ extension Publishers {
 
         /// A third publisher to zip.
         public let c: C
-
-        /// Creates a publisher that applies the zip function to three upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to zip.
-        ///   - b: A second publisher to zip.
-        ///   - c: A third publisher to zip.
-        public init(_ a: A, _ b: B, _ c: C)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, C.Failure == S.Failure, S.Input == (A.Output, B.Output, C.Output)
+        
+        public let inner: Zip3<A, B, C>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Zip3<A, B, C>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher created by applying the zip function to four upstream publishers.
@@ -3019,7 +2682,7 @@ extension Publishers {
     /// Use a `Publishers.Zip4` to combine the latest elements from four publishers and emit a tuple to the downstream. The returned publisher waits until all four publishers have emitted an event, then delivers the oldest unconsumed event from each publisher as a tuple to the subscriber.
     ///
     /// If any upstream publisher finishes successfully or fails with an error, so too does the zipped publisher.
-    public struct Zip4<A, B, C, D> : Publisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, B.Failure == C.Failure, C.Failure == D.Failure {
+    public struct CZZip4<A, B, C, D> : CZPublisher where A : Publisher, B : Publisher, C : Publisher, D : Publisher, A.Failure == B.Failure, B.Failure == C.Failure, C.Failure == D.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -3042,23 +2705,18 @@ extension Publishers {
 
         /// A fourth publisher to zip.
         public let d: D
-
-        /// Creates a publisher created by applying the zip function to four upstream publishers.
-        /// - Parameters:
-        ///   - a: A publisher to zip.
-        ///   - b: A second publisher to zip.
-        ///   - c: A third publisher to zip.
-        ///   - d: A fourth publisher to zip.
-        public init(_ a: A, _ b: B, _ c: C, _ d: D)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, D.Failure == S.Failure, S.Input == (A.Output, B.Output, C.Output, D.Output)
+        
+        public let inner: Zip4<A, B, C, D>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Zip4<A, B, C, D>, uuid: UUID) {
+            self.a = inner.a
+            self.b = inner.b
+            self.c = inner.c
+            self.d = inner.d
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3066,7 +2724,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes elements specified by a range in the sequence of published elements.
-    public struct Output<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZOutput<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -3083,22 +2741,16 @@ extension Publishers {
 
         /// The range of elements to publish.
         public let range: CountableRange<Int>
-
-        /// Creates a publisher that publishes elements specified by a range.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - range: The range of elements to publish.
-        public init(upstream: Upstream, range: CountableRange<Int>)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Publishers.Output<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Output<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.range = inner.range
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3106,7 +2758,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher.
-    public struct Catch<Upstream, NewPublisher> : Publisher where Upstream : Publisher, NewPublisher : Publisher, Upstream.Output == NewPublisher.Output {
+    public struct CZCatch<Upstream, NewPublisher> : CZPublisher where Upstream : Publisher, NewPublisher : Publisher, Upstream.Output == NewPublisher.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -3123,28 +2775,22 @@ extension Publishers {
 
         /// A closure that accepts the upstream failure as input and returns a publisher to replace the upstream publisher.
         public let handler: (Upstream.Failure) -> NewPublisher
-
-        /// Creates a publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - handler: A closure that accepts the upstream failure as input and returns a publisher to replace the upstream publisher.
-        public init(upstream: Upstream, handler: @escaping (Upstream.Failure) -> NewPublisher)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, NewPublisher.Failure == S.Failure, NewPublisher.Output == S.Input
+        
+        public let inner: Catch<Upstream, NewPublisher>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Catch<Upstream, NewPublisher>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.handler = inner.handler
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher or producing a new error.
     ///
     /// Because this publisher’s handler can throw an error, ``Publishers/TryCatch`` defines its ``Publisher/Failure`` type as `Error`. This is different from ``Publishers/Catch``, which gets its failure type from the replacement publisher.
-    public struct TryCatch<Upstream, NewPublisher> : Publisher where Upstream : Publisher, NewPublisher : Publisher, Upstream.Output == NewPublisher.Output {
+    public struct CZTryCatch<Upstream, NewPublisher> : CZPublisher where Upstream : Publisher, NewPublisher : Publisher, Upstream.Output == NewPublisher.Output {
 
         /// The kind of values published by this publisher.
         ///
@@ -3161,22 +2807,16 @@ extension Publishers {
 
         /// A closure that accepts the upstream failure as input and either returns a publisher to replace the upstream publisher or throws an error.
         public let handler: (Upstream.Failure) throws -> NewPublisher
-
-        /// Creates a publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher or by throwing an error.
-        ///
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - handler: A closure that accepts the upstream failure as input and either returns a publisher to replace the upstream publisher. If this closure throws an error, the publisher terminates with the thrown error.
-        public init(upstream: Upstream, handler: @escaping (Upstream.Failure) throws -> NewPublisher)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, NewPublisher.Output == S.Input, S.Failure == Error
+        
+        public let inner: TryCatch<Upstream, NewPublisher>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.TryCatch<Upstream, NewPublisher>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.handler = inner.handler
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3184,7 +2824,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that transforms elements from an upstream publisher into a new publisher.
-    public struct FlatMap<NewPublisher, Upstream> : Publisher where NewPublisher : Publisher, Upstream : Publisher, NewPublisher.Failure == Upstream.Failure {
+    public struct CZFlatMap<NewPublisher, Upstream> : CZPublisher where NewPublisher : Publisher, Upstream : Publisher, NewPublisher.Failure == Upstream.Failure {
 
         /// The kind of values published by this publisher.
         ///
@@ -3204,22 +2844,17 @@ extension Publishers {
 
         /// A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
         public let transform: (Upstream.Output) -> NewPublisher
-
-        /// Creates a publisher that transforms elements from an upstream publisher into a new publisher.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - maxPublishers: The maximum number of concurrent publisher subscriptions.
-        ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
-        public init(upstream: Upstream, maxPublishers: Subscribers.Demand, transform: @escaping (Upstream.Output) -> NewPublisher)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, NewPublisher.Output == S.Input, Upstream.Failure == S.Failure
+        
+        public let inner: FlatMap<NewPublisher, Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.FlatMap<NewPublisher, Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.maxPublishers = inner.maxPublishers
+            self.transform = inner.transform
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3227,7 +2862,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that delays delivery of elements and completion to the downstream receiver.
-    public struct Delay<Upstream, Context> : Publisher where Upstream : Publisher, Context : Scheduler {
+    public struct CZDelay<Upstream, Context> : CZPublisher where Upstream : Publisher, Context : Scheduler {
 
         /// The kind of values published by this publisher.
         ///
@@ -3253,24 +2888,19 @@ extension Publishers {
 
         /// Options relevant to the scheduler’s behavior.
         public let options: Context.SchedulerOptions?
-
-        /// Creates a publisher that delays delivery of elements and completion to the downstream receiver.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives its elements.
-        ///   - interval: The amount of time to delay.
-        ///   - tolerance: The allowed tolerance in delivering delayed events. The `Delay` publisher may deliver elements this much sooner or later than the interval specifies.
-        ///   - scheduler: The scheduler to deliver the delayed events.
-        ///   - options: Options relevant to the scheduler’s behavior.
-        public init(upstream: Upstream, interval: Context.SchedulerTimeType.Stride, tolerance: Context.SchedulerTimeType.Stride, scheduler: Context, options: Context.SchedulerOptions? = nil)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Delay<Upstream, Context>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Delay<Upstream, Context>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.interval = inner.interval
+            self.tolerance = inner.tolerance
+            self.scheduler = inner.scheduler
+            self.options = inner.options
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3278,7 +2908,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that omits a specified number of elements before republishing later elements.
-    public struct Drop<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZDrop<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -3295,21 +2925,16 @@ extension Publishers {
 
         /// The number of elements to drop.
         public let count: Int
-
-        /// Creates a publisher that omits a specified number of elements before republishing later elements.
-        /// - Parameters:
-        ///   - upstream: The publisher from which this publisher receives elements.
-        ///   - count: The number of elements to drop.
-        public init(upstream: Upstream, count: Int)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: Drop<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.Drop<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.count = inner.count
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }
 
@@ -3317,7 +2942,7 @@ extension Publishers {
 extension Publishers {
 
     /// A publisher that publishes the first element of a stream, then finishes.
-    public struct First<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZFirst<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -3331,23 +2956,19 @@ extension Publishers {
 
         /// The publisher from which this publisher receives elements.
         public let upstream: Upstream
-
-        /// Creates a publisher that publishes the first element of a stream, then finishes.
-        /// - Parameter upstream: The publisher from which this publisher receives elements.
-        public init(upstream: Upstream)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: First<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.First<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that only publishes the first element of a stream to satisfy a predicate closure.
-    public struct FirstWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZFirstWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -3364,21 +2985,20 @@ extension Publishers {
 
         /// The closure that determines whether to publish an element.
         public let predicate: (Publishers.FirstWhere<Upstream>.Output) -> Bool
-
-        public init(upstream: Upstream, predicate: @escaping (Publishers.FirstWhere<Upstream>.Output) -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Failure == S.Failure, Upstream.Output == S.Input
+        
+        public let inner: FirstWhere<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.FirstWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 
     /// A publisher that only publishes the first element of a stream to satisfy a throwing predicate closure.
-    public struct TryFirstWhere<Upstream> : Publisher where Upstream : Publisher {
+    public struct CZTryFirstWhere<Upstream> : CZPublisher where Upstream : Publisher {
 
         /// The kind of values published by this publisher.
         ///
@@ -3395,16 +3015,15 @@ extension Publishers {
 
         /// The error-throwing closure that determines whether to publish an element.
         public let predicate: (Publishers.TryFirstWhere<Upstream>.Output) throws -> Bool
-
-        public init(upstream: Upstream, predicate: @escaping (Publishers.TryFirstWhere<Upstream>.Output) throws -> Bool)
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where S : Subscriber, Upstream.Output == S.Input, S.Failure == Error
+        
+        public let inner: TryFirstWhere<Upstream>
+        public let uuid: UUID
+        
+        public init(inner: Publishers.TryFirstWhere<Upstream>, uuid: UUID) {
+            self.upstream = inner.upstream
+            self.predicate = inner.predicate
+            self.inner = inner
+            self.uuid = uuid
+        }
     }
 }

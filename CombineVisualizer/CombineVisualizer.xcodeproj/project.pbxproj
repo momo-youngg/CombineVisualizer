@@ -12,6 +12,7 @@
 		FAB657162A03B34A005DEA44 /* CombineVisualizer.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FAB657202A03B417005DEA44 /* Inner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB6571F2A03B417005DEA44 /* Inner.swift */; };
 		FAB657222A03B850005DEA44 /* Public.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657212A03B850005DEA44 /* Public.swift */; };
+		FAB657262A07CCC7005DEA44 /* Upper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657252A07CCC7005DEA44 /* Upper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		FAB657142A03B34A005DEA44 /* CombineVisualizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerTests.swift; sourceTree = "<group>"; };
 		FAB6571F2A03B417005DEA44 /* Inner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inner.swift; sourceTree = "<group>"; };
 		FAB657212A03B850005DEA44 /* Public.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Public.swift; sourceTree = "<group>"; };
+		FAB657252A07CCC7005DEA44 /* Upper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Upper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */,
+				FAB657252A07CCC7005DEA44 /* Upper.swift */,
 				FAB6571F2A03B417005DEA44 /* Inner.swift */,
 				FAB657212A03B850005DEA44 /* Public.swift */,
 			);
@@ -199,6 +202,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAB657222A03B850005DEA44 /* Public.swift in Sources */,
+				FAB657262A07CCC7005DEA44 /* Upper.swift in Sources */,
 				FAB657202A03B417005DEA44 /* Inner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

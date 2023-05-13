@@ -110,153 +110,9 @@ public class CZAnySubscriber<Input, Failure> : CZSubscriber<AnySubscriber<Input,
         self.inner.playgroundDescription
     }
     
-    public let inner: AnySubscriber<Input, Failure>
-    public let uuid: UUID
-    
     public override init(_ inner: AnySubscriber<Input, Failure>, uuid: UUID) {
-        self.inner = inner
-        self.uuid = uuid
+        super.init(inner, uuid: uuid)
     }
-}
-
-/// A publisher that exposes its elements as an asynchronous sequence.
-///
-/// `AsyncPublisher` conforms to <doc://com.apple.documentation/documentation/Swift/AsyncSequence>, which allows callers to receive values with the `for`-`await`-`in` syntax, rather than attaching a ``Subscriber``.
-///
-/// Use the ``Combine/Publisher/values-1dm9r`` property of the ``Combine/Publisher`` protocol to wrap an existing publisher with an instance of this type.
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-public struct AsyncPublisher<P> : AsyncSequence where P : Publisher, P.Failure == Never {
-
-    /// The type of element produced by this asynchronous sequence.
-    public typealias Element = P.Output
-
-    /// The iterator that produces elements of the asynchronous publisher sequence.
-    public struct Iterator : AsyncIteratorProtocol {
-
-        /// Produces the next element in the prefix sequence.
-        ///
-        /// - Returns: The next published element, or nil if the publisher finishes normally.
-        public mutating func next() async -> P.Output?
-
-        public typealias Element = P.Output
-    }
-
-    /// Creates a publisher that exposes elements received from an upstream publisher as an asynchronous sequence.
-    ///
-    /// - Parameter publisher: An upstream publisher. The asynchronous publisher converts elements received from this publisher into an asynchronous sequence.
-    public init(_ publisher: P)
-
-    /// Creates the asynchronous iterator that produces elements of this asynchronous sequence.
-    ///
-    /// - Returns: An instance of the `AsyncIterator` type used to produce elements of the asynchronous sequence.
-    public func makeAsyncIterator() -> AsyncPublisher<P>.Iterator
-
-    /// The type of asynchronous iterator that produces elements of this
-    /// asynchronous sequence.
-    public typealias AsyncIterator = AsyncPublisher<P>.Iterator
-}
-
-/// A publisher that exposes its elements as a throwing asynchronous sequence.
-///
-/// `AsyncThrowingPublisher` conforms to <doc://com.apple.documentation/documentation/Swift/AsyncSequence>, which allows callers to receive values with the `for`-`await`-`in` syntax, rather than attaching a ``Subscriber``. If the upstream publisher terminates with an error, `AsyncThrowingPublisher` throws the error to the awaiting caller.
-///
-/// Use the ``Combine/Publisher/values-v7nz`` property of the ``Combine/Publisher`` protocol to wrap an existing publisher with an instance of this type.
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-public struct AsyncThrowingPublisher<P> : AsyncSequence where P : Publisher {
-
-    /// The type of element produced by this asynchronous sequence.
-    public typealias Element = P.Output
-
-    /// The iterator that produces elements of the asynchronous publisher sequence.
-    public struct Iterator : AsyncIteratorProtocol {
-
-        /// Produces the next element in the prefix sequence.
-        ///
-        /// - Returns: The next published element, or nil if the publisher finishes normally. If the publisher terminates with an error, the call point receives the error as a `throw`.
-        public mutating func next() async throws -> P.Output?
-
-        public typealias Element = P.Output
-    }
-
-    /// Creates a publisher that exposes elements received from an upstream publisher as a throwing asynchronous sequence.
-    /// - Parameter publisher: An upstream publisher. The asynchronous publisher converts elements received from this publisher into an asynchronous sequence.
-    public init(_ publisher: P)
-
-    /// Creates the asynchronous iterator that produces elements of this asynchronous sequence.
-    ///
-    /// - Returns: An instance of the `AsyncIterator` type used to produce elements of the asynchronous sequence.
-    public func makeAsyncIterator() -> AsyncThrowingPublisher<P>.Iterator
-
-    /// The type of asynchronous iterator that produces elements of this
-    /// asynchronous sequence.
-    public typealias AsyncIterator = AsyncThrowingPublisher<P>.Iterator
-}
-
-/// A protocol indicating that an activity or action supports cancellation.
-///
-/// Calling ``Cancellable/cancel()`` frees up any allocated resources. It also stops side effects such as timers, network access, or disk I/O.
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public protocol Cancellable {
-
-    /// Cancel the activity.
-    ///
-    /// When implementing ``Cancellable`` in support of a custom publisher, implement `cancel()` to request that your publisher stop calling its downstream subscribers. Combine doesn't require that the publisher stop immediately, but the `cancel()` call should take effect quickly. Canceling should also eliminate any strong references it currently holds.
-    ///
-    /// After you receive one call to `cancel()`, subsequent calls shouldn't do anything. Additionally, your implementation must be thread-safe, and it shouldn't block the caller.
-    ///
-    /// > Tip: Keep in mind that your `cancel()` may execute concurrently with another call to `cancel()` --- including the scenario where an ``AnyCancellable`` is deallocating --- or to ``Subscription/request(_:)``.
-    func cancel()
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Cancellable {
-
-    /// Stores this cancellable instance in the specified collection.
-    ///
-    /// - Parameter collection: The collection in which to store this ``Cancellable``.
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public func store<C>(in collection: inout C) where C : RangeReplaceableCollection, C.Element == AnyCancellable
-
-    /// Stores this cancellable instance in the specified set.
-    ///
-    /// - Parameter set: The set in which to store this ``Cancellable``.
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    public func store(in set: inout Set<AnyCancellable>)
-}
-
-/// A publisher that provides an explicit means of connecting and canceling publication.
-///
-/// Use a ``ConnectablePublisher`` when you need to perform additional configuration or setup prior to producing any elements.
-///
-/// This publisher doesn’t produce any elements until you call its ``ConnectablePublisher/connect()`` method.
-///
-/// Use ``Publisher/makeConnectable()`` to create a ``ConnectablePublisher`` from any publisher whose failure type is <doc://com.apple.documentation/documentation/Swift/Never>.
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public protocol ConnectablePublisher<Output, Failure> : Publisher {
-
-    /// Connects to the publisher, allowing it to produce elements, and returns an instance with which to cancel publishing.
-    ///
-    /// - Returns: A ``Cancellable`` instance that you use to cancel publishing.
-    func connect() -> Cancellable
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension ConnectablePublisher {
-
-    /// Automates the process of connecting or disconnecting from this connectable publisher.
-    ///
-    /// Use ``ConnectablePublisher/autoconnect()`` to simplify working with ``ConnectablePublisher`` instances, such as <doc://com.apple.documentation/documentation/Foundation/Timer/TimerPublisher> in the Foundation framework.
-    ///
-    /// In the following example, the <doc://com.apple.documentation/documentation/Foundation/Timer/3329589-publish> operator creates a <doc://com.apple.documentation/documentation/Foundation/Timer/TimerPublisher>, which is a ``ConnectablePublisher``. As a result, subscribers don’t receive any values until after a call to ``ConnectablePublisher/connect()``.
-    /// For convenience when working with a single subscriber, the ``ConnectablePublisher/autoconnect()`` operator performs the ``ConnectablePublisher/connect()`` call when attached to by the subscriber.
-    ///
-    ///     cancellable = Timer.publish(every: 1, on: .main, in: .default)
-    ///         .autoconnect()
-    ///         .sink { date in
-    ///             print ("Date now: \(date)")
-    ///         }
-    /// - Returns: A publisher which automatically connects to its upstream connectable publisher.
-    public func autoconnect() -> Publishers.Autoconnect<Self>
 }
 
 /// A subject that wraps a single value and publishes a new element whenever the value changes.
@@ -265,7 +121,7 @@ extension ConnectablePublisher {
 ///
 /// Calling ``CurrentValueSubject/send(_:)`` on a ``CurrentValueSubject`` also updates the current value, making it equivalent to updating the ``CurrentValueSubject/value`` directly.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-final public class CZCurrentValueSubject<Output, Failure> : CZSubject<CurrentValueSubject<Output, Failure>> where Failure : Error {
+final public class CZCurrentValueSubject<Output, Failure> : CZSubject where Failure : Error {
 
     /// The value wrapped by this subject, published as a new element whenever it changes.
     final public var value: Output {
@@ -275,36 +131,15 @@ final public class CZCurrentValueSubject<Output, Failure> : CZSubject<CurrentVal
     public let inner: CurrentValueSubject<Output, Failure>
     public let uuid: UUID
     
-    public override init(inner: CurrentValueSubject<Output, Failure>, uuid: UUID) {
+    public init(inner: CurrentValueSubject<Output, Failure>, uuid: UUID) {
         self.inner = inner
         self.uuid = uuid
     }
 }
 
-/// A protocol for uniquely identifying publisher streams.
-///
-/// If you create a custom ``Subscription`` or ``Subscriber`` type, implement this protocol so that development tools can uniquely identify publisher chains in your app.
-/// If your type is a class, Combine provides an implementation of ``CustomCombineIdentifierConvertible/combineIdentifier-1frze`` for you.
-/// If your type is a structure, set up the identifier as follows:
-///
-///     let combineIdentifier = CombineIdentifier()
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public protocol CustomCombineIdentifierConvertible {
-
-    /// A unique identifier for identifying publisher streams.
-    var combineIdentifier: CombineIdentifier { get }
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension CustomCombineIdentifierConvertible where Self : AnyObject {
-
-    /// A unique identifier for identifying publisher streams.
-    public var combineIdentifier: CombineIdentifier { get }
-}
-
 /// A publisher that awaits subscription before running the supplied closure to create a publisher for the new subscriber.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public struct Deferred<DeferredPublisher> : Publisher where DeferredPublisher : Publisher {
+public struct CZDeferred<DeferredPublisher> : CZPublisher where DeferredPublisher : Publisher {
 
     /// The kind of values published by this publisher.
     public typealias Output = DeferredPublisher.Output
@@ -316,105 +151,75 @@ public struct Deferred<DeferredPublisher> : Publisher where DeferredPublisher : 
     ///
     /// The publisher returned by this closure immediately receives the incoming subscription.
     public let createPublisher: () -> DeferredPublisher
-
-    /// Creates a deferred publisher.
-    ///
-    /// - Parameter createPublisher: The closure to execute when calling `subscribe(_:)`.
-    public init(createPublisher: @escaping () -> DeferredPublisher)
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    public func receive<S>(subscriber: S) where S : Subscriber, DeferredPublisher.Failure == S.Failure, DeferredPublisher.Output == S.Input
+    
+    public let inner: Deferred<DeferredPublisher>
+    public let uuid: UUID
+    
+    public init(inner: Deferred<DeferredPublisher>, uuid: UUID) {
+        self.createPublisher = inner.createPublisher
+        self.inner = inner
+        self.uuid = uuid
+    }
 }
 
 /// A publisher that never publishes any values, and optionally finishes immediately.
 ///
 /// You can create a ”Never” publisher — one which never sends values and never finishes or fails — with the initializer `Empty(completeImmediately: false)`.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public struct Empty<Output, Failure> : Publisher, Equatable where Failure : Error {
-
-    /// Creates an empty publisher.
-    ///
-    /// - Parameter completeImmediately: A Boolean value that indicates whether the publisher should immediately finish.
-    public init(completeImmediately: Bool = true)
-
-    /// Creates an empty publisher with the given completion behavior and output and failure types.
-    ///
-    /// Use this initializer to connect the empty publisher to subscribers or other publishers that have specific output and failure types.
-    ///
-    /// - Parameters:
-    ///   - completeImmediately: A Boolean value that indicates whether the publisher should immediately finish.
-    ///   - outputType: The output type exposed by this publisher.
-    ///   - failureType: The failure type exposed by this publisher.
-    public init(completeImmediately: Bool = true, outputType: Output.Type, failureType: Failure.Type)
+public struct CZEmpty<Output, Failure> : CZPublisher, Equatable where Failure : Error {
 
     /// A Boolean value that indicates whether the publisher immediately sends a completion.
     ///
     /// If `true`, the publisher finishes immediately after sending a subscription to the subscriber. If `false`, it never completes.
     public let completeImmediately: Bool
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    public func receive<S>(subscriber: S) where Output == S.Input, Failure == S.Failure, S : Subscriber
+    
+    public let inner: Empty<Output, Failure>
+    public let uuid: UUID
+    
+    public init(inner: Empty<Output, Failure>, uuid: UUID) {
+        self.completeImmediately = inner.completeImmediately
+        self.inner = inner
+        self.uuid = uuid
+    }
 
     /// Returns a Boolean value that indicates whether two publishers are equivalent.
     /// - Parameters:
     ///   - lhs: An `Empty` instance to compare.
     ///   - rhs: Another `Empty` instance to compare.
     /// - Returns: `true` if the two publishers have equal `completeImmediately` properties; otherwise `false`.
-    public static func == (lhs: Empty<Output, Failure>, rhs: Empty<Output, Failure>) -> Bool
+    public static func == (lhs: CZEmpty<Output, Failure>, rhs: CZEmpty<Output, Failure>) -> Bool {
+        return lhs.inner == rhs.inner
+    }
 }
 
 /// A publisher that immediately terminates with the specified error.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public struct Fail<Output, Failure> : Publisher where Failure : Error {
-
-    /// Creates a publisher that immediately terminates with the specified failure.
-    ///
-    /// - Parameter error: The failure to send when terminating the publisher.
-    public init(error: Failure)
-
-    /// Creates publisher with the given output type, that immediately terminates with the specified failure.
-    ///
-    /// Use this initializer to create a `Fail` publisher that can work with subscribers or publishers that expect a given output type.
-    ///
-    /// - Parameters:
-    ///   - outputType: The output type exposed by this publisher.
-    ///   - failure: The failure to send when terminating the publisher.
-    public init(outputType: Output.Type, failure: Failure)
+public struct CZFail<Output, Failure> : CZPublisher where Failure : Error {
 
     /// The failure to send when terminating the publisher.
     public let error: Failure
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    public func receive<S>(subscriber: S) where Output == S.Input, Failure == S.Failure, S : Subscriber
+    
+    public let inner: Fail<Output, Failure>
+    public let uuid: UUID
+    
+    public init(inner: Fail<Output, Failure>, uuid: UUID) {
+        self.error = inner.error
+        self.inner = inner
+        self.uuid = uuid
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Fail : Equatable where Failure : Equatable {
+extension CZFail : Equatable where Failure : Equatable {
 
     /// Returns a Boolean value that indicates whether two publishers are equivalent.
     /// - Parameters:
     ///   - lhs: A `Fail` publisher to compare for equality.
     ///   - rhs: Another `Fail` publisher to compare for equality.
     /// - Returns: `true` if the publishers have equal `error` properties; otherwise `false`.
-    public static func == (lhs: Fail<Output, Failure>, rhs: Fail<Output, Failure>) -> Bool
+    public static func == (lhs: CZFail<Output, Failure>, rhs: CZFail<Output, Failure>) -> Bool {
+        return lhs.inner == rhs.inner
+    }
 }
 
 /// A publisher that eventually produces a single value and then finishes or fails.
@@ -465,271 +270,48 @@ extension Fail : Equatable where Failure : Equatable {
 ///
 /// For more information on continuations, see the <doc://com.apple.documentation/documentation/swift/swift_standard_library/concurrency> topic in the Swift standard library.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-final public class Future<Output, Failure> : Publisher where Failure : Error {
+final public class CZFuture<Output, Failure> : CZPublisher where Failure : Error {
 
     /// A type that represents a closure to invoke in the future, when an element or error is available.
     ///
     /// The promise closure receives one parameter: a `Result` that contains either a single element published by a ``Future``, or an error.
     public typealias Promise = (Result<Output, Failure>) -> Void
-
-    /// Creates a publisher that invokes a promise closure when the publisher emits an element.
-    ///
-    /// - Parameter attemptToFulfill: A ``Future/Promise`` that the publisher invokes when the publisher emits an element or terminates with an error.
-    public init(_ attemptToFulfill: @escaping (@escaping Future<Output, Failure>.Promise) -> Void)
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    final public func receive<S>(subscriber: S) where Output == S.Input, Failure == S.Failure, S : Subscriber
+    
+    public let inner: Future<Output, Failure>
+    public let uuid: UUID
+    
+    public init(inner: Future<Output, Failure>, uuid: UUID) {
+        self.inner = inner
+        self.uuid = uuid
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Future where Failure == Never {
+extension CZFuture where Failure == Never {
 
     /// The published value of the future, delivered asynchronously.
     ///
     /// This property subscribes to the `Future` and delivers the value asynchronously when the `Future` publishes it. Use this property when you want to use the `async`-`await` syntax with a `Future`.
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    final public var value: Output { get async }
+    final public var value: Output {
+        get async {
+            await inner.value
+        }
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Future {
+extension CZFuture {
 
     /// The published value of the future or an error, delivered asynchronously.
     ///
     /// This property subscribes to the `Future` and delivers the value asynchronously when the `Future` publishes it. If the `Future` terminates with an error, the awaiting caller receives the error instead. Use this property when you want to the `async`-`await` syntax with a `Future` whose ``Publisher/Failure`` type is not <doc://com.apple.documentation/documentation/Swift/Never>.
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    final public var value: Output { get async throws }
-}
-
-/// A scheduler for performing synchronous actions.
-///
-/// You can only use this scheduler for immediate actions. If you attempt to schedule actions after a specific date, this scheduler ignores the date and performs them immediately.
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public struct ImmediateScheduler : Scheduler {
-
-    /// The time type used by the immediate scheduler.
-    public struct SchedulerTimeType : Strideable {
-
-        /// Returns the distance to another immediate scheduler time; this distance is always `0` in the context of an immediate scheduler.
-        ///
-        /// - Parameter other: The other scheduler time.
-        /// - Returns: `0`, as a `Stride`.
-        public func distance(to other: ImmediateScheduler.SchedulerTimeType) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-        /// Advances the time by the specified amount; this is meaningless in the context of an immediate scheduler.
-        ///
-        /// - Parameter n: The amount to advance by. The `ImmediateScheduler` ignores this value.
-        /// - Returns: An empty `SchedulerTimeType`.
-        public func advanced(by n: ImmediateScheduler.SchedulerTimeType.Stride) -> ImmediateScheduler.SchedulerTimeType
-
-        /// The increment by which the immediate scheduler counts time.
-        public struct Stride : ExpressibleByFloatLiteral, Comparable, SignedNumeric, Codable, SchedulerTimeIntervalConvertible {
-
-            /// The type used when evaluating floating-point literals.
-            public typealias FloatLiteralType = Double
-
-            /// The type used when evaluating integer literals.
-            public typealias IntegerLiteralType = Int
-
-            /// The type used for expressing the stride’s magnitude.
-            public typealias Magnitude = Int
-
-            /// The value of this time interval in seconds.
-            public var magnitude: Int
-
-            /// Creates an immediate scheduler time interval from the given time interval.
-            public init(_ value: Int)
-
-            /// Creates an immediate scheduler time interval from an integer seconds value.
-            public init(integerLiteral value: Int)
-
-            /// Creates an immediate scheduler time interval from a floating-point seconds value.
-            public init(floatLiteral value: Double)
-
-            /// Creates an immediate scheduler time interval from a binary integer type.
-            ///
-            /// If `exactly` can’t convert to an `Int`, the resulting time interval is `nil`.
-            public init?<T>(exactly source: T) where T : BinaryInteger
-
-            /// Returns a Boolean value indicating whether the value of the first
-            /// argument is less than that of the second argument.
-            ///
-            /// This function is the only requirement of the `Comparable` protocol. The
-            /// remainder of the relational operator functions are implemented by the
-            /// standard library for any type that conforms to `Comparable`.
-            ///
-            /// - Parameters:
-            ///   - lhs: A value to compare.
-            ///   - rhs: Another value to compare.
-            public static func < (lhs: ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride) -> Bool
-
-            /// Multiplies two values and produces their product.
-            ///
-            /// The multiplication operator (`*`) calculates the product of its two
-            /// arguments. For example:
-            ///
-            ///     2 * 3                   // 6
-            ///     100 * 21                // 2100
-            ///     -10 * 15                // -150
-            ///     3.5 * 2.25              // 7.875
-            ///
-            /// You cannot use `*` with arguments of different types. To multiply values
-            /// of different types, convert one of the values to the other value's type.
-            ///
-            ///     let x: Int8 = 21
-            ///     let y: Int = 1000000
-            ///     Int(x) * y              // 21000000
-            ///
-            /// - Parameters:
-            ///   - lhs: The first value to multiply.
-            ///   - rhs: The second value to multiply.
-            public static func * (lhs: ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Adds two values and produces their sum.
-            ///
-            /// The addition operator (`+`) calculates the sum of its two arguments. For
-            /// example:
-            ///
-            ///     1 + 2                   // 3
-            ///     -10 + 15                // 5
-            ///     -15 + -5                // -20
-            ///     21.5 + 3.25             // 24.75
-            ///
-            /// You cannot use `+` with arguments of different types. To add values of
-            /// different types, convert one of the values to the other value's type.
-            ///
-            ///     let x: Int8 = 21
-            ///     let y: Int = 1000000
-            ///     Int(x) + y              // 1000021
-            ///
-            /// - Parameters:
-            ///   - lhs: The first value to add.
-            ///   - rhs: The second value to add.
-            public static func + (lhs: ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Subtracts one value from another and produces their difference.
-            ///
-            /// The subtraction operator (`-`) calculates the difference of its two
-            /// arguments. For example:
-            ///
-            ///     8 - 3                   // 5
-            ///     -10 - 5                 // -15
-            ///     100 - -5                // 105
-            ///     10.5 - 100.0            // -89.5
-            ///
-            /// You cannot use `-` with arguments of different types. To subtract values
-            /// of different types, convert one of the values to the other value's type.
-            ///
-            ///     let x: UInt8 = 21
-            ///     let y: UInt = 1000000
-            ///     y - UInt(x)             // 999979
-            ///
-            /// - Parameters:
-            ///   - lhs: A numeric value.
-            ///   - rhs: The value to subtract from `lhs`.
-            public static func - (lhs: ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Subtracts the second value from the first and stores the difference in the
-            /// left-hand-side variable.
-            ///
-            /// - Parameters:
-            ///   - lhs: A numeric value.
-            ///   - rhs: The value to subtract from `lhs`.
-            public static func -= (lhs: inout ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride)
-
-            /// Multiplies two values and stores the result in the left-hand-side
-            /// variable.
-            ///
-            /// - Parameters:
-            ///   - lhs: The first value to multiply.
-            ///   - rhs: The second value to multiply.
-            public static func *= (lhs: inout ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride)
-
-            /// Adds two values and stores the result in the left-hand-side variable.
-            ///
-            /// - Parameters:
-            ///   - lhs: The first value to add.
-            ///   - rhs: The second value to add.
-            public static func += (lhs: inout ImmediateScheduler.SchedulerTimeType.Stride, rhs: ImmediateScheduler.SchedulerTimeType.Stride)
-
-            /// Converts the specified number of seconds into an instance of this scheduler time type.
-            public static func seconds(_ s: Int) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Converts the specified number of seconds, as a floating-point value, into an instance of this scheduler time type.
-            public static func seconds(_ s: Double) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Converts the specified number of milliseconds into an instance of this scheduler time type.
-            public static func milliseconds(_ ms: Int) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Converts the specified number of microseconds into an instance of this scheduler time type.
-            public static func microseconds(_ us: Int) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Converts the specified number of nanoseconds into an instance of this scheduler time type.
-            public static func nanoseconds(_ ns: Int) -> ImmediateScheduler.SchedulerTimeType.Stride
-
-            /// Returns a Boolean value indicating whether two values are equal.
-            ///
-            /// Equality is the inverse of inequality. For any values `a` and `b`,
-            /// `a == b` implies that `a != b` is `false`.
-            ///
-            /// - Parameters:
-            ///   - lhs: A value to compare.
-            ///   - rhs: Another value to compare.
-            public static func == (a: ImmediateScheduler.SchedulerTimeType.Stride, b: ImmediateScheduler.SchedulerTimeType.Stride) -> Bool
-
-            /// Encodes this value into the given encoder.
-            ///
-            /// If the value fails to encode anything, `encoder` will encode an empty
-            /// keyed container in its place.
-            ///
-            /// This function throws an error if any values are invalid for the given
-            /// encoder's format.
-            ///
-            /// - Parameter encoder: The encoder to write data to.
-            public func encode(to encoder: Encoder) throws
-
-            /// Creates a new instance by decoding from the given decoder.
-            ///
-            /// This initializer throws an error if reading from the decoder fails, or
-            /// if the data read is corrupted or otherwise invalid.
-            ///
-            /// - Parameter decoder: The decoder to read data from.
-            public init(from decoder: Decoder) throws
+    final public var value: Output {
+        get async throws {
+            try await self.inner.value
         }
     }
-
-    /// A type that defines options accepted by the immediate scheduler.
-    public typealias SchedulerOptions = Never
-
-    /// The shared instance of the immediate scheduler.
-    ///
-    /// You cannot create instances of the immediate scheduler yourself. Use only the shared instance.
-    public static let shared: ImmediateScheduler
-
-    /// Performs the action at the next possible opportunity.
-    public func schedule(options: ImmediateScheduler.SchedulerOptions?, _ action: @escaping () -> Void)
-
-    /// The immediate scheduler’s definition of the current moment in time.
-    public var now: ImmediateScheduler.SchedulerTimeType { get }
-
-    /// The minimum tolerance allowed by the immediate scheduler.
-    public var minimumTolerance: ImmediateScheduler.SchedulerTimeType.Stride { get }
-
-    /// Performs the action at some time after the specified date.
-    ///
-    /// The immediate scheduler ignores `date` and performs the action immediately.
-    public func schedule(after date: ImmediateScheduler.SchedulerTimeType, tolerance: ImmediateScheduler.SchedulerTimeType.Stride, options: ImmediateScheduler.SchedulerOptions?, _ action: @escaping () -> Void)
-
-    /// Performs the action at some time after the specified date, at the specified frequency, optionally taking into account tolerance if possible.
-    ///
-    /// The immediate scheduler ignores `date` and performs the action immediately.
-    public func schedule(after date: ImmediateScheduler.SchedulerTimeType, interval: ImmediateScheduler.SchedulerTimeType.Stride, tolerance: ImmediateScheduler.SchedulerTimeType.Stride, options: ImmediateScheduler.SchedulerOptions?, _ action: @escaping () -> Void) -> Cancellable
 }
 
 /// A publisher that emits an output to each subscriber just once, and then finishes.
@@ -738,7 +320,7 @@ public struct ImmediateScheduler : Scheduler {
 ///
 /// In contrast with <doc://com.apple.documentation/documentation/Swift/Result/Publisher>, a ``Just`` publisher can’t fail with an error. And unlike <doc://com.apple.documentation/documentation/Swift/Optional/Publisher>, a ``Just`` publisher always produces a value.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-public struct Just<Output> : Publisher {
+public struct CZJust<Output> : CZPublisher {
 
     /// The kind of errors this publisher might publish.
     ///
@@ -747,176 +329,222 @@ public struct Just<Output> : Publisher {
 
     /// The one element that the publisher emits.
     public let output: Output
-
-    /// Initializes a publisher that emits the specified output just once.
-    ///
-    /// - Parameter output: The one element that the publisher emits.
-    public init(_ output: Output)
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    public func receive<S>(subscriber: S) where Output == S.Input, S : Subscriber, S.Failure == Never
+    
+    public let inner: Just<Output>
+    public let uuid: UUID
+    
+    public init(inner: Just<Output>, uuid: UUID) {
+        self.output = inner.output
+        self.inner = inner
+        self.uuid = uuid
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Just : Equatable where Output : Equatable {
+extension CZJust : Equatable where Output : Equatable {
 
     /// Returns a Boolean value that indicates whether two publishers are equivalent.
     /// - Parameters:
     ///   - lhs: A `Just` publisher to compare for equality.
     ///   - rhs: Another `Just` publisher to compare for equality.
     /// - Returns: `true` if the publishers have equal `output` properties; otherwise `false`.
-    public static func == (lhs: Just<Output>, rhs: Just<Output>) -> Bool
+    public static func == (lhs: CZJust<Output>, rhs: CZJust<Output>) -> Bool {
+        return lhs.inner == rhs.inner
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Just where Output : Comparable {
+extension CZJust where Output : Comparable {
 
-    public func min() -> Just<Output>
+    public func min() -> CZJust<Output> {
+        return CZJust(inner: self.inner.min(), uuid: self.uuid)
+    }
 
-    public func max() -> Just<Output>
+    public func max() -> CZJust<Output> {
+        return CZJust(inner: self.inner.max(), uuid: self.uuid)
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Just where Output : Equatable {
-
-    public func contains(_ output: Output) -> Just<Bool>
-
-    public func removeDuplicates() -> Just<Output>
+extension CZJust where Output : Equatable {
+    
+    public func contains(_ output: Output) -> CZJust<Bool> {
+        return CZJust<Bool>(inner: self.inner.contains(output), uuid: self.uuid)
+    }
+    
+    public func removeDuplicates() -> CZJust<Output> {
+        return CZJust(inner: self.inner.removeDuplicates(), uuid: self.uuid)
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Just {
+extension CZJust {
 
-    public func allSatisfy(_ predicate: (Output) -> Bool) -> Just<Bool>
+    public func allSatisfy(_ predicate: (Output) -> Bool) -> CZJust<Bool> {
+        return CZJust<Bool>(inner: self.inner.allSatisfy(predicate), uuid: self.uuid)
+    }
 
-    public func tryAllSatisfy(_ predicate: (Output) throws -> Bool) -> Result<Bool, Error>.Publisher
+    public func tryAllSatisfy(_ predicate: (Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryAllSatisfy(predicate), uuid: self.uuid)
+    }
 
-    public func collect() -> Just<[Output]>
+    public func collect() -> CZJust<[Output]> {
+        return CZJust<[Output]>(inner: self.inner.collect(), uuid: self.uuid)
+    }
 
-    public func compactMap<T>(_ transform: (Output) -> T?) -> Optional<T>.Publisher
+    public func compactMap<T>(_ transform: (Output) -> T?) -> Optional<T>.CZPublisher {
+        return Optional<T>.CZPublisher(inner: self.inner.compactMap(transform), uuid: self.uuid)
+    }
 
-    public func min(by areInIncreasingOrder: (Output, Output) -> Bool) -> Just<Output>
+    public func min(by areInIncreasingOrder: (Output, Output) -> Bool) -> CZJust<Output> {
+        return CZJust(inner: self.inner.min(by: areInIncreasingOrder), uuid: self.uuid)
+    }
 
-    public func max(by areInIncreasingOrder: (Output, Output) -> Bool) -> Just<Output>
+    public func max(by areInIncreasingOrder: (Output, Output) -> Bool) -> CZJust<Output> {
+        return CZJust(inner: self.inner.max(by: areInIncreasingOrder), uuid: self.uuid)
+    }
 
-    public func prepend(_ elements: Output...) -> Publishers.Sequence<[Output], Just<Output>.Failure>
+    public func prepend(_ elements: Output...) -> Publishers.CZSequence<[Output], Just<Output>.Failure> {
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+    }
 
-    public func prepend<S>(_ elements: S) -> Publishers.Sequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence
+    public func prepend<S>(_ elements: S) -> Publishers.CZSequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence {
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+    }
 
-    public func append(_ elements: Output...) -> Publishers.Sequence<[Output], Just<Output>.Failure>
+    public func append(_ elements: Output...) -> Publishers.CZSequence<[Output], Just<Output>.Failure> {
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+    }
 
-    public func append<S>(_ elements: S) -> Publishers.Sequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence
+    public func append<S>(_ elements: S) -> Publishers.CZSequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence {
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+    }
 
-    public func contains(where predicate: (Output) -> Bool) -> Just<Bool>
+    public func contains(where predicate: (Output) -> Bool) -> CZJust<Bool> {
+        return CZJust<Bool>(inner: self.inner.contains(where: predicate), uuid: self.uuid)
+    }
 
-    public func tryContains(where predicate: (Output) throws -> Bool) -> Result<Bool, Error>.Publisher
+    public func tryContains(where predicate: (Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryContains(where: predicate), uuid: self.uuid)
+    }
 
-    public func count() -> Just<Int>
+    public func count() -> CZJust<Int> {
+        return CZJust<Int>(inner: self.inner.count(), uuid: self.uuid)
+    }
 
-    public func dropFirst(_ count: Int = 1) -> Optional<Output>.Publisher
+    public func dropFirst(_ count: Int = 1) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.dropFirst(count), uuid: self.uuid)
+    }
 
-    public func drop(while predicate: (Output) -> Bool) -> Optional<Output>.Publisher
+    public func drop(while predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.drop(while: predicate), uuid: self.uuid)
+    }
 
-    public func first() -> Just<Output>
+    public func first() -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.first(), uuid: self.uuid)
+    }
 
-    public func first(where predicate: (Output) -> Bool) -> Optional<Output>.Publisher
+    public func first(where predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.first(where: predicate), uuid: self.uuid)
+    }
 
-    public func last() -> Just<Output>
+    public func last() -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.last(), uuid: self.uuid)
+    }
 
-    public func last(where predicate: (Output) -> Bool) -> Optional<Output>.Publisher
+    public func last(where predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.last(where: predicate), uuid: self.uuid)
+    }
 
-    public func filter(_ isIncluded: (Output) -> Bool) -> Optional<Output>.Publisher
+    public func filter(_ isIncluded: (Output) -> Bool) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.filter(isIncluded), uuid: self.uuid)
+    }
 
-    public func ignoreOutput() -> Empty<Output, Just<Output>.Failure>
+    public func ignoreOutput() -> CZEmpty<Output, Just<Output>.Failure> {
+        return CZEmpty<Output, Just<Output>.Failure>(inner: self.inner.ignoreOutput(), uuid: self.uuid)
+    }
 
-    public func map<T>(_ transform: (Output) -> T) -> Just<T>
+    public func map<T>(_ transform: (Output) -> T) -> CZJust<T> {
+        return CZJust<T>(inner: self.inner.map(transform), uuid: self.uuid)
+    }
 
-    public func tryMap<T>(_ transform: (Output) throws -> T) -> Result<T, Error>.Publisher
+    public func tryMap<T>(_ transform: (Output) throws -> T) -> Result<T, Error>.CZPublisher {
+        return  Result<T, Error>.CZPublisher(inner: self.inner.tryMap(transform), uuid: self.uuid)
+    }
 
-    public func mapError<E>(_ transform: (Just<Output>.Failure) -> E) -> Result<Output, E>.Publisher where E : Error
+    public func mapError<E>(_ transform: (Just<Output>.Failure) -> E) -> Result<Output, E>.CZPublisher where E : Error {
+        return Result<Output, E>.CZPublisher(inner: self.inner.mapError(transform), uuid: self.uuid)
+    }
 
-    public func output(at index: Int) -> Optional<Output>.Publisher
+    public func output(at index: Int) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.output(at: index), uuid: self.uuid)
+    }
 
-    public func output<R>(in range: R) -> Optional<Output>.Publisher where R : RangeExpression, R.Bound == Int
+    public func output<R>(in range: R) -> Optional<Output>.CZPublisher where R : RangeExpression, R.Bound == Int {
+        return Optional<Output>.CZPublisher(inner: self.inner.output(in: range), uuid: self.uuid)
+    }
 
-    public func prefix(_ maxLength: Int) -> Optional<Output>.Publisher
+    public func prefix(_ maxLength: Int) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.prefix(maxLength), uuid: self.uuid)
+    }
 
-    public func prefix(while predicate: (Output) -> Bool) -> Optional<Output>.Publisher
+    public func prefix(while predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
+        return Optional<Output>.CZPublisher(inner: self.inner.prefix(while: predicate), uuid: self.uuid)
+    }
 
-    public func reduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.Publisher
+    public func reduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.CZPublisher {
+        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.reduce(initialResult, nextPartialResult), uuid: self.uuid)
+    }
 
-    public func tryReduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.Publisher
+    public func tryReduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.CZPublisher {
+        return Result<T, Error>.CZPublisher(inner: self.inner.tryReduce(initialResult, nextPartialResult), uuid: self.uuid)
+    }
 
-    public func removeDuplicates(by predicate: (Output, Output) -> Bool) -> Just<Output>
+    public func removeDuplicates(by predicate: (Output, Output) -> Bool) -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.removeDuplicates(by: predicate), uuid: self.uuid)
+    }
 
-    public func tryRemoveDuplicates(by predicate: (Output, Output) throws -> Bool) -> Result<Output, Error>.Publisher
+    public func tryRemoveDuplicates(by predicate: (Output, Output) throws -> Bool) -> Result<Output, Error>.CZPublisher {
+        return Result<Output, Error>.CZPublisher(inner: self.inner.tryRemoveDuplicates(by: predicate), uuid: self.uuid)
+    }
 
-    public func replaceError(with output: Output) -> Just<Output>
+    public func replaceError(with output: Output) -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.replaceError(with: output), uuid: self.uuid)
+    }
 
-    public func replaceEmpty(with output: Output) -> Just<Output>
+    public func replaceEmpty(with output: Output) -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.replaceEmpty(with: output), uuid: self.uuid)
+    }
 
-    public func retry(_ times: Int) -> Just<Output>
+    public func retry(_ times: Int) -> CZJust<Output> {
+        return CZJust<Output>(inner: self.inner.retry(times), uuid: self.uuid)
+    }
 
-    public func scan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.Publisher
+    public func scan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.CZPublisher {
+        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.scan(initialResult, nextPartialResult), uuid: self.uuid)
+    }
 
-    public func tryScan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.Publisher
+    public func tryScan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.CZPublisher {
+        return Result<T, Error>.CZPublisher(inner: self.inner.tryScan(initialResult, nextPartialResult), uuid: self.uuid)
+    }
 
-    public func setFailureType<E>(to failureType: E.Type) -> Result<Output, E>.Publisher where E : Error
-}
-
-/// A type of object with a publisher that emits before the object has changed.
-///
-/// By default an ``ObservableObject`` synthesizes an ``ObservableObject/objectWillChange-2oa5v`` publisher that emits the changed value before any of its `@Published` properties changes.
-///
-///     class Contact: ObservableObject {
-///         @Published var name: String
-///         @Published var age: Int
-///
-///         init(name: String, age: Int) {
-///             self.name = name
-///             self.age = age
-///         }
-///
-///         func haveBirthday() -> Int {
-///             age += 1
-///             return age
-///         }
-///     }
-///
-///     let john = Contact(name: "John Appleseed", age: 24)
-///     cancellable = john.objectWillChange
-///         .sink { _ in
-///             print("\(john.age) will change")
-///     }
-///     print(john.haveBirthday())
-///     // Prints "24 will change"
-///     // Prints "25"
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-public protocol ObservableObject : AnyObject {
-
-    /// The type of publisher that emits before the object has changed.
-    associatedtype ObjectWillChangePublisher : Publisher = ObservableObjectPublisher where Self.ObjectWillChangePublisher.Failure == Never
-
-    /// A publisher that emits before the object has changed.
-    var objectWillChange: Self.ObjectWillChangePublisher { get }
+    public func setFailureType<E>(to failureType: E.Type) -> Result<Output, E>.CZPublisher where E : Error {
+        return Result<Output, E>.CZPublisher(inner: self.inner.setFailureType(to: failureType), uuid: self.uuid)
+    }
 }
 
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 extension ObservableObject where Self.ObjectWillChangePublisher == ObservableObjectPublisher {
 
     /// A publisher that emits before the object has changed.
-    public var objectWillChange: ObservableObjectPublisher { get }
+    public var czObjectWillChange: CZObservableObjectPublisher {
+        return CZObservableObjectPublisher(inner: self.objectWillChange, uuid: UUID())
+    }
 }
 
 /// A publisher that publishes changes from observable objects.
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-final public class ObservableObjectPublisher : Publisher {
+final public class CZObservableObjectPublisher : CZPublisher {
 
     /// The kind of values published by this publisher.
     public typealias Output = Void
@@ -925,21 +553,20 @@ final public class ObservableObjectPublisher : Publisher {
     ///
     /// Use `Never` if this `Publisher` does not publish errors.
     public typealias Failure = Never
-
-    /// Creates an observable object publisher instance.
-    public init()
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    final public func receive<S>(subscriber: S) where S : Subscriber, S.Failure == Never, S.Input == ()
+    
+    public let inner: ObservableObjectPublisher
+    public let uuid: UUID
+    
+    public init(inner: ObservableObjectPublisher, uuid: UUID) {
+        self.inner = inner
+        self.uuid = uuid
+    }
 
     /// Sends the changed value to the downstream subscriber.
-    final public func send()
+    final public func send() {
+        self.visualize()
+        self.inner.send()
+    }
 }
 
 /// A subject that broadcasts elements to downstream subscribers.
@@ -949,112 +576,15 @@ final public class ObservableObjectPublisher : Publisher {
 /// Unlike ``CurrentValueSubject``, a ``PassthroughSubject`` doesn’t have an initial value or a buffer of the most recently-published element.
 /// A ``PassthroughSubject`` drops values if there are no subscribers, or its current demand is zero.
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-final public class PassthroughSubject<Output, Failure> : Subject where Failure : Error {
+final public class CZPassthroughSubject<Output, Failure> : CZSubject where Failure : Error {
 
-    public init()
-
-    /// Sends a subscription to the subscriber.
-    ///
-    /// This call provides the ``Subject`` an opportunity to establish demand for any new upstream subscriptions.
-    ///
-    /// - Parameter subscription: The subscription instance through which the subscriber can request elements.
-    final public func send(subscription: Subscription)
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Implementations of ``Publisher`` must implement this method.
-    ///
-    /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-    final public func receive<S>(subscriber: S) where Output == S.Input, Failure == S.Failure, S : Subscriber
-
-    /// Sends a value to the subscriber.
-    ///
-    /// - Parameter value: The value to send.
-    final public func send(_ input: Output)
-
-    /// Sends a completion signal to the subscriber.
-    ///
-    /// - Parameter completion: A `Completion` instance which indicates whether publishing has finished normally or failed with an error.
-    final public func send(completion: Subscribers.Completion<Failure>)
-}
-
-/// A type that publishes a property marked with an attribute.
-///
-/// Publishing a property with the `@Published` attribute creates a publisher of this type. You access the publisher with the `$` operator, as shown here:
-///
-///     class Weather {
-///         @Published var temperature: Double
-///         init(temperature: Double) {
-///             self.temperature = temperature
-///         }
-///     }
-///
-///     let weather = Weather(temperature: 20)
-///     cancellable = weather.$temperature
-///         .sink() {
-///             print ("Temperature now: \($0)")
-///     }
-///     weather.temperature = 25
-///
-///     // Prints:
-///     // Temperature now: 20.0
-///     // Temperature now: 25.0
-///
-/// When the property changes, publishing occurs in the property's `willSet` block, meaning subscribers receive the new value before it's actually set on the property. In the above example, the second time the sink executes its closure, it receives the parameter value `25`. However, if the closure evaluated `weather.temperature`, the value returned would be `20`.
-///
-/// > Important: The `@Published` attribute is class constrained. Use it with properties of classes, not with non-class types like structures.
-///
-/// ### See Also
-///
-/// - ``Combine/Publisher/assign(to:)``
-@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-@propertyWrapper public struct Published<Value> {
-
-    /// Creates the published instance with an initial wrapped value.
-    ///
-    /// Don't use this initializer directly. Instead, create a property with the `@Published` attribute, as shown here:
-    ///
-    ///     @Published var lastUpdated: Date = Date()
-    ///
-    /// - Parameter wrappedValue: The publisher's initial value.
-    public init(wrappedValue: Value)
-
-    /// Creates the published instance with an initial value.
-    ///
-    /// Don't use this initializer directly. Instead, create a property with the `@Published` attribute, as shown here:
-    ///
-    ///     @Published var lastUpdated: Date = Date()
-    ///
-    /// - Parameter initialValue: The publisher's initial value.
-    public init(initialValue: Value)
-
-    /// A publisher for properties marked with the `@Published` attribute.
-    public struct Publisher : Publisher {
-
-        /// The kind of values published by this publisher.
-        public typealias Output = Value
-
-        /// The kind of errors this publisher might publish.
-        ///
-        /// Use `Never` if this `Publisher` does not publish errors.
-        public typealias Failure = Never
-
-        /// Attaches the specified subscriber to this publisher.
-        ///
-        /// Implementations of ``Publisher`` must implement this method.
-        ///
-        /// The provided implementation of ``Publisher/subscribe(_:)-4u8kn``calls this method.
-        ///
-        /// - Parameter subscriber: The subscriber to attach to this ``Publisher``, after which it can receive values.
-        public func receive<S>(subscriber: S) where Value == S.Input, S : Subscriber, S.Failure == Never
+    public let inner: PassthroughSubject<Output, Failure>
+    public let uuid: UUID
+    
+    public init(inner: PassthroughSubject<Output, Failure>, uuid: UUID) {
+        self.inner = inner
+        self.uuid = uuid
     }
-
-    /// The property for which this instance exposes a publisher.
-    ///
-    /// The ``Published/projectedValue`` is the property accessed with the `$` operator.
-    public var projectedValue: Published<Value>.Publisher { mutating get set }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1094,7 +624,9 @@ extension Publisher {
     /// In this example, the output shows that the ``Publisher/print(_:to:)`` operator receives each random value only one time, and then sends the value to both subscribers.
     ///
     /// - Parameter createSubject: A closure to create a new ``Subject`` each time a subscriber attaches to the multicast publisher.
-    public func multicast<S>(_ createSubject: @escaping () -> S) -> Publishers.Multicast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output
+    public func czMulticast<S>(_ createSubject: @escaping () -> S) -> Publishers.CZMulticast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output {
+        return Publishers.CZMulticast(inner: self.multicast(createSubject), uuid: self.generateUUID())
+    }
 
     /// Provides a subject to deliver elements to multiple subscribers.
     ///
@@ -1130,7 +662,9 @@ extension Publisher {
     /// In this example, the output shows that the ``Publisher/print(_:to:)`` operator receives each random value only one time, and then sends the value to both subscribers.
     ///
     /// - Parameter subject: A subject to deliver elements to downstream subscribers.
-    public func multicast<S>(subject: S) -> Publishers.Multicast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output
+    public func czMulticast<S>(subject: S) -> Publishers.CZMulticast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output {
+        return Publishers.CZMulticast(inner: self.multicast(subject: subject), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1157,7 +691,9 @@ extension Publisher {
     ///   - scheduler: The scheduler used to send messages to upstream publishers.
     ///   - options: Options that customize the delivery of elements.
     /// - Returns: A publisher which performs upstream operations on the specified scheduler.
-    public func subscribe<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.SubscribeOn<Self, S> where S : Scheduler
+    public func czSubscribe<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZSubscribeOn<Self, S> where S : Scheduler {
+        return Publishers.CZSubscribeOn(inner: self.subscribe(on: scheduler, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1186,7 +722,9 @@ extension Publisher {
     ///   - scheduler: A scheduler to use for tracking the timing of events.
     ///   - options: Options that customize the delivery of elements.
     /// - Returns: A publisher that emits elements representing the time interval between the elements it receives.
-    public func measureInterval<S>(using scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.MeasureInterval<Self, S> where S : Scheduler
+    public func czMeasureInterval<S>(using scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZMeasureInterval<Self, S> where S : Scheduler {
+        return Publishers.CZMeasureInterval(inner: self.measureInterval(using: scheduler, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1208,7 +746,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value indicating whether to drop the element from the publisher’s output.
     /// - Returns: A publisher that skips over elements until the provided closure returns `false`.
-    public func drop(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.DropWhile<Self>
+    public func czDrop(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZDropWhile<Self> {
+        return Publishers.CZDropWhile(inner: self.drop(while: predicate), uuid: self.generateUUID())
+    }
 
     /// Omits elements from the upstream publisher until an error-throwing closure returns false, before republishing all remaining elements.
     ///
@@ -1234,7 +774,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value indicating whether to drop the element from the publisher’s output.
     /// - Returns: A publisher that skips over elements until the provided closure returns `false`, and then republishes all remaining elements. If the predicate closure throws, the publisher fails with an error.
-    public func tryDrop(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryDropWhile<Self>
+    public func czTryDrop(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryDropWhile<Self> {
+        return Publishers.CZTryDropWhile(inner: self.tryDrop(while: predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1255,7 +797,9 @@ extension Publisher {
     ///
     /// - Parameter isIncluded: A closure that takes one element and returns a Boolean value indicating whether to republish the element.
     /// - Returns: A publisher that republishes all elements that satisfy the closure.
-    public func filter(_ isIncluded: @escaping (Self.Output) -> Bool) -> Publishers.Filter<Self>
+    public func czFilter(_ isIncluded: @escaping (Self.Output) -> Bool) -> Publishers.CZFilter<Self> {
+        return Publishers.CZFilter(inner: self.filter(isIncluded), uuid: self.generateUUID())
+    }
 
     /// Republishes all elements that match a provided error-throwing closure.
     ///
@@ -1283,7 +827,9 @@ extension Publisher {
     ///
     /// - Parameter isIncluded: A closure that takes one element and returns a Boolean value that indicated whether to republish the element or throws an error.
     /// - Returns: A publisher that republishes all elements that satisfy the closure.
-    public func tryFilter(_ isIncluded: @escaping (Self.Output) throws -> Bool) -> Publishers.TryFilter<Self>
+    public func czTryFilter(_ isIncluded: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryFilter<Self> {
+        return Publishers.CZTryFilter(inner: self.tryFilter(isIncluded), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1313,7 +859,9 @@ extension Publisher {
     ///   - receiveOutput: A closure that executes when the publisher receives a value. Return `true` from this closure to raise `SIGTRAP`, or false to continue.
     ///   - receiveCompletion: A closure that executes when the publisher receives a completion. Return `true` from this closure to raise `SIGTRAP`, or false to continue.
     /// - Returns: A publisher that raises a debugger signal when one of the provided closures returns `true`.
-    public func breakpoint(receiveSubscription: ((Subscription) -> Bool)? = nil, receiveOutput: ((Self.Output) -> Bool)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Bool)? = nil) -> Publishers.Breakpoint<Self>
+    public func czBreakpoint(receiveSubscription: ((Subscription) -> Bool)? = nil, receiveOutput: ((Self.Output) -> Bool)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Bool)? = nil) -> Publishers.CZBreakpoint<Self> {
+        return Publishers.CZBreakpoint(inner: self.breakpoint(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion), uuid: self.generateUUID())
+    }
 
     /// Raises a debugger signal upon receiving a failure.
     ///
@@ -1340,7 +888,9 @@ extension Publisher {
     ///      // also include stack trace information, which is not shown here.
     ///
     /// - Returns: A publisher that raises a debugger signal upon receiving a failure.
-    public func breakpointOnError() -> Publishers.Breakpoint<Self>
+    public func czBreakpointOnError() -> Publishers.CZBreakpoint<Self> {
+        return Publishers.CZBreakpoint(inner: self.breakpointOnError(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1366,7 +916,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that evaluates each received element. Return `true` to continue, or `false` to cancel the upstream and complete.
     /// - Returns: A publisher that publishes a Boolean value that indicates whether all received elements pass a given predicate.
-    public func allSatisfy(_ predicate: @escaping (Self.Output) -> Bool) -> Publishers.AllSatisfy<Self>
+    public func czAllSatisfy(_ predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZAllSatisfy<Self> {
+        return Publishers.CZAllSatisfy(inner: self.allSatisfy(predicate), uuid: self.generateUUID())
+    }
 
     /// Publishes a single Boolean value that indicates whether all received elements pass a given error-throwing predicate.
     ///
@@ -1395,65 +947,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that evaluates each received element. Return `true` to continue, or `false` to cancel the upstream and complete. The closure may throw an error, in which case the publisher cancels the upstream publisher and fails with the thrown error.
     /// - Returns: A publisher that publishes a Boolean value that indicates whether all received elements pass a given predicate.
-    public func tryAllSatisfy(_ predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryAllSatisfy<Self>
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher {
-
-    /// Attaches a subscriber with closure-based behavior.
-    ///
-    /// Use ``Publisher/sink(receiveCompletion:receiveValue:)`` to observe values received by the publisher and process them using a closure you specify.
-    ///
-    /// In this example, a <doc://com.apple.documentation/documentation/Swift/Range> publisher publishes integers to a ``Publisher/sink(receiveCompletion:receiveValue:)`` operator’s `receiveValue` closure that prints them to the console. Upon completion the ``Publisher/sink(receiveCompletion:receiveValue:)`` operator’s `receiveCompletion` closure indicates the successful termination of the stream.
-    ///
-    ///     let myRange = (0...3)
-    ///     cancellable = myRange.publisher
-    ///         .sink(receiveCompletion: { print ("completion: \($0)") },
-    ///               receiveValue: { print ("value: \($0)") })
-    ///
-    ///     // Prints:
-    ///     //  value: 0
-    ///     //  value: 1
-    ///     //  value: 2
-    ///     //  value: 3
-    ///     //  completion: finished
-    ///
-    /// This method creates the subscriber and immediately requests an unlimited number of values, prior to returning the subscriber.
-    /// The return value should be held, otherwise the stream will be canceled.
-    ///
-    /// - parameter receiveComplete: The closure to execute on completion.
-    /// - parameter receiveValue: The closure to execute on receipt of a value.
-    /// - Returns: A cancellable instance, which you use when you end assignment of the received value. Deallocation of the result will tear down the subscription stream.
-    public func sink(receiveCompletion: @escaping ((Subscribers.Completion<Self.Failure>) -> Void), receiveValue: @escaping ((Self.Output) -> Void)) -> AnyCancellable
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher where Self.Failure == Never {
-
-    /// Attaches a subscriber with closure-based behavior to a publisher that never fails.
-    ///
-    /// Use ``Publisher/sink(receiveValue:)`` to observe values received by the publisher and print them to the console. This operator can only be used when the stream doesn’t fail, that is, when the publisher’s ``Publisher/Failure`` type is <doc://com.apple.documentation/documentation/Swift/Never>.
-    ///
-    /// In this example, a <doc://com.apple.documentation/documentation/Swift/Range> publisher publishes integers to a ``Publisher/sink(receiveValue:)`` operator’s
-    /// `receiveValue` closure that prints them to the console:
-    ///
-    ///     let integers = (0...3)
-    ///     integers.publisher
-    ///         .sink { print("Received \($0)") }
-    ///
-    ///     // Prints:
-    ///     //  Received 0
-    ///     //  Received 1
-    ///     //  Received 2
-    ///     //  Received 3
-    ///
-    /// This method creates the subscriber and immediately requests an unlimited number of values, prior to returning the subscriber.
-    /// The return value should be held, otherwise the stream will be canceled.
-    ///
-    /// - parameter receiveValue: The closure to execute on receipt of a value.
-    /// - Returns: A cancellable instance, which you use when you end assignment of the received value. Deallocation of the result will tear down the subscription stream.
-    public func sink(receiveValue: @escaping ((Self.Output) -> Void)) -> AnyCancellable
+    public func czTryAllSatisfy(_ predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryAllSatisfy<Self> {
+        return Publishers.CZTryAllSatisfy(inner: self.tryAllSatisfy(predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1473,7 +969,9 @@ extension Publisher where Self.Output : Equatable {
     ///     // Prints: "0 1 2 3 4 0"
     ///
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
-    public func removeDuplicates() -> Publishers.RemoveDuplicates<Self>
+    public func czRemoveDuplicates() -> Publishers.CZRemoveDuplicates<Self> {
+        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1506,7 +1004,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first.
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
-    public func removeDuplicates(by predicate: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.RemoveDuplicates<Self>
+    public func czRemoveDuplicates(by predicate: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZRemoveDuplicates<Self> {
+        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(by: predicate), uuid: self.generateUUID())
+    }
 
     /// Publishes only elements that don’t match the previous element, as evaluated by a provided error-throwing closure.
     ///
@@ -1533,7 +1033,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first. If this closure throws an error, the publisher terminates with the thrown error.
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
-    public func tryRemoveDuplicates(by predicate: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.TryRemoveDuplicates<Self>
+    public func czTryRemoveDuplicates(by predicate: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryRemoveDuplicates<Self> {
+        return Publishers.CZTryRemoveDuplicates(inner: self.tryRemoveDuplicates(by: predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1565,12 +1067,14 @@ extension Publisher {
     ///   - type: The encoded data to decode into a struct that conforms to the <doc://com.apple.documentation/documentation/Swift/Decodable> protocol.
     ///   - decoder:  A decoder that implements the ``TopLevelDecoder`` protocol.
     /// - Returns: A publisher that decodes a given type using a specified decoder and publishes the result.
-    public func decode<Item, Coder>(type: Item.Type, decoder: Coder) -> Publishers.Decode<Self, Item, Coder> where Item : Decodable, Coder : TopLevelDecoder, Self.Output == Coder.Input
+    public func czDecode<Item, Coder>(type: Item.Type, decoder: Coder) -> Publishers.CZDecode<Self, Item, Coder> where Item : Decodable, Coder : TopLevelDecoder, Self.Output == Coder.Input {
+        return Publishers.CZDecode(inner: self.decode(type: type, decoder: decoder), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension Publisher where Self.Output : Encodable {
-
+    
     /// Encodes the output from upstream using a specified encoder.
     ///
     /// Use ``Publisher/encode(encoder:)`` with a <doc://com.apple.documentation/documentation/Foundation/JSONDecoder> (or a <doc://com.apple.documentation/documentation/Foundation/PropertyListDecoder> for property lists) to encode an <doc://com.apple.documentation/documentation/Swift/Encodable> struct into <doc://com.apple.documentation/documentation/Foundation/Data> that could be used to make a JSON string (or written to disk as a binary plist in the case of property lists).
@@ -1598,7 +1102,9 @@ extension Publisher where Self.Output : Encodable {
     ///
     /// - Parameter encoder: An encoder that implements the ``TopLevelEncoder`` protocol.
     /// - Returns: A publisher that encodes received elements using a specified encoder, and publishes the resulting data.
-    public func encode<Coder>(encoder: Coder) -> Publishers.Encode<Self, Coder> where Coder : TopLevelEncoder
+    public func czEncode<Coder>(encoder: Coder) -> Publishers.CZEncode<Self, Coder> where Coder : TopLevelEncoder {
+        return Publishers.CZEncode(inner: self.encode(encoder: encoder), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1619,7 +1125,9 @@ extension Publisher where Self.Output : Equatable {
     ///
     /// - Parameter output: An element to match against.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream publisher emits a matching value.
-    public func contains(_ output: Self.Output) -> Publishers.Contains<Self>
+    public func czContains(_ output: Self.Output) -> Publishers.CZContains<Self> {
+        return Publishers.CZContains(inner: self.contains(output), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1659,7 +1167,9 @@ extension Publisher {
     ///
     /// - Parameter other: Another publisher to combine with this one.
     /// - Returns: A publisher that receives and combines elements from this and another publisher.
-    public func combineLatest<P>(_ other: P) -> Publishers.CombineLatest<Self, P> where P : Publisher, Self.Failure == P.Failure
+    public func czCombineLatest<P>(_ other: P) -> Publishers.CZCombineLatest<Self, P> where P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZCombineLatest(inner: self.combineLatest(other), uuid: self.generateUUID())
+    }
 
     ///     cancellable = pub1
     ///         .combineLatest(pub2) { (first, second) in
@@ -1689,7 +1199,9 @@ extension Publisher {
     ///   - other: Another publisher to combine with this one.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this and another publisher.
-    public func combineLatest<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.Map<Publishers.CombineLatest<Self, P>, T> where P : Publisher, Self.Failure == P.Failure
+    public func czCombineLatest<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest<Self, P>, T> where P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZMap(inner: self.combineLatest(other, transform), uuid: self.generateUUID())
+    }
 
     /// Subscribes to two additional publishers and publishes a tuple upon receiving output from any of the publishers.
     ///
@@ -1733,7 +1245,9 @@ extension Publisher {
     ///   - publisher1: A second publisher to combine with the first publisher.
     ///   - publisher2: A third publisher to combine with the first publisher.
     /// - Returns: A publisher that receives and combines elements from this publisher and two other publishers.
-    public func combineLatest<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.CombineLatest3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure
+    public func czCombineLatest<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.CZCombineLatest3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
+        return Publishers.CZCombineLatest3(inner: self.combineLatest(publisher1, publisher2), uuid: self.generateUUID())
+    }
 
     /// Subscribes to two additional publishers and invokes a closure upon receiving output from any of the publishers.
     ///
@@ -1777,7 +1291,9 @@ extension Publisher {
     ///   - publisher2: A third publisher to combine with the first publisher.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this publisher and two other publishers.
-    public func combineLatest<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.Map<Publishers.CombineLatest3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure
+    public func czCombineLatest<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
+        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, transform), uuid: self.generateUUID())
+    }
 
     /// Subscribes to three additional publishers and publishes a tuple upon receiving output from any of the publishers.
     ///
@@ -1825,7 +1341,9 @@ extension Publisher {
     ///   - publisher2: A third publisher to combine with the first publisher.
     ///   - publisher3: A fourth publisher to combine with the first publisher.
     /// - Returns: A publisher that receives and combines elements from this publisher and three other publishers.
-    public func combineLatest<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.CombineLatest4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure
+    public func czCombineLatest<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.CZCombineLatest4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
+        return Publishers.CZCombineLatest4(inner: self.combineLatest(publisher1, publisher2, publisher3), uuid: self.generateUUID())
+    }
 
     /// Subscribes to three additional publishers and invokes a closure upon receiving output from any of the publishers.
     ///
@@ -1874,7 +1392,9 @@ extension Publisher {
     ///   - publisher3: A fourth publisher to combine with the first publisher.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this publisher and three other publishers.
-    public func combineLatest<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.Map<Publishers.CombineLatest4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure
+    public func czCombineLatest<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
+        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, publisher3, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1895,7 +1415,9 @@ extension Publisher {
     ///
     /// - Parameter maxLength: The maximum number of elements to republish.
     /// - Returns: A publisher that publishes up to the specified number of elements.
-    public func prefix(_ maxLength: Int) -> Publishers.Output<Self>
+    public func czPrefix(_ maxLength: Int) -> Publishers.CZOutput<Self> {
+        return Publishers.CZOutput(inner: self.prefix(maxLength), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1922,7 +1444,9 @@ extension Publisher {
     ///   - prefix: A string —- which defaults to empty -— with which to prefix all log messages.
     ///   - stream: A stream for text output that receives messages, and which directs output to the console by default.  A custom stream can be used to log messages to other destinations.
     /// - Returns: A publisher that prints log messages for all publishing events.
-    public func print(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Publishers.Print<Self>
+    public func czPrint(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Publishers.CZPrint<Self> {
+        return Publishers.CZPrint(inner: self.print(prefix, to: stream), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1943,7 +1467,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether publishing should continue.
     /// - Returns: A publisher that passes through elements until the predicate indicates publishing should finish.
-    public func prefix(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.PrefixWhile<Self>
+    public func czPrefix(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZPrefixWhile<Self> {
+        return Publishers.CZPrefixWhile(inner: self.prefix(while: predicate), uuid: self.generateUUID())
+    }
 
     /// Republishes elements while an error-throwing predicate closure indicates publishing should continue.
     ///
@@ -1967,7 +1493,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value indicating whether publishing should continue.
     /// - Returns: A publisher that passes through elements until the predicate throws or indicates publishing should finish.
-    public func tryPrefix(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryPrefixWhile<Self>
+    public func czTryPrefix(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryPrefixWhile<Self> {
+        return Publishers.CZTryPrefixWhile(inner: self.tryPrefix(while: predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -1995,7 +1523,9 @@ extension Publisher where Self.Failure == Never {
     ///
     /// - Parameter failureType: The `Failure` type presented by this publisher.
     /// - Returns: A publisher that appears to send the specified failure type.
-    public func setFailureType<E>(to failureType: E.Type) -> Publishers.SetFailureType<Self, E> where E : Error
+    public func czSetFailureType<E>(to failureType: E.Type) -> Publishers.CZSetFailureType<Self, E> where E : Error {
+        return Publishers.CZSetFailureType(inner: self.setFailureType(to: failureType), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2018,7 +1548,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether the element satisfies the closure’s comparison logic.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream  publisher emits a matching value.
-    public func contains(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.ContainsWhere<Self>
+    public func czContains(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZContainsWhere<Self> {
+        return Publishers.CZContainsWhere(inner: self.contains(where: predicate), uuid: self.generateUUID())
+    }
 
     /// Publishes a Boolean value upon receiving an element that satisfies the throwing predicate closure.
     ///
@@ -2052,52 +1584,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether the element satisfies the closure’s comparison logic.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream publisher emits a matching value.
-    public func tryContains(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryContainsWhere<Self>
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher {
-
-    /// Attaches the specified subscriber to this publisher.
-    ///
-    /// Always call this function instead of ``Publisher/receive(subscriber:)``.
-    /// Adopters of ``Publisher`` must implement ``Publisher/receive(subscriber:)``. The implementation of ``Publisher/subscribe(_:)-4u8kn`` provided by ``Publisher`` calls through to ``Publisher/receive(subscriber:)``.
-    ///
-    /// - Parameter subscriber: The subscriber to attach to this publisher. After attaching, the subscriber can start to receive values.
-    public func subscribe<S>(_ subscriber: S) where S : Subscriber, Self.Failure == S.Failure, Self.Output == S.Input
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher where Self.Failure == Never {
-
-    /// Republishes elements received from a publisher, by assigning them to a property marked as a publisher.
-    ///
-    /// Use this operator when you want to receive elements from a publisher and republish them through a property marked with the `@Published` attribute. The `assign(to:)` operator manages the life cycle of the subscription, canceling the subscription automatically when the ``Published`` instance deinitializes. Because of this, the `assign(to:)` operator doesn't return an ``AnyCancellable`` that you're responsible for like ``assign(to:on:)`` does.
-    ///
-    /// The example below shows a model class that receives elements from an internal <doc://com.apple.documentation/documentation/Foundation/Timer/TimerPublisher>, and assigns them to a `@Published` property called `lastUpdated`. Because the `to` parameter has the `inout` keyword, you need to use the `&` operator when calling this method.
-    ///
-    ///     class MyModel: ObservableObject {
-    ///         @Published var lastUpdated: Date = Date()
-    ///         init() {
-    ///              Timer.publish(every: 1.0, on: .main, in: .common)
-    ///                  .autoconnect()
-    ///                  .assign(to: &$lastUpdated)
-    ///         }
-    ///     }
-    ///
-    /// If you instead implemented `MyModel` with `assign(to: lastUpdated, on: self)`, storing the returned ``AnyCancellable`` instance could cause a reference cycle, because the ``Subscribers/Assign`` subscriber would hold a strong reference to `self`. Using `assign(to:)` solves this problem.
-    ///
-    /// While the `to` parameter uses the `inout` keyword, this method doesn't replace a reference type passed to it. Instead, this notation indicates that the operator may modify members of the assigned object, as seen in the following example:
-    ///
-    ///         class MyModel2: ObservableObject {
-    ///             @Published var id: Int = 0
-    ///         }
-    ///         let model2 = MyModel2()
-    ///         Just(100).assign(to: &model2.$id)
-    ///
-    /// - Parameter published: A property marked with the `@Published` attribute, which receives and republishes all elements received from the upstream publisher.
-    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-    public func assign(to published: inout Published<Self.Output>.Publisher)
+    public func czTryContains(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryContainsWhere<Self> {
+        return Publishers.CZTryContainsWhere(inner: self.tryContains(where: predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2128,7 +1617,9 @@ extension Publisher where Self.Failure == Never {
     ///  > Note: The ``ConnectablePublisher/connect()`` operator returns a ``Cancellable`` instance that you must retain. You can also use this instance to cancel publishing.
     ///
     /// - Returns: A ``ConnectablePublisher`` wrapping this publisher.
-    public func makeConnectable() -> Publishers.MakeConnectable<Self>
+    public func czMakeConnectable() -> Publishers.CZMakeConnectable<Self> {
+        return Publishers.CZMakeConnectable(inner: self.makeConnectable(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2154,7 +1645,9 @@ extension Publisher {
     ///     // Prints: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
     ///
     /// - Returns: A publisher that collects all received items and returns them as an array upon completion.
-    public func collect() -> Publishers.Collect<Self>
+    public func czCollect() -> Publishers.CZCollect<Self> {
+        return Publishers.CZCollect(inner: self.collect(), uuid: self.generateUUID())
+    }
 
     /// Collects up to the specified number of elements, and then emits a single array of the collection.
     ///
@@ -2175,7 +1668,9 @@ extension Publisher {
     ///
     /// - Parameter count: The maximum number of received elements to buffer before publishing.
     /// - Returns: A publisher that collects up to the specified number of elements, and then publishes them as an array.
-    public func collect(_ count: Int) -> Publishers.CollectByCount<Self>
+    public func czCollect(_ count: Int) -> Publishers.CZCollectByCount<Self> {
+        return Publishers.CZCollectByCount(inner: self.collect(count), uuid: self.generateUUID())
+    }
 
     /// Collects elements by a given time-grouping strategy, and emits a single array of the collection.
     ///
@@ -2200,7 +1695,9 @@ extension Publisher {
     ///   - strategy: The timing group strategy used by the operator to collect and publish elements.
     ///   - options: Scheduler options to use for the strategy.
     /// - Returns: A publisher that collects elements by a given strategy, and emits a single array of the collection.
-    public func collect<S>(_ strategy: Publishers.TimeGroupingStrategy<S>, options: S.SchedulerOptions? = nil) -> Publishers.CollectByTime<Self, S> where S : Scheduler
+    public func czCollect<S>(_ strategy: Publishers.TimeGroupingStrategy<S>, options: S.SchedulerOptions? = nil) -> Publishers.CZCollectByTime<Self, S> where S : Scheduler {
+        return Publishers.CZCollectByTime(inner: self.collect(strategy, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2242,7 +1739,9 @@ extension Publisher {
     ///   - scheduler: The scheduler the publisher uses for element delivery.
     ///   - options: Scheduler options used to customize element delivery.
     /// - Returns: A publisher that delivers elements using the specified scheduler.
-    public func receive<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.ReceiveOn<Self, S> where S : Scheduler
+    public func czReceive<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZReceiveOn<Self, S> where S : Scheduler {
+        return Publishers.CZReceiveOn(inner: self.receive(on: scheduler, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2267,7 +1766,9 @@ extension Publisher {
     ///
     /// - Parameter keyPath: The key path of a property on `Output`.
     /// - Returns: A publisher that publishes the value of the key path.
-    public func map<T>(_ keyPath: KeyPath<Self.Output, T>) -> Publishers.MapKeyPath<Self, T>
+    public func czMap<T>(_ keyPath: KeyPath<Self.Output, T>) -> Publishers.CZMapKeyPath<Self, T> {
+        return Publishers.CZMapKeyPath(inner: self.map(keyPath), uuid: self.generateUUID())
+    }
 
     /// Publishes the values of two key paths as a tuple.
     ///
@@ -2292,7 +1793,9 @@ extension Publisher {
     ///   - keyPath0: The key path of a property on `Output`.
     ///   - keyPath1: The key path of another property on `Output`.
     /// - Returns: A publisher that publishes the values of two key paths as a tuple.
-    public func map<T0, T1>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>) -> Publishers.MapKeyPath2<Self, T0, T1>
+    public func czMap<T0, T1>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>) -> Publishers.CZMapKeyPath2<Self, T0, T1> {
+        return Publishers.CZMapKeyPath2(inner: self.map(keyPath0, keyPath1), uuid: self.generateUUID())
+    }
 
     /// Publishes the values of three key paths as a tuple.
     ///
@@ -2320,61 +1823,9 @@ extension Publisher {
     ///   - keyPath1: The key path of a second property on `Output`.
     ///   - keyPath2: The key path of a third property on `Output`.
     /// - Returns: A publisher that publishes the values of three key paths as a tuple.
-    public func map<T0, T1, T2>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>, _ keyPath2: KeyPath<Self.Output, T2>) -> Publishers.MapKeyPath3<Self, T0, T1, T2>
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher where Self.Failure == Never {
-
-    /// The elements produced by the publisher, as an asynchronous sequence.
-    ///
-    /// This property provides an ``AsyncPublisher``, which allows you to use the Swift `async`-`await` syntax to receive the publisher's elements. Because ``AsyncPublisher`` conforms to <doc://com.apple.documentation/documentation/Swift/AsyncSequence>, you iterate over its elements with a `for`-`await`-`in` loop, rather than attaching a subscriber.
-    ///
-    /// The following example shows how to use the `values` property to receive elements asynchronously. The example adapts a code snippet from the ``Publisher/filter(_:)`` operator's documentation, which filters a sequence to only emit even integers. This example replaces the ``Subscribers/Sink`` subscriber with a `for`-`await`-`in` loop that iterates over the ``AsyncPublisher`` provided by the `values` property.
-    ///
-    ///     let numbers: [Int] = [1, 2, 3, 4, 5]
-    ///     let filtered = numbers.publisher
-    ///         .filter { $0 % 2 == 0 }
-    ///
-    ///     for await number in filtered.values
-    ///     {
-    ///         print("\(number)", terminator: " ")
-    ///     }
-    ///
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    public var values: AsyncPublisher<Self> { get }
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher {
-
-    /// The elements produced by the publisher, as a throwing asynchronous sequence.
-    ///
-    /// This property provides an ``AsyncThrowingPublisher``, which allows you to use the Swift `async`-`await` syntax to receive the publisher's elements. Because ``AsyncPublisher`` conforms to <doc://com.apple.documentation/documentation/Swift/AsyncSequence>, you iterate over its elements with a `for`-`await`-`in` loop, rather than attaching a subscriber. If the publisher terminates with an error, the awaiting caller receives the error as a `throw`.
-    ///
-    /// The following example shows how to use the `values` property to receive elements asynchronously. The example adapts a code snippet from the ``Publisher/tryFilter(_:)`` operator's documentation, which filters a sequence to only emit even integers, and terminate with an error on a `0`. This example replaces the ``Subscribers/Sink`` subscriber with a `for`-`await`-`in` loop that iterates over the ``AsyncPublisher`` provided by the `values` property. With this approach, the error handling previously provided in the sink subscriber's ``Subscribers/Sink/receiveCompletion`` closure goes instead in a `catch` block.
-    ///
-    ///     let numbers: [Int] = [1, 2, 3, 4, 0, 5]
-    ///     let filterPublisher = numbers.publisher
-    ///         .tryFilter{
-    ///             if $0 == 0 {
-    ///                 throw ZeroError()
-    ///             } else {
-    ///                 return $0 % 2 == 0
-    ///             }
-    ///         }
-    ///
-    ///     do {
-    ///         for try await number in filterPublisher.values {
-    ///             print ("\(number)", terminator: " ")
-    ///         }
-    ///     } catch {
-    ///         print ("\(error)")
-    ///     }
-    ///
-    ///
-    @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-    public var values: AsyncThrowingPublisher<Self> { get }
+    public func czMap<T0, T1, T2>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>, _ keyPath2: KeyPath<Self.Output, T2>) -> Publishers.CZMapKeyPath3<Self, T0, T1, T2> {
+        return Publishers.CZMapKeyPath3(inner: self.map(keyPath0, keyPath1, keyPath2), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2386,16 +1837,9 @@ extension Publisher {
     ///
     /// - Parameter publisher: A second publisher.
     /// - Returns: A publisher that republishes elements until the second publisher publishes an element.
-    public func prefix<P>(untilOutputFrom publisher: P) -> Publishers.PrefixUntilOutput<Self, P> where P : Publisher
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher {
-
-    /// Attaches the specified subject to this publisher.
-    ///
-    /// - Parameter subject: The subject to attach to this publisher.
-    public func subscribe<S>(_ subject: S) -> AnyCancellable where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output
+    public func czPrefix<P>(untilOutputFrom publisher: P) -> Publishers.CZPrefixUntilOutput<Self, P> where P : Publisher {
+        return Publishers.CZPrefixUntilOutput(inner: self.prefix(untilOutputFrom: publisher), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2418,7 +1862,9 @@ extension Publisher {
     ///   - initialResult: The value that the closure receives the first time it’s called.
     ///   - nextPartialResult: A closure that produces a new value by taking the previously-accumulated value and the next element it receives from the upstream publisher.
     /// - Returns: A publisher that applies the closure to all received elements and produces an accumulated value when the upstream publisher finishes. If ``Publisher/reduce(_:_:)`` receives an error from the upstream publisher, the operator delivers it to the downstream subscriber, the publisher terminates and publishes no value.
-    public func reduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.Reduce<Self, T>
+    public func czReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.CZReduce<Self, T> {
+        return Publishers.CZReduce(inner: self.reduce(initialResult, nextPartialResult), uuid: self.generateUUID())
+    }
 
     /// Applies an error-throwing closure that collects each element of a stream and publishes a final result upon completion.
     ///
@@ -2444,7 +1890,9 @@ extension Publisher {
     ///   - nextPartialResult: An error-throwing closure that takes the previously-accumulated value and the next element from the upstream publisher to produce a new value.
     ///
     /// - Returns: A publisher that applies the closure to all received elements and produces an accumulated value when the upstream publisher finishes.
-    public func tryReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.TryReduce<Self, T>
+    public func czTryReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.CZTryReduce<Self, T> {
+        return Publishers.CZTryReduce(inner: self.tryReduce(initialResult, nextPartialResult), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2468,7 +1916,9 @@ extension Publisher {
     ///
     /// - Parameter transform: A closure that receives a value and returns an optional value.
     /// - Returns: Any non-`nil` optional results of the calling the supplied closure.
-    public func compactMap<T>(_ transform: @escaping (Self.Output) -> T?) -> Publishers.CompactMap<Self, T>
+    public func czCompactMap<T>(_ transform: @escaping (Self.Output) -> T?) -> Publishers.CZCompactMap<Self, T> {
+        return Publishers.CZCompactMap(inner: self.compactMap(transform), uuid: self.generateUUID())
+    }
 
     /// Calls an error-throwing closure with each received element and publishes any returned optional that has a value.
     ///
@@ -2499,7 +1949,9 @@ extension Publisher {
     ///
     /// - Parameter transform: An error-throwing closure that receives a value and returns an optional value.
     /// - Returns: Any non-`nil` optional results of calling the supplied closure.
-    public func tryCompactMap<T>(_ transform: @escaping (Self.Output) throws -> T?) -> Publishers.TryCompactMap<Self, T>
+    public func czTryCompactMap<T>(_ transform: @escaping (Self.Output) throws -> T?) -> Publishers.CZTryCompactMap<Self, T> {
+        return Publishers.CZTryCompactMap(inner: self.tryCompactMap(transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2534,7 +1986,9 @@ extension Publisher {
     ///
     /// - Parameter other: Another publisher.
     /// - Returns: A publisher that emits an event when either upstream publisher emits an event.
-    public func merge<P>(with other: P) -> Publishers.Merge<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output
+    public func czMerge<P>(with other: P) -> Publishers.CZMerge<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
+        return Publishers.CZMerge(inner: self.merge(with: other), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from two other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2567,7 +2021,9 @@ extension Publisher {
     ///   - b: A second publisher.
     ///   - c: A third publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C>(with b: B, _ c: C) -> Publishers.Merge3<Self, B, C> where B : Publisher, C : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output
+    public func czMerge<B, C>(with b: B, _ c: C) -> Publishers.CZMerge3<Self, B, C> where B : Publisher, C : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output {
+        return Publishers.CZMerge3(inner: self.merge(with: b, c), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from three other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2604,7 +2060,9 @@ extension Publisher {
     ///   - c: A third publisher.
     ///   - d: A fourth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C, D>(with b: B, _ c: C, _ d: D) -> Publishers.Merge4<Self, B, C, D> where B : Publisher, C : Publisher, D : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output
+    public func czMerge<B, C, D>(with b: B, _ c: C, _ d: D) -> Publishers.CZMerge4<Self, B, C, D> where B : Publisher, C : Publisher, D : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output {
+        return Publishers.CZMerge4(inner: self.merge(with: b, c, d), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from four other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2646,7 +2104,9 @@ extension Publisher {
     ///   - d: A fourth publisher.
     ///   - e: A fifth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C, D, E>(with b: B, _ c: C, _ d: D, _ e: E) -> Publishers.Merge5<Self, B, C, D, E> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output
+    public func czMerge<B, C, D, E>(with b: B, _ c: C, _ d: D, _ e: E) -> Publishers.CZMerge5<Self, B, C, D, E> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output {
+        Publishers.CZMerge5(inner: self.merge(with: b, c, d, e), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from five other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2692,7 +2152,9 @@ extension Publisher {
     ///   - e: A fifth publisher.
     ///   - f: A sixth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C, D, E, F>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> Publishers.Merge6<Self, B, C, D, E, F> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output
+    public func czMerge<B, C, D, E, F>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> Publishers.CZMerge6<Self, B, C, D, E, F> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output {
+        return Publishers.CZMerge6(inner: self.merge(with: b, c, d, e, f), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from six other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2743,7 +2205,9 @@ extension Publisher {
     ///   - f: A sixth publisher.
     ///   - g: A seventh publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C, D, E, F, G>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> Publishers.Merge7<Self, B, C, D, E, F, G> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output
+    public func czMerge<B, C, D, E, F, G>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> Publishers.CZMerge7<Self, B, C, D, E, F, G> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output {
+        Publishers.CZMerge7(inner: self.merge(with: b, c, d, e, f, g), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from seven other publishers, delivering an interleaved sequence of elements.
     ///
@@ -2797,13 +2261,17 @@ extension Publisher {
     ///   - g: A seventh publisher.
     ///   - h: An eighth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
-    public func merge<B, C, D, E, F, G, H>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> Publishers.Merge8<Self, B, C, D, E, F, G, H> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, H : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output, G.Failure == H.Failure, G.Output == H.Output
+    public func czMerge<B, C, D, E, F, G, H>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> Publishers.CZMerge8<Self, B, C, D, E, F, G, H> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, H : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output, G.Failure == H.Failure, G.Output == H.Output {
+        Publishers.CZMerge8(inner: self.merge(with: b, c, d, e, f, g, h), uuid: self.generateUUID())
+    }
 
     /// Combines elements from this publisher with those from another publisher of the same type, delivering an interleaved sequence of elements.
     ///
     /// - Parameter other: Another publisher of this publisher’s type.
     /// - Returns: A publisher that emits an event when either upstream publisher emits an event.
-    public func merge(with other: Self) -> Publishers.MergeMany<Self>
+    public func czMerge(with other: Self) -> Publishers.CZMergeMany<Self> {
+        return Publishers.CZMergeMany(inner: self.merge(with: other), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2828,7 +2296,9 @@ extension Publisher {
     ///   - initialResult: The previous result returned by the `nextPartialResult` closure.
     ///   - nextPartialResult: A closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
     /// - Returns: A publisher that transforms elements by applying a closure that receives its previous return value and the next element from the upstream publisher.
-    public func scan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.Scan<Self, T>
+    public func czScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.CZScan<Self, T> {
+        return Publishers.CZScan(inner: self.scan(initialResult, nextPartialResult), uuid: self.generateUUID())
+    }
 
     /// Transforms elements from the upstream publisher by providing the current element to an error-throwing closure along with the last value returned by the closure.
     ///
@@ -2861,7 +2331,9 @@ extension Publisher {
     ///   - initialResult: The previous result returned by the `nextPartialResult` closure.
     ///   - nextPartialResult: An error-throwing closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
     /// - Returns: A publisher that transforms elements by applying a closure that receives its previous return value and the next element from the upstream publisher.
-    public func tryScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.TryScan<Self, T>
+    public func czTryScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.CZTryScan<Self, T> {
+        return Publishers.CZTryScan(inner: self.tryScan(initialResult, nextPartialResult), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2879,7 +2351,9 @@ extension Publisher {
     ///     // Prints: "11"
     ///
     /// - Returns: A publisher that consumes all elements until the upstream publisher finishes, then emits a single value with the total number of elements received.
-    public func count() -> Publishers.Count<Self>
+    public func czCount() -> Publishers.CZCount<Self> {
+        return Publishers.CZCount(inner: self.count(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2900,7 +2374,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the last element satisfying the given predicate.
-    public func last(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.LastWhere<Self>
+    public func czLast(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZLastWhere<Self> {
+        return Publishers.CZLastWhere(inner: self.last(where: predicate), uuid: self.generateUUID())
+    }
 
     /// Publishes the last element of a stream that satisfies an error-throwing predicate closure, after the stream finishes.
     ///
@@ -2925,7 +2401,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the last element satisfying the given predicate.
-    public func tryLast(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryLastWhere<Self>
+    public func czTryLast(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryLastWhere<Self> {
+        return Publishers.CZTryLastWhere(inner: self.tryLast(where: predicate), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -2953,40 +2431,9 @@ extension Publisher {
     /// The output type of this publisher is <doc://com.apple.documentation/documentation/Swift/Never>.
     ///
     /// - Returns: A publisher that ignores all upstream elements.
-    public func ignoreOutput() -> Publishers.IgnoreOutput<Self>
-}
-
-@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-extension Publisher where Self.Failure == Never {
-
-    /// Assigns each element from a publisher to a property on an object.
-    ///
-    /// Use the ``Publisher/assign(to:on:)`` subscriber when you want to set a given property each time a publisher produces a value.
-    ///
-    /// In this example, the ``Publisher/assign(to:on:)`` sets the value of the `anInt` property on an instance of `MyClass`:
-    ///
-    ///     class MyClass {
-    ///         var anInt: Int = 0 {
-    ///             didSet {
-    ///                 print("anInt was set to: \(anInt)", terminator: "; ")
-    ///             }
-    ///         }
-    ///     }
-    ///
-    ///     var myObject = MyClass()
-    ///     let myRange = (0...2)
-    ///     cancellable = myRange.publisher
-    ///         .assign(to: \.anInt, on: myObject)
-    ///
-    ///     // Prints: "anInt was set to: 0; anInt was set to: 1; anInt was set to: 2"
-    ///
-    ///  > Important: The ``Subscribers/Assign`` instance created by this operator maintains a strong reference to `object`, and sets it to `nil` when the upstream publisher completes (either normally or with an error).
-    ///
-    /// - Parameters:
-    ///   - keyPath: A key path that indicates the property to assign. See [Key-Path Expression](https://developer.apple.com/library/archive/documentation/Swift/Conceptual/Swift_Programming_Language/Expressions.html#//apple_ref/doc/uid/TP40014097-CH32-ID563) in _The Swift Programming Language_ to learn how to use key paths to specify a property of an object.
-    ///   - object: The object that contains the property. The subscriber assigns the object’s property every time it receives a new value.
-    /// - Returns: An ``AnyCancellable`` instance. Call ``Cancellable/cancel()`` on this instance when you no longer want the publisher to automatically assign the property. Deinitializing this instance will also cancel automatic assignment.
-    public func assign<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable
+    public func czIgnoreOutput() -> Publishers.CZIgnoreOutput<Self> {
+        return Publishers.CZIgnoreOutput(inner: self.ignoreOutput(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3025,7 +2472,9 @@ extension Publisher where Self.Failure == Self.Output.Failure, Self.Output : Pub
     ///     // Prints "URL: https://example.org/get?index=5"
     ///
     /// The exact behavior of this example depends on the value of `asyncAfter` and the speed of the network connection. If the delay value is longer, or the network connection is fast, the earlier data tasks may complete before `switchToLatest()` can cancel them. If this happens, the output includes multiple URLs whose tasks complete before cancellation.
-    public func switchToLatest() -> Publishers.SwitchToLatest<Self.Output, Self>
+    public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Self> {
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -3036,7 +2485,9 @@ extension Publisher where Self.Failure == Never, Self.Output : Publisher {
     /// This operator works with an upstream publisher of publishers, flattening the stream of elements to appear as if they were coming from a single stream of elements. It switches the inner publisher as new ones arrive but keeps the outer publisher constant for downstream subscribers.
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
-    public func switchToLatest() -> Publishers.SwitchToLatest<Self.Output, Publishers.SetFailureType<Self, Self.Output.Failure>>
+    public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Publishers.SetFailureType<Self, Self.Output.Failure>> {
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -3047,7 +2498,9 @@ extension Publisher where Self.Failure == Never, Self.Output : Publisher, Self.O
     /// This operator works with an upstream publisher of publishers, flattening the stream of elements to appear as if they were coming from a single stream of elements. It switches the inner publisher as new ones arrive but keeps the outer publisher constant for downstream subscribers.
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
-    public func switchToLatest() -> Publishers.SwitchToLatest<Self.Output, Self>
+    public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Self> {
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -3058,7 +2511,9 @@ extension Publisher where Self.Output : Publisher, Self.Output.Failure == Never 
     /// This operator works with an upstream publisher of publishers, flattening the stream of elements to appear as if they were coming from a single stream of elements. It switches the inner publisher as new ones arrive but keeps the outer publisher constant for downstream subscribers.
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
-    public func switchToLatest() -> Publishers.SwitchToLatest<Publishers.SetFailureType<Self.Output, Self.Failure>, Publishers.Map<Self, Publishers.SetFailureType<Self.Output, Self.Failure>>>
+    public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Publishers.SetFailureType<Self.Output, Self.Failure>, Publishers.Map<Self, Publishers.SetFailureType<Self.Output, Self.Failure>>> {
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3094,7 +2549,9 @@ extension Publisher {
     /// After exceeding the specified number of retries, the publisher passes the failure to the downstream receiver.
     /// - Parameter retries: The number of times to attempt to recreate the subscription.
     /// - Returns: A publisher that attempts to recreate its subscription to a failed upstream publisher.
-    public func retry(_ retries: Int) -> Publishers.Retry<Self>
+    public func czRetry(_ retries: Int) -> Publishers.CZRetry<Self> {
+        return Publishers.CZRetry(inner: self.retry(retries), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3128,7 +2585,9 @@ extension Publisher {
     ///
     /// - Parameter transform: A closure that takes the upstream failure as a parameter and returns a new error for the publisher to terminate with.
     /// - Returns: A publisher that replaces any upstream failure with a new error produced by the `transform` closure.
-    public func mapError<E>(_ transform: @escaping (Self.Failure) -> E) -> Publishers.MapError<Self, E> where E : Error
+    public func czMapError<E>(_ transform: @escaping (Self.Failure) -> E) -> Publishers.CZMapError<Self, E> where E : Error {
+        return Publishers.CZMapError(inner: self.mapError(transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3163,7 +2622,9 @@ extension Publisher {
     ///   - scheduler: The scheduler on which to publish elements.
     ///   - latest: A Boolean value that indicates whether to publish the most recent element. If `false`, the publisher emits the first element received during the interval.
     /// - Returns: A publisher that emits either the most-recent or first element received during the specified interval.
-    public func throttle<S>(for interval: S.SchedulerTimeType.Stride, scheduler: S, latest: Bool) -> Publishers.Throttle<Self, S> where S : Scheduler
+    public func czThrottle<S>(for interval: S.SchedulerTimeType.Stride, scheduler: S, latest: Bool) -> Publishers.CZThrottle<Self, S> where S : Scheduler {
+        return Publishers.CZThrottle(inner: self.throttle(for: interval, scheduler: scheduler, latest: latest), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3204,7 +2665,9 @@ extension Publisher {
     ///
     /// Also note that ``Publishers/Share`` is a class rather than a structure like most other publishers. This means you can use this operator to create a publisher instance that uses reference semantics.
     /// - Returns: A class instance that shares elements received from its upstream to multiple subscribers.
-    public func share() -> Publishers.Share<Self>
+    public func czShare() -> Publishers.CZShare<Self> {
+        return Publishers.CZShare(inner: self.share(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3225,7 +2688,9 @@ extension Publisher where Self.Output : Comparable {
     ///
     /// After this publisher receives a request for more than 0 items, it requests unlimited items from its upstream publisher.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
-    public func min() -> Publishers.Comparison<Self>
+    public func czMin() -> Publishers.CZComparison<Self> {
+        return Publishers.CZComparison(inner: self.min(), uuid: self.generateUUID())
+    }
 
     /// Publishes the maximum value received from the upstream publisher, after it finishes.
     ///
@@ -3242,7 +2707,9 @@ extension Publisher where Self.Output : Comparable {
     ///
     /// After this publisher receives a request for more than 0 items, it requests unlimited items from its upstream publisher.
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
-    public func max() -> Publishers.Comparison<Self>
+    public func czMax() -> Publishers.CZComparison<Self> {
+        return Publishers.CZComparison(inner: self.max(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3273,7 +2740,9 @@ extension Publisher {
     ///
     /// - Parameter areInIncreasingOrder: A closure that receives two elements and returns true if they’re in increasing order.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
-    public func min(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.Comparison<Self>
+    public func czMin(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZComparison<Self> {
+        return Publishers.CZComparison(inner: self.min(by: areInIncreasingOrder), uuid: self.generateUUID())
+    }
 
     /// Publishes the minimum value received from the upstream publisher, using the provided error-throwing closure to order the items.
     ///
@@ -3302,7 +2771,9 @@ extension Publisher {
     ///
     /// - Parameter areInIncreasingOrder: A throwing closure that receives two elements and returns `true` if they’re in increasing order. If this closure throws, the publisher terminates with a ``Subscribers/Completion/failure(_:)``.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
-    public func tryMin(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.TryComparison<Self>
+    public func czTryMin(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryComparison<Self> {
+        return Publishers.CZTryComparison(inner: self.tryMin(by: areInIncreasingOrder), uuid: self.generateUUID())
+    }
 
     /// Publishes the maximum value received from the upstream publisher, using the provided ordering closure.
     ///
@@ -3327,7 +2798,9 @@ extension Publisher {
     ///
     /// - Parameter areInIncreasingOrder: A closure that receives two elements and returns true if they’re in increasing order.
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
-    public func max(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.Comparison<Self>
+    public func czMax(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZComparison<Self> {
+        return Publishers.CZComparison(inner: self.max(by: areInIncreasingOrder), uuid: self.generateUUID())
+    }
 
     /// Publishes the maximum value received from the upstream publisher, using the provided error-throwing closure to order the items.
     ///
@@ -3357,7 +2830,9 @@ extension Publisher {
     /// - Parameter areInIncreasingOrder: A throwing closure that receives two elements and returns `true` if they’re in increasing order. If this closure throws, the publisher terminates with a ``Subscribers/Completion/failure(_:)``.
     ///
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
-    public func tryMax(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.TryComparison<Self>
+    public func czTryMax(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryComparison<Self> {
+        return Publishers.CZTryComparison(inner: self.tryMax(by: areInIncreasingOrder), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3376,7 +2851,9 @@ extension Publisher {
     ///
     /// - Parameter output: The element to use when replacing `nil`.
     /// - Returns: A publisher that replaces `nil` elements from the upstream publisher with the provided element.
-    public func replaceNil<T>(with output: T) -> Publishers.Map<Self, T> where Self.Output == T?
+    public func czReplaceNil<T>(with output: T) -> Publishers.CZMap<Self, T> where Self.Output == T? {
+        return Publishers.CZMap(inner: self.replaceNil(with: output), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3403,7 +2880,9 @@ extension Publisher {
     ///
     /// - Parameter output: An element to emit when the upstream publisher fails.
     /// - Returns: A publisher that replaces an error from the upstream publisher with the provided output element.
-    public func replaceError(with output: Self.Output) -> Publishers.ReplaceError<Self>
+    public func czReplaceError(with output: Self.Output) -> Publishers.CZReplaceError<Self> {
+        return Publishers.CZReplaceError(inner: self.replaceError(with: output), uuid: self.generateUUID())
+    }
 
     /// Replaces an empty stream with the provided element.
     ///
@@ -3429,7 +2908,9 @@ extension Publisher {
     ///
     /// - Parameter output: An element to emit when the upstream publisher finishes without emitting any elements.
     /// - Returns: A publisher that replaces an empty stream with the provided output element.
-    public func replaceEmpty(with output: Self.Output) -> Publishers.ReplaceEmpty<Self>
+    public func czReplaceEmpty(with output: Self.Output) -> Publishers.CZReplaceEmpty<Self> {
+        return Publishers.CZReplaceEmpty(inner: self.replaceEmpty(with: output), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3465,7 +2946,9 @@ extension Publisher {
     ///   - file: A filename used in the error message. This defaults to `#file`.
     ///   - line: A line number used in the error message. This defaults to `#line`.
     /// - Returns: A publisher that raises a fatal error when its upstream publisher fails.
-    public func assertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Publishers.AssertNoFailure<Self>
+    public func czAssertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Publishers.CZAssertNoFailure<Self> {
+        return Publishers.CZAssertNoFailure(inner: self.assertNoFailure(prefix, file: file, line: line), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3495,7 +2978,9 @@ extension Publisher {
     ///
     /// - Parameter publisher: A publisher to monitor for its first emitted element.
     /// - Returns: A publisher that drops elements from the upstream publisher until the `other` publisher produces a value.
-    public func drop<P>(untilOutputFrom publisher: P) -> Publishers.DropUntilOutput<Self, P> where P : Publisher, Self.Failure == P.Failure
+    public func czDrop<P>(untilOutputFrom publisher: P) -> Publishers.CZDropUntilOutput<Self, P> where P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZDropUntilOutput(inner: self.drop(untilOutputFrom: publisher), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3538,7 +3023,9 @@ extension Publisher {
     ///   - receiveCancel: An optional closure that executes when the downstream receiver cancels publishing. This value defaults to `nil`.
     ///   - receiveRequest: An optional closure that executes when the publisher receives a request for more elements. This value defaults to `nil`.
     /// - Returns: A publisher that performs the specified closures when publisher events occur.
-    public func handleEvents(receiveSubscription: ((Subscription) -> Void)? = nil, receiveOutput: ((Self.Output) -> Void)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Void)? = nil, receiveCancel: (() -> Void)? = nil, receiveRequest: ((Subscribers.Demand) -> Void)? = nil) -> Publishers.HandleEvents<Self>
+    public func czHandleEvents(receiveSubscription: ((Subscription) -> Void)? = nil, receiveOutput: ((Self.Output) -> Void)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Void)? = nil, receiveCancel: (() -> Void)? = nil, receiveRequest: ((Subscribers.Demand) -> Void)? = nil) -> Publishers.CZHandleEvents<Self> {
+        return Publishers.CZHandleEvents(inner: self.handleEvents(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion, receiveCancel: receiveCancel, receiveRequest: receiveRequest), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3559,7 +3046,9 @@ extension Publisher {
     ///
     /// - Parameter elements: The elements to publish before this publisher’s elements.
     /// - Returns: A publisher that prefixes the specified elements prior to this publisher’s elements.
-    public func prepend(_ elements: Self.Output...) -> Publishers.Concatenate<Publishers.Sequence<[Self.Output], Self.Failure>, Self>
+    public func czPrepend(_ elements: Self.Output...) -> Publishers.CZConcatenate<Publishers.Sequence<[Self.Output], Self.Failure>, Self> {
+        return Publishers.CZConcatenate(inner: self.prepend(elements), uuid: self.generateUUID())
+    }
 
     /// Prefixes a publisher’s output with the specified sequence.
     ///
@@ -3577,7 +3066,9 @@ extension Publisher {
     ///
     /// - Parameter elements: A sequence of elements to publish before this publisher’s elements.
     /// - Returns: A publisher that prefixes the sequence of elements prior to this publisher’s elements.
-    public func prepend<S>(_ elements: S) -> Publishers.Concatenate<Publishers.Sequence<S, Self.Failure>, Self> where S : Sequence, Self.Output == S.Element
+    public func czPrepend<S>(_ elements: S) -> Publishers.CZConcatenate<Publishers.Sequence<S, Self.Failure>, Self> where S : Sequence, Self.Output == S.Element {
+        return Publishers.CZConcatenate(inner: self.prepend(elements), uuid: self.generateUUID())
+    }
 
     /// Prefixes the output of this publisher with the elements emitted by the given publisher.
     ///
@@ -3595,7 +3086,9 @@ extension Publisher {
     ///
     /// - Parameter publisher: The prefixing publisher.
     /// - Returns: A publisher that prefixes the prefixing publisher’s elements prior to this publisher’s elements.
-    public func prepend<P>(_ publisher: P) -> Publishers.Concatenate<P, Self> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output
+    public func czPrepend<P>(_ publisher: P) -> Publishers.CZConcatenate<P, Self> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
+        return Publishers.CZConcatenate(inner: self.prepend(publisher), uuid: self.generateUUID())
+    }
 
     /// Appends a publisher’s output with the specified elements.
     ///
@@ -3613,7 +3106,9 @@ extension Publisher {
     ///
     /// - Parameter elements: Elements to publish after this publisher’s elements.
     /// - Returns: A publisher that appends the specifiecd elements after this publisher’s elements.
-    public func append(_ elements: Self.Output...) -> Publishers.Concatenate<Self, Publishers.Sequence<[Self.Output], Self.Failure>>
+    public func czAppend(_ elements: Self.Output...) -> Publishers.CZConcatenate<Self, Publishers.Sequence<[Self.Output], Self.Failure>> {
+        return Publishers.CZConcatenate(inner: self.append(elements), uuid: self.generateUUID())
+    }
 
     /// Appends a publisher’s output with the specified sequence.
     ///
@@ -3631,7 +3126,9 @@ extension Publisher {
     ///
     /// - Parameter elements: A sequence of elements to publish after this publisher’s elements.
     /// - Returns: A publisher that appends the sequence of elements after this publisher’s elements.
-    public func append<S>(_ elements: S) -> Publishers.Concatenate<Self, Publishers.Sequence<S, Self.Failure>> where S : Sequence, Self.Output == S.Element
+    public func czAppend<S>(_ elements: S) -> Publishers.CZConcatenate<Self, Publishers.Sequence<S, Self.Failure>> where S : Sequence, Self.Output == S.Element {
+        return Publishers.CZConcatenate(inner: self.append(elements), uuid: self.generateUUID())
+    }
 
     /// Appends the output of this publisher with the elements emitted by the given publisher.
     ///
@@ -3649,7 +3146,9 @@ extension Publisher {
     ///
     /// - Parameter publisher: The appending publisher.
     /// - Returns: A publisher that appends the appending publisher’s elements after this publisher’s elements.
-    public func append<P>(_ publisher: P) -> Publishers.Concatenate<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output
+    public func czAppend<P>(_ publisher: P) -> Publishers.CZConcatenate<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
+        return Publishers.CZConcatenate(inner: self.append(publisher), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3704,7 +3203,9 @@ extension Publisher {
     ///   - scheduler: The scheduler on which this publisher delivers elements
     ///   - options: Scheduler options that customize this publisher’s delivery of elements.
     /// - Returns: A publisher that publishes events only after a specified time elapses.
-    public func debounce<S>(for dueTime: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.Debounce<Self, S> where S : Scheduler
+    public func czDebounce<S>(for dueTime: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZDebounce<Self, S> where S : Scheduler {
+        return Publishers.CZDebounce(inner: self.debounce(for: dueTime, scheduler: scheduler, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3724,7 +3225,9 @@ extension Publisher {
     ///     // Prints: "10"
     ///
     /// - Returns: A publisher that only publishes the last element of a stream.
-    public func last() -> Publishers.Last<Self>
+    public func czLast() -> Publishers.CZLast<Self> {
+        return Publishers.CZLast(inner: self.last(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3750,7 +3253,9 @@ extension Publisher {
     ///
     /// - Parameter transform: A closure that takes one element as its parameter and returns a new element.
     /// - Returns: A publisher that uses the provided closure to map elements from the upstream publisher to new elements that it then publishes.
-    public func map<T>(_ transform: @escaping (Self.Output) -> T) -> Publishers.Map<Self, T>
+    public func czMap<T>(_ transform: @escaping (Self.Output) -> T) -> Publishers.CZMap<Self, T> {
+        return Publishers.CZMap(inner: self.map(transform), uuid: self.generateUUID())
+    }
 
     /// Transforms all elements from the upstream publisher with a provided error-throwing closure.
     ///
@@ -3782,7 +3287,9 @@ extension Publisher {
     ///
     /// - Parameter transform: A closure that takes one element as its parameter and returns a new element. If the closure throws an error, the publisher fails with the thrown error.
     /// - Returns: A publisher that uses the provided closure to map elements from the upstream publisher to new elements that it then publishes.
-    public func tryMap<T>(_ transform: @escaping (Self.Output) throws -> T) -> Publishers.TryMap<Self, T>
+    public func czTryMap<T>(_ transform: @escaping (Self.Output) throws -> T) -> Publishers.CZTryMap<Self, T> {
+        return Publishers.CZTryMap(inner: self.tryMap(transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3820,7 +3327,9 @@ extension Publisher {
     ///   - options: Scheduler options that customize the delivery of elements.
     ///   - customError: A closure that executes if the publisher times out. The publisher sends the failure returned by this closure to the subscriber as the reason for termination.
     /// - Returns: A publisher that terminates if the specified interval elapses with no events received from the upstream publisher.
-    public func timeout<S>(_ interval: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil, customError: (() -> Self.Failure)? = nil) -> Publishers.Timeout<Self, S> where S : Scheduler
+    public func czTimeout<S>(_ interval: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil, customError: (() -> Self.Failure)? = nil) -> Publishers.CZTimeout<Self, S> where S : Scheduler {
+        return Publishers.CZTimeout(inner: self.timeout(interval, scheduler: scheduler, options: options, customError: customError), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3837,7 +3346,9 @@ extension Publisher {
     ///   - prefetch: The strategy to initially populate the buffer.
     ///   - whenFull: The action to take when the buffer becomes full.
     /// - Returns: A publisher that buffers elements received from an upstream publisher.
-    public func buffer(size: Int, prefetch: Publishers.PrefetchStrategy, whenFull: Publishers.BufferingStrategy<Self.Failure>) -> Publishers.Buffer<Self>
+    public func czBuffer(size: Int, prefetch: Publishers.PrefetchStrategy, whenFull: Publishers.BufferingStrategy<Self.Failure>) -> Publishers.CZBuffer<Self> {
+        return Publishers.CZBuffer(inner: self.buffer(size: size, prefetch: prefetch, whenFull: whenFull), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -3871,7 +3382,9 @@ extension Publisher {
     ///
     /// - Parameter other: Another publisher.
     /// - Returns: A publisher that emits pairs of elements from the upstream publishers as tuples.
-    public func zip<P>(_ other: P) -> Publishers.Zip<Self, P> where P : Publisher, Self.Failure == P.Failure
+    public func czZip<P>(_ other: P) -> Publishers.CZZip<Self, P> where P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZZip(inner: self.zip(other), uuid: self.generateUUID())
+    }
 
     /// Combines elements from another publisher and delivers a transformed output.
     ///
@@ -3901,7 +3414,9 @@ extension Publisher {
     ///   - other: Another publisher.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from two upstream publishers.
-    public func zip<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.Map<Publishers.Zip<Self, P>, T> where P : Publisher, Self.Failure == P.Failure
+    public func czZip<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.CZMap<Publishers.Zip<Self, P>, T> where P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZMap(inner: self.zip(other, transform), uuid: self.generateUUID())
+    }
 
     /// Combines elements from two other publishers and delivers groups of elements as tuples.
     ///
@@ -3935,7 +3450,9 @@ extension Publisher {
     ///   - publisher1: A second publisher.
     ///   - publisher2: A third publisher.
     /// - Returns: A publisher that emits groups of elements from the upstream publishers as tuples.
-    public func zip<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.Zip3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure
+    public func czZip<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.CZZip3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
+        return Publishers.CZZip3(inner: self.zip(publisher1, publisher2), uuid: self.generateUUID())
+    }
 
     /// Combines elements from two other publishers and delivers a transformed output.
     ///
@@ -3972,7 +3489,9 @@ extension Publisher {
     ///   - publisher2: A third publisher.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from three upstream publishers.
-    public func zip<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.Map<Publishers.Zip3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure
+    public func czZip<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.CZMap<Publishers.Zip3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
+        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, transform), uuid: self.generateUUID())
+    }
 
     /// Combines elements from three other publishers and delivers groups of elements as tuples.
     ///
@@ -4009,7 +3528,9 @@ extension Publisher {
     ///   - publisher2: A third publisher.
     ///   - publisher3: A fourth publisher.
     /// - Returns: A publisher that emits groups of elements from the upstream publishers as tuples.
-    public func zip<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.Zip4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure
+    public func czZip<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.CZZip4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
+        return Publishers.CZZip4(inner: self.zip(publisher1, publisher2, publisher3), uuid: self.generateUUID())
+    }
 
     /// Combines elements from three other publishers and delivers a transformed output.
     ///
@@ -4050,7 +3571,9 @@ extension Publisher {
     ///   - publisher3: A fourth publisher.
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from four upstream publishers.
-    public func zip<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.Map<Publishers.Zip4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure
+    public func czZip<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.CZMap<Publishers.Zip4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
+        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, publisher3, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4071,7 +3594,9 @@ extension Publisher {
     ///
     /// - Parameter index: The index that indicates the element to publish.
     /// - Returns: A publisher that publishes a specific indexed element.
-    public func output(at index: Int) -> Publishers.Output<Self>
+    public func czOutput(at index: Int) -> Publishers.CZOutput<Self> {
+        return Publishers.CZOutput(inner: self.output(at: index), uuid: self.generateUUID())
+    }
 
     /// Publishes elements specified by their range in the sequence of published elements.
     ///
@@ -4088,7 +3613,9 @@ extension Publisher {
     ///
     /// - Parameter range: A range that indicates which elements to publish.
     /// - Returns: A publisher that publishes elements specified by a range.
-    public func output<R>(in range: R) -> Publishers.Output<Self> where R : RangeExpression, R.Bound == Int
+    public func czOutput<R>(in range: R) -> Publishers.CZOutput<Self> where R : RangeExpression, R.Bound == Int {
+        return Publishers.CZOutput(inner: self.output(in: range), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4117,7 +3644,9 @@ extension Publisher {
     /// SeeAlso: `replaceError`
     /// - Parameter handler: A closure that accepts the upstream failure as input and returns a publisher to replace the upstream publisher.
     /// - Returns: A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher.
-    public func `catch`<P>(_ handler: @escaping (Self.Failure) -> P) -> Publishers.Catch<Self, P> where P : Publisher, Self.Output == P.Output
+    public func czCatch<P>(_ handler: @escaping (Self.Failure) -> P) -> Publishers.CZCatch<Self, P> where P : Publisher, Self.Output == P.Output {
+        return Publishers.CZCatch(inner: self.catch(handler), uuid: self.generateUUID())
+    }
 
     /// Handles errors from an upstream publisher by either replacing it with another publisher or throwing a new error.
     ///
@@ -4153,7 +3682,9 @@ extension Publisher {
     ///
     /// - Parameter handler: A throwing closure that accepts the upstream failure as input. This closure can either replace the upstream publisher with a new one, or throw a new error to the downstream subscriber.
     /// - Returns: A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher, or an error.
-    public func tryCatch<P>(_ handler: @escaping (Self.Failure) throws -> P) -> Publishers.TryCatch<Self, P> where P : Publisher, Self.Output == P.Output
+    public func czTryCatch<P>(_ handler: @escaping (Self.Failure) throws -> P) -> Publishers.CZTryCatch<Self, P> where P : Publisher, Self.Output == P.Output {
+        return Publishers.CZTryCatch(inner: self.tryCatch(handler), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4192,7 +3723,9 @@ extension Publisher {
     ///   - maxPublishers: Specifies the maximum number of concurrent publisher subscriptions, or ``Combine/Subscribers/Demand/unlimited`` if unspecified.
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
-    public func flatMap<T, P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.FlatMap<P, Self> where T == P.Output, P : Publisher, Self.Failure == P.Failure
+    public func czFlatMap<T, P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Self> where T == P.Output, P : Publisher, Self.Failure == P.Failure {
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -4204,7 +3737,9 @@ extension Publisher where Self.Failure == Never {
     ///   - maxPublishers: Specifies the maximum number of concurrent publisher subscriptions, or ``Combine/Subscribers/Demand/unlimited`` if unspecified.
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
-    public func flatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.FlatMap<P, Publishers.SetFailureType<Self, P.Failure>> where P : Publisher
+    public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Publishers.SetFailureType<Self, P.Failure>> where P : Publisher {
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -4216,7 +3751,9 @@ extension Publisher where Self.Failure == Never {
     ///   - maxPublishers: Specifies the maximum number of concurrent publisher subscriptions, or ``Combine/Subscribers/Demand/unlimited`` if unspecified.
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
-    public func flatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.FlatMap<P, Self> where P : Publisher, P.Failure == Never
+    public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Self> where P : Publisher, P.Failure == Never {
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
@@ -4228,7 +3765,9 @@ extension Publisher {
     ///   - maxPublishers: Specifies the maximum number of concurrent publisher subscriptions, or ``Combine/Subscribers/Demand/unlimited`` if unspecified.
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
-    public func flatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.FlatMap<Publishers.SetFailureType<P, Self.Failure>, Self> where P : Publisher, P.Failure == Never
+    public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<Publishers.SetFailureType<P, Self.Failure>, Self> where P : Publisher, P.Failure == Never {
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4276,7 +3815,9 @@ extension Publisher {
     ///   - scheduler: The scheduler to deliver the delayed events.
     ///   - options: Options relevant to the scheduler’s behavior.
     /// - Returns: A publisher that delays delivery of elements and completion to the downstream receiver.
-    public func delay<S>(for interval: S.SchedulerTimeType.Stride, tolerance: S.SchedulerTimeType.Stride? = nil, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.Delay<Self, S> where S : Scheduler
+    public func czDelay<S>(for interval: S.SchedulerTimeType.Stride, tolerance: S.SchedulerTimeType.Stride? = nil, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZDelay<Self, S> where S : Scheduler {
+        return Publishers.CZDelay(inner: self.delay(for: interval, tolerance: tolerance, scheduler: scheduler, options: options), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4297,7 +3838,9 @@ extension Publisher {
     ///
     /// - Parameter count: The number of elements to omit. The default is `1`.
     /// - Returns: A publisher that doesn’t republish the first `count` elements.
-    public func dropFirst(_ count: Int = 1) -> Publishers.Drop<Self>
+    public func czDropFirst(_ count: Int = 1) -> Publishers.CZDrop<Self> {
+        return Publishers.CZDrop(inner: self.dropFirst(count), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4332,7 +3875,9 @@ extension Publisher {
     ///     // Prints "Successfully cast nonErased.publisher."
     ///
     /// - Returns: An ``AnyPublisher`` wrapping this publisher.
-    public func eraseToAnyPublisher() -> AnyPublisher<Self.Output, Self.Failure>
+    public func czEraseToAnyPublisher() -> CZAnyPublisher<Self.Output, Self.Failure> {
+        return CZAnyPublisher(inner: self.eraseToAnyPublisher(), uuid: self.generateUUID())
+    }
 }
 
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
@@ -4352,7 +3897,9 @@ extension Publisher {
     ///     // Print: "-10"
     ///
     /// - Returns: A publisher that only publishes the first element of a stream.
-    public func first() -> Publishers.First<Self>
+    public func czFirst() -> Publishers.CZFirst<Self> {
+        return Publishers.CZFirst(inner: self.first(), uuid: self.generateUUID())
+    }
 
     /// Publishes the first element of a stream to satisfy a predicate closure, then finishes normally.
     ///
@@ -4370,7 +3917,9 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the first element of a stream that satisfies the predicate.
-    public func first(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.FirstWhere<Self>
+    public func czFirst(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZFirstWhere<Self> {
+        return Publishers.CZFirstWhere(inner: self.first(where: predicate), uuid: self.generateUUID())
+    }
 
     /// Publishes the first element of a stream to satisfy a throwing predicate closure, then finishes normally.
     ///
@@ -4395,5 +3944,7 @@ extension Publisher {
     ///
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the first element of a stream that satisfies the predicate.
-    public func tryFirst(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.TryFirstWhere<Self>
+    public func czTryFirst(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryFirstWhere<Self> {
+        return Publishers.CZTryFirstWhere(inner: self.tryFirst(where: predicate), uuid: self.generateUUID())
+    }
 }

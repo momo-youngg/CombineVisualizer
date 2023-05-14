@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import CombineVisualizer
+import Combine
 
 class CombineVisualizerTests: XCTestCase {
 
@@ -24,6 +25,24 @@ class CombineVisualizerTests: XCTestCase {
         // Any test you write for XCTest can be annotated as throws and async.
         // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+        var bag = Set<AnyCancellable>()
+        let subject = CZPassthroughSubject(inner: PassthroughSubject<Int, Never>(), uuid: UUID())
+        subject
+            .czSubscribe(on: DispatchQueue.global(qos: .utility))
+            .czReceive(on: DispatchQueue.global(qos: .background))
+            .sink { num in print(num) }
+            .store(in: &bag)
+        
+        let date1 = Date().timeIntervalSince1970
+        while Date().timeIntervalSince1970 - date1 < 3 { }
+
+        subject.send(1)
+        subject.send(2)
+        subject.send(3)
+        
+        let date2 = Date().timeIntervalSince1970
+        while Date().timeIntervalSince1970 - date2 < 3 { }
+        bag.removeAll()
     }
 
     func testPerformanceExample() throws {
@@ -32,5 +51,4 @@ class CombineVisualizerTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-
 }

@@ -46,7 +46,6 @@ extension Publishers {
         ///
         /// - Returns: A ``Cancellable`` instance that you use to cancel publishing.
         final public func connect() -> Cancellable {
-            self.visualize()
             return inner.connect()
         }
     }
@@ -772,7 +771,6 @@ extension Publishers {
         }
 
         public func setFailureType<E>(to failure: E.Type) -> Publishers.CZSetFailureType<Upstream, E> where E : Error {
-            self.visualize()
             return Publishers.CZSetFailureType(inner: self.inner.setFailureType(to: failure), uuid: self.uuid)
         }
     }
@@ -1292,32 +1290,26 @@ extension Publishers {
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge3<A, B, P> where P : Publisher, B.Failure == P.Failure, B.Output == P.Output {
-            self.visualize()
             return CZMerge3(inner: inner.merge(with: other), uuid: self.uuid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge4<A, B, Z, Y> where Z : Publisher, Y : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            self.visualize()
             return CZMerge4(inner: inner.merge(with: z, y), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge5<A, B, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            self.visualize()
             return CZMerge5(inner: inner.merge(with: z, y, x), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge6<A, B, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            self.visualize()
             return CZMerge6(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge7<A, B, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
-            self.visualize()
             return CZMerge7(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W, V, U>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V, _ u: U) -> Publishers.CZMerge8<A, B, Z, Y, X, W, V, U> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, U : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output, V.Failure == U.Failure, V.Output == U.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: z, y, x, w, v, u), uuid: self.uuid)
         }
     }
@@ -1356,27 +1348,22 @@ extension Publishers {
         }
         
         public func merge<P>(with other: P) -> Publishers.CZMerge4<A, B, C, P> where P : Publisher, C.Failure == P.Failure, C.Output == P.Output {
-            self.visualize()
             return CZMerge4(inner: inner.merge(with: other), uuid: self.uuid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge5<A, B, C, Z, Y> where Z : Publisher, Y : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            self.visualize()
             return CZMerge5(inner: inner.merge(with: z, y), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge6<A, B, C, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            self.visualize()
             return CZMerge6(inner: inner.merge(with: z, y, x), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge7<A, B, C, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            self.visualize()
             return CZMerge7(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge8<A, B, C, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
         }
     }
@@ -1419,22 +1406,18 @@ extension Publishers {
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge5<A, B, C, D, P> where P : Publisher, D.Failure == P.Failure, D.Output == P.Output {
-            self.visualize()
             return CZMerge5(inner: inner.merge(with: other), uuid: self.uuid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge6<A, B, C, D, Z, Y> where Z : Publisher, Y : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            self.visualize()
             return CZMerge6(inner: inner.merge(with: z, y), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge7<A, B, C, D, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            self.visualize()
             return CZMerge7(inner: inner.merge(with: z, y, x), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge8<A, B, C, D, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
         }
     }
@@ -1481,17 +1464,14 @@ extension Publishers {
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge6<A, B, C, D, E, P> where P : Publisher, E.Failure == P.Failure, E.Output == P.Output {
-            self.visualize()
             return CZMerge6(inner: inner.merge(with: other), uuid: self.uuid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge7<A, B, C, D, E, Z, Y> where Z : Publisher, Y : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            self.visualize()
             return CZMerge7(inner: inner.merge(with: z, y), uuid: self.uuid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge8<A, B, C, D, E, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: z, y, x), uuid: self.uuid)
         }
     }
@@ -1542,12 +1522,10 @@ extension Publishers {
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge7<A, B, C, D, E, F, P> where P : Publisher, F.Failure == P.Failure, F.Output == P.Output {
-            self.visualize()
             return CZMerge7(inner: inner.merge(with: other), uuid: self.uuid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge8<A, B, C, D, E, F, Z, Y> where Z : Publisher, Y : Publisher, F.Failure == Z.Failure, F.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: z, y), uuid: self.uuid)
         }
     }
@@ -1602,7 +1580,6 @@ extension Publishers {
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge8<A, B, C, D, E, F, G, P> where P : Publisher, G.Failure == P.Failure, G.Output == P.Output {
-            self.visualize()
             return CZMerge8(inner: inner.merge(with: other), uuid: self.uuid)
         }
     }
@@ -1687,7 +1664,6 @@ extension Publishers {
         }
 
         public func merge(with other: Upstream) -> Publishers.CZMergeMany<Upstream> {
-            self.visualize()
             return CZMergeMany(inner: inner.merge(with: other), uuid: self.uuid)
         }
     }

@@ -10,14 +10,52 @@ import Combine
 
 // MARK: - Common
 enum Element {
-    case publisher, subscriber, subscription, subject
+    case publisher(PublisherMethod)
+    case subscriber(SubscriberMethod)
+    case subscription(SubscriptionMethod)
+    case subject(SubjectMethod)
     
-    func visualize(name: String, uuid: UUID, function: String = #function, message: String = "") {
+    func visualize(name: String, uuid: UUID, message: String = "") {
         // do something
         // TODO: visualize 되는 코드들 제대로 확인. 되야 하는 것인지. 필요한 정보는 다 있는지.
         let queueName = String(cString: __dispatch_queue_get_label(nil))
         let thread = Thread.current.description
-        print("########## \(uuid) \(self) \(name) \(function) \(message) \(queueName) \(thread)")
+        print("########## \(uuid) \(self) \(name) \(self.method) \(message) \(queueName) \(thread)")
+    }
+    
+    private var method: String {
+        switch self {
+        case .publisher(let publisherMethod):
+            return "Publisher.\(publisherMethod)"
+        case .subscriber(let subscriberMethod):
+            return "Subscriber.\(subscriberMethod)"
+        case .subscription(let subscriptionMethod):
+            return "Subscription.\(subscriptionMethod)"
+        case .subject(let subjectMethod):
+            return "Subject.\(subjectMethod)"
+        }
+    }
+    
+    enum PublisherMethod {
+        case receiveSubscriber(String)
+    }
+    
+    enum SubscriberMethod {
+        case receiveSubscription(String)
+        case receiveInput
+        case receiveCompletion
+    }
+    
+    enum SubscriptionMethod {
+        case request
+        case cancel
+    }
+    
+    enum SubjectMethod {
+        case sendOutput
+        case sendCompletion
+        case sendSubscription
+        case receiveSubscriber(String)
     }
 }
 
@@ -34,7 +72,7 @@ public protocol CZPublisher : Publisher {
 extension CZPublisher where Inner : Publisher {
     public func receive<S>(subscriber: S) where S : Subscriber, Inner.Failure == S.Failure, Inner.Output == S.Input {
         let czSubscriber = CZSubscriber(subscriber, uuid: self.uuid)
-        self.visualize()
+        self.visualize(method: .receiveSubscriber(String(describing: subscriber).simpleTypeName))
         self.inner.receive(subscriber: czSubscriber)
     }
 }
@@ -45,29 +83,19 @@ public protocol CZConnectablePublisher: CZPublisher {
 
 extension CZConnectablePublisher where Inner : ConnectablePublisher {
     public func connect() -> Cancellable {
-        self.visualize()
         return self.inner.connect()
     }
     
     public func autoconnect() -> Publishers.CZAutoconnect<Inner> {
-        self.visualize()
         return Publishers.CZAutoconnect<Inner>(inner: self.inner.autoconnect(), uuid: self.uuid)
     }
 }
 
 extension CZPublisher {
-    func visualize(function: String = #function) {
-        let fullName = String(describing: self.inner.self)
-        let simpleName: String = {
-            guard let parenthesisIndex = fullName.firstIndex(of: "<") else {
-                return fullName
-            }
-            return String(fullName[..<parenthesisIndex])
-        }()
-        Element.publisher.visualize(
-            name: simpleName,
-            uuid: self.uuid,
-            function: function
+    func visualize(method: Element.PublisherMethod) {
+        Element.publisher(method).visualize(
+            name: String(describing: self.inner.self).simpleTypeName,
+            uuid: self.uuid
         )
     }
 }
@@ -99,35 +127,27 @@ public class CZSubscriber<Inner: Subscriber> : Subscriber {
     }
     
     public func receive(subscription: Subscription) {
-        self.visualize()
+        self.visualize(method: .receiveSubscription(String(describing: subscription).simpleTypeName))
         let subscription = CZSubscription(subscription, uuid: self.uuid)
         self.inner.receive(subscription: subscription)
     }
     
     public func receive(_ input: Input) -> Subscribers.Demand {
-        self.visualize()
+        self.visualize(method: .receiveInput)
         return self.inner.receive(input)
     }
     
     public func receive(completion: Subscribers.Completion<Failure>) {
-        self.visualize()
+        self.visualize(method: .receiveCompletion)
         return self.inner.receive(completion: completion)
     }
 }
 
 extension CZSubscriber {
-    func visualize(function: String = #function) {
-        let fullName = String(describing: self.inner.self)
-        let simpleName: String = {
-            guard let parenthesisIndex = fullName.firstIndex(of: "<") else {
-                return fullName
-            }
-            return String(fullName[..<parenthesisIndex])
-        }()
-        Element.subscriber.visualize(
-            name: simpleName,
-            uuid: self.uuid,
-            function: function
+    func visualize(method: Element.SubscriberMethod) {
+        Element.subscriber(method).visualize(
+            name: String(describing: self.inner.self).simpleTypeName,
+            uuid: self.uuid
         )
     }
 }
@@ -143,29 +163,21 @@ class CZSubscription : Subscription {
     }
     
     func request(_ demand: Subscribers.Demand) {
-        self.visualize()
+        self.visualize(method: .request)
         self.inner.request(demand)
     }
     
     func cancel() {
-        self.visualize()
+        self.visualize(method: .cancel)
         self.inner.cancel()
     }
 }
 
 extension CZSubscription {
-    func visualize(function: String = #function) {
-        let fullName = String(describing: self.inner.self)
-        let simpleName: String = {
-            guard let parenthesisIndex = fullName.firstIndex(of: "<") else {
-                return fullName
-            }
-            return String(fullName[..<parenthesisIndex])
-        }()
-        Element.subscription.visualize(
-            name: simpleName,
-            uuid: self.uuid,
-            function: function
+    func visualize(method: Element.SubscriptionMethod) {
+        Element.subscription(method).visualize(
+            name: String(describing: self.inner.self).simpleTypeName,
+            uuid: self.uuid
         )
     }
 }
@@ -182,41 +194,43 @@ public protocol CZSubject : Subject {
 
 extension CZSubject where Inner : Subject {
     public func send(_ value: Inner.Output) {
-        self.visualize()
+        self.visualize(method: .sendOutput)
         self.inner.send(value)
     }
     
     public func send(completion: Subscribers.Completion<Inner.Failure>) {
-        self.visualize()
+        self.visualize(method: .sendCompletion)
         self.inner.send(completion: completion)
     }
         
     public func send(subscription: Subscription) {
-        self.visualize()
+        self.visualize(method: .sendSubscription)
         let czSubscription = CZSubscription(subscription, uuid: self.uuid)
         self.inner.send(subscription: czSubscription)
     }
     
     public func receive<S>(subscriber: S) where S : Subscriber, Inner.Failure == S.Failure, Inner.Output == S.Input {
-        self.visualize()
+        self.visualize(method: .receiveSubscriber(String(describing: subscriber).simpleTypeName))
         let czSubscriber = CZSubscriber(subscriber, uuid: self.uuid)
         self.inner.receive(subscriber: czSubscriber)
     }
 }
 
 extension CZSubject {
-    func visualize(function: String = #function) {
-        let fullName = String(describing: self.inner.self)
-        let simpleName: String = {
-            guard let parenthesisIndex = fullName.firstIndex(of: "<") else {
-                return fullName
-            }
-            return String(fullName[..<parenthesisIndex])
-        }()
-        Element.subject.visualize(
-            name: simpleName,
-            uuid: self.uuid,
-            function: function
+    func visualize(method: Element.SubjectMethod) {
+        Element.subject(method).visualize(
+            name: String(describing: self.inner.self).simpleTypeName,
+            uuid: self.uuid
         )
+    }
+}
+
+// MARK: - String Extension
+extension String {
+    fileprivate var simpleTypeName: String {
+        guard let parenthesisIndex = self.firstIndex(of: "<") else {
+            return self
+        }
+        return String(self[..<parenthesisIndex])
     }
 }

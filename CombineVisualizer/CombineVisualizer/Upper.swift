@@ -564,7 +564,6 @@ final public class CZObservableObjectPublisher : CZPublisher {
 
     /// Sends the changed value to the downstream subscriber.
     final public func send() {
-        self.visualize()
         self.inner.send()
     }
 }

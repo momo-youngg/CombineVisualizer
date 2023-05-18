@@ -16,6 +16,9 @@ struct ContentView: View {
             Text("Hello, world!")
         }
         .padding()
+        .onAppear {
+            CombineVisualizerServer.shared.start()
+        }
     }
 }
 

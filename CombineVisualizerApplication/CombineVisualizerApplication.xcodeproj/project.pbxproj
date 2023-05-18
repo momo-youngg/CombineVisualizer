@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC1202413295F43149345168 /* libPods-CombineVisualizerApplication.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EFA4CEDA1866E158C29B6089 /* libPods-CombineVisualizerApplication.a */; };
 		FAB657792A121306005DEA44 /* CombineVisualizerApplicationApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657782A121306005DEA44 /* CombineVisualizerApplicationApp.swift */; };
 		FAB6577B2A121306005DEA44 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB6577A2A121306005DEA44 /* ContentView.swift */; };
 		FAB6577D2A121307005DEA44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAB6577C2A121307005DEA44 /* Assets.xcassets */; };
@@ -14,6 +15,7 @@
 		FAB6578B2A121307005DEA44 /* CombineVisualizerApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB6578A2A121307005DEA44 /* CombineVisualizerApplicationTests.swift */; };
 		FAB657952A121307005DEA44 /* CombineVisualizerApplicationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657942A121307005DEA44 /* CombineVisualizerApplicationUITests.swift */; };
 		FAB657972A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657962A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift */; };
+		FAB657A52A164219005DEA44 /* CombineVisualizerServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +36,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		023053CE80DC31B7A5210DC7 /* Pods-CombineVisualizerApplication.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CombineVisualizerApplication.debug.xcconfig"; path = "Target Support Files/Pods-CombineVisualizerApplication/Pods-CombineVisualizerApplication.debug.xcconfig"; sourceTree = "<group>"; };
+		A6F5F0418AFB01FEB730FB3A /* Pods-CombineVisualizerApplication.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CombineVisualizerApplication.release.xcconfig"; path = "Target Support Files/Pods-CombineVisualizerApplication/Pods-CombineVisualizerApplication.release.xcconfig"; sourceTree = "<group>"; };
+		EFA4CEDA1866E158C29B6089 /* libPods-CombineVisualizerApplication.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-CombineVisualizerApplication.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAB657752A121306005DEA44 /* CombineVisualizerApplication.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CombineVisualizerApplication.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAB657782A121306005DEA44 /* CombineVisualizerApplicationApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerApplicationApp.swift; sourceTree = "<group>"; };
 		FAB6577A2A121306005DEA44 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -45,6 +50,8 @@
 		FAB657902A121307005DEA44 /* CombineVisualizerApplicationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CombineVisualizerApplicationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAB657942A121307005DEA44 /* CombineVisualizerApplicationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerApplicationUITests.swift; sourceTree = "<group>"; };
 		FAB657962A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerApplicationUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		FAB657A32A164047005DEA44 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerServer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC1202413295F43149345168 /* libPods-CombineVisualizerApplication.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +80,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		15CD3FB5709860530CFEB34C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EFA4CEDA1866E158C29B6089 /* libPods-CombineVisualizerApplication.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AB72DF92BDA83AB5FF04FEB3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				023053CE80DC31B7A5210DC7 /* Pods-CombineVisualizerApplication.debug.xcconfig */,
+				A6F5F0418AFB01FEB730FB3A /* Pods-CombineVisualizerApplication.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		FAB6576C2A121306005DEA44 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +104,8 @@
 				FAB657892A121307005DEA44 /* CombineVisualizerApplicationTests */,
 				FAB657932A121307005DEA44 /* CombineVisualizerApplicationUITests */,
 				FAB657762A121306005DEA44 /* Products */,
+				AB72DF92BDA83AB5FF04FEB3 /* Pods */,
+				15CD3FB5709860530CFEB34C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,9 +124,11 @@
 			children = (
 				FAB657782A121306005DEA44 /* CombineVisualizerApplicationApp.swift */,
 				FAB6577A2A121306005DEA44 /* ContentView.swift */,
+				FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */,
 				FAB6577C2A121307005DEA44 /* Assets.xcassets */,
 				FAB657812A121307005DEA44 /* CombineVisualizerApplication.entitlements */,
 				FAB6577E2A121307005DEA44 /* Preview Content */,
+				FAB657A32A164047005DEA44 /* Bridging-Header.h */,
 			);
 			path = CombineVisualizerApplication;
 			sourceTree = "<group>";
@@ -136,6 +165,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FAB6579A2A121307005DEA44 /* Build configuration list for PBXNativeTarget "CombineVisualizerApplication" */;
 			buildPhases = (
+				899FED0825F5A610A1B4CE17 /* [CP] Check Pods Manifest.lock */,
 				FAB657712A121306005DEA44 /* Sources */,
 				FAB657722A121306005DEA44 /* Frameworks */,
 				FAB657732A121306005DEA44 /* Resources */,
@@ -254,12 +284,38 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		899FED0825F5A610A1B4CE17 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CombineVisualizerApplication-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		FAB657712A121306005DEA44 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				FAB6577B2A121306005DEA44 /* ContentView.swift in Sources */,
+				FAB657A52A164219005DEA44 /* CombineVisualizerServer.swift in Sources */,
 				FAB657792A121306005DEA44 /* CombineVisualizerApplicationApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -412,6 +468,7 @@
 		};
 		FAB6579B2A121307005DEA44 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 023053CE80DC31B7A5210DC7 /* Pods-CombineVisualizerApplication.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -433,12 +490,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.momo.CombineVisualizerApplication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CombineVisualizerApplication/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		FAB6579C2A121307005DEA44 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A6F5F0418AFB01FEB730FB3A /* Pods-CombineVisualizerApplication.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -460,6 +519,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.momo.CombineVisualizerApplication;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CombineVisualizerApplication/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

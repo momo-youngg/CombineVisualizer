@@ -16,6 +16,7 @@
 		FAB657952A121307005DEA44 /* CombineVisualizerApplicationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657942A121307005DEA44 /* CombineVisualizerApplicationUITests.swift */; };
 		FAB657972A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657962A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift */; };
 		FAB657A52A164219005DEA44 /* CombineVisualizerServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */; };
+		FAB657A82A1647A2005DEA44 /* CombineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657A72A1647A2005DEA44 /* CombineView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		FAB657962A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerApplicationUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		FAB657A32A164047005DEA44 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerServer.swift; sourceTree = "<group>"; };
+		FAB657A72A1647A2005DEA44 /* CombineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,9 +124,10 @@
 		FAB657772A121306005DEA44 /* CombineVisualizerApplication */ = {
 			isa = PBXGroup;
 			children = (
+				FAB657A92A1647A9005DEA44 /* Server */,
+				FAB657A62A16478A005DEA44 /* View */,
 				FAB657782A121306005DEA44 /* CombineVisualizerApplicationApp.swift */,
 				FAB6577A2A121306005DEA44 /* ContentView.swift */,
-				FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */,
 				FAB6577C2A121307005DEA44 /* Assets.xcassets */,
 				FAB657812A121307005DEA44 /* CombineVisualizerApplication.entitlements */,
 				FAB6577E2A121307005DEA44 /* Preview Content */,
@@ -156,6 +159,22 @@
 				FAB657962A121307005DEA44 /* CombineVisualizerApplicationUITestsLaunchTests.swift */,
 			);
 			path = CombineVisualizerApplicationUITests;
+			sourceTree = "<group>";
+		};
+		FAB657A62A16478A005DEA44 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				FAB657A72A1647A2005DEA44 /* CombineView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		FAB657A92A1647A9005DEA44 /* Server */ = {
+			isa = PBXGroup;
+			children = (
+				FAB657A42A164219005DEA44 /* CombineVisualizerServer.swift */,
+			);
+			path = Server;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -314,6 +333,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAB657A82A1647A2005DEA44 /* CombineView.swift in Sources */,
 				FAB6577B2A121306005DEA44 /* ContentView.swift in Sources */,
 				FAB657A52A164219005DEA44 /* CombineVisualizerServer.swift in Sources */,
 				FAB657792A121306005DEA44 /* CombineVisualizerApplicationApp.swift in Sources */,

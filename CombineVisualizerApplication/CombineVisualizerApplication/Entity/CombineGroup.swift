@@ -61,4 +61,27 @@ enum ElementMethod {
     // Subscription
     case request
     case cancel
+    
+    var text: String {
+        switch self {
+        case .receiveSubscriber(let subscriber):
+            return "receive(\(subscriber))"
+        case .sendOutput:
+            return "send(output)"
+        case .sendCompletion:
+            return "send(completion)"
+        case .sendSubscription:
+            return "send(subscription)"
+        case .receiveSubscription(let subscription):
+            return "receive(\(subscription))"
+        case .receiveInput:
+            return "receive(input)"
+        case .receiveCompletion:
+            return "receive(completion)"
+        case .request:
+            return "request(demand)"
+        case .cancel:
+            return "cancel"
+        }
+    }
 }

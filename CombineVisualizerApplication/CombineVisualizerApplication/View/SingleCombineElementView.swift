@@ -54,6 +54,8 @@ extension SingleCombineElementView {
                         Color.clear
                             .onAppear {
                                 self.titleWidth = proxy.size.width
+                                self.maxLeftEdgeWidth = max(self.maxLeftEdgeWidth, proxy.size.width / 2)
+                                self.maxRightEdgeWidth = max(self.maxRightEdgeWidth, proxy.size.width / 2)
                             }
                     }
                 }

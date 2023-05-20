@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CombineGroup {
+struct CombineGroup: Identifiable {
     let uuid: UUID
     var elements: [CombineElement]
     var totalEdgesCount: Int {
@@ -24,6 +24,10 @@ struct CombineGroup {
     }
     var subscribers: [CombineElement] {
         elements.filter { $0.elementType == .subscriber }
+    }
+    
+    var id: UUID {
+        uuid
     }
 }
 

@@ -15,27 +15,6 @@ enum Element {
     case subscription(SubscriptionMethod)
     case subject(SubjectMethod)
     
-    func visualize(name: String, uuid: UUID, message: String = "") {
-        // do something
-        // TODO: visualize 되는 코드들 제대로 확인. 되야 하는 것인지. 필요한 정보는 다 있는지.
-        let queueName = String(cString: __dispatch_queue_get_label(nil))
-        let thread = Thread.current.description
-        print("########## \(uuid) \(self) \(name) \(self.method) \(message) \(queueName) \(thread)")
-    }
-    
-    private var method: String {
-        switch self {
-        case .publisher(let publisherMethod):
-            return "Publisher.\(publisherMethod)"
-        case .subscriber(let subscriberMethod):
-            return "Subscriber.\(subscriberMethod)"
-        case .subscription(let subscriptionMethod):
-            return "Subscription.\(subscriptionMethod)"
-        case .subject(let subjectMethod):
-            return "Subject.\(subjectMethod)"
-        }
-    }
-    
     enum PublisherMethod {
         case receiveSubscriber(String)
     }
@@ -56,6 +35,12 @@ enum Element {
         case sendCompletion
         case sendSubscription
         case receiveSubscriber(String)
+    }
+}
+
+extension Element {
+    func visualize(name: String, uuid: UUID) {
+        self.sendToApplication(name: name, uuid: uuid)
     }
 }
 

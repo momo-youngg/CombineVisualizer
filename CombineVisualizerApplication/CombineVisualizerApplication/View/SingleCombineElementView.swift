@@ -132,7 +132,7 @@ extension SingleCombineElementView {
                         .lineLimit(1)
                     Text(edge.queue)
                         .lineLimit(1)
-                    Text(edge.thread)
+                    Text("thread <\(edge.thread)>")
                         .lineLimit(1)
                 }
                 .padding(Constants.edgeTextPadding)
@@ -211,7 +211,7 @@ extension SingleCombineElementView {
         static func edgeColor(_ elementType: ElementType) -> Color {
             switch elementType {
             case .subject:
-                return .red
+                return .purple
             case .publisher:
                 return .red
             case .subscription:
@@ -225,7 +225,7 @@ extension SingleCombineElementView {
         static func stickColor(_ elementType: ElementType) -> Color {
             switch elementType {
             case .subject:
-                return .red
+                return .purple
             case .publisher:
                 return .red
             case .subscription:

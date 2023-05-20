@@ -27,10 +27,14 @@ struct CombineGroup {
     }
 }
 
-struct CombineElement {
+struct CombineElement: Identifiable {
     let elementType: ElementType
     let typeName: String
     let edges: [Edges]
+    
+    var id: String {
+        "\(elementType)-\(typeName)"
+    }
 }
 
 enum ElementType {

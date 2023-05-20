@@ -10,11 +10,13 @@
 		FAB657102A03B34A005DEA44 /* CombineVisualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAB657072A03B349005DEA44 /* CombineVisualizer.framework */; };
 		FAB657152A03B34A005DEA44 /* CombineVisualizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657142A03B34A005DEA44 /* CombineVisualizerTests.swift */; };
 		FAB657162A03B34A005DEA44 /* CombineVisualizer.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FAB657202A03B417005DEA44 /* Inner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB6571F2A03B417005DEA44 /* Inner.swift */; };
-		FAB657222A03B850005DEA44 /* Public.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657212A03B850005DEA44 /* Public.swift */; };
-		FAB657262A07CCC7005DEA44 /* Upper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657252A07CCC7005DEA44 /* Upper.swift */; };
-		FAB657282A0CE21E005DEA44 /* Lower.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657272A0CE21E005DEA44 /* Lower.swift */; };
+		FAB657202A03B417005DEA44 /* CombineElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB6571F2A03B417005DEA44 /* CombineElement.swift */; };
 		FAB657B42A18BFEB005DEA44 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657B32A18BFEB005DEA44 /* Network.swift */; };
+		FAB657B72A18CAA7005DEA44 /* CZPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657B62A18CAA7005DEA44 /* CZPublisher.swift */; };
+		FAB657B92A18CAC4005DEA44 /* CZSubscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657B82A18CAC4005DEA44 /* CZSubscriber.swift */; };
+		FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */; };
+		FAB657BD2A18CAF0005DEA44 /* CZSubject.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */; };
+		FAB657C02A18CB40005DEA44 /* Combine+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,11 +34,13 @@
 		FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CombineVisualizer.h; sourceTree = "<group>"; };
 		FAB6570F2A03B34A005DEA44 /* CombineVisualizerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CombineVisualizerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAB657142A03B34A005DEA44 /* CombineVisualizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerTests.swift; sourceTree = "<group>"; };
-		FAB6571F2A03B417005DEA44 /* Inner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inner.swift; sourceTree = "<group>"; };
-		FAB657212A03B850005DEA44 /* Public.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Public.swift; sourceTree = "<group>"; };
-		FAB657252A07CCC7005DEA44 /* Upper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Upper.swift; sourceTree = "<group>"; };
-		FAB657272A0CE21E005DEA44 /* Lower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lower.swift; sourceTree = "<group>"; };
+		FAB6571F2A03B417005DEA44 /* CombineElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineElement.swift; sourceTree = "<group>"; };
 		FAB657B32A18BFEB005DEA44 /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
+		FAB657B62A18CAA7005DEA44 /* CZPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZPublisher.swift; sourceTree = "<group>"; };
+		FAB657B82A18CAC4005DEA44 /* CZSubscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubscriber.swift; sourceTree = "<group>"; };
+		FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubscription.swift; sourceTree = "<group>"; };
+		FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubject.swift; sourceTree = "<group>"; };
+		FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,12 +83,10 @@
 		FAB657092A03B349005DEA44 /* CombineVisualizer */ = {
 			isa = PBXGroup;
 			children = (
+				FAB657C12A18CB86005DEA44 /* Network */,
+				FAB657BE2A18CB2D005DEA44 /* Combine+Extension */,
+				FAB657B52A18CA92005DEA44 /* CombineElement */,
 				FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */,
-				FAB657272A0CE21E005DEA44 /* Lower.swift */,
-				FAB657252A07CCC7005DEA44 /* Upper.swift */,
-				FAB6571F2A03B417005DEA44 /* Inner.swift */,
-				FAB657212A03B850005DEA44 /* Public.swift */,
-				FAB657B32A18BFEB005DEA44 /* Network.swift */,
 			);
 			path = CombineVisualizer;
 			sourceTree = "<group>";
@@ -95,6 +97,34 @@
 				FAB657142A03B34A005DEA44 /* CombineVisualizerTests.swift */,
 			);
 			path = CombineVisualizerTests;
+			sourceTree = "<group>";
+		};
+		FAB657B52A18CA92005DEA44 /* CombineElement */ = {
+			isa = PBXGroup;
+			children = (
+				FAB6571F2A03B417005DEA44 /* CombineElement.swift */,
+				FAB657B62A18CAA7005DEA44 /* CZPublisher.swift */,
+				FAB657B82A18CAC4005DEA44 /* CZSubscriber.swift */,
+				FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */,
+				FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */,
+			);
+			path = CombineElement;
+			sourceTree = "<group>";
+		};
+		FAB657BE2A18CB2D005DEA44 /* Combine+Extension */ = {
+			isa = PBXGroup;
+			children = (
+				FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */,
+			);
+			path = "Combine+Extension";
+			sourceTree = "<group>";
+		};
+		FAB657C12A18CB86005DEA44 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				FAB657B32A18BFEB005DEA44 /* Network.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -208,10 +238,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAB657B42A18BFEB005DEA44 /* Network.swift in Sources */,
-				FAB657222A03B850005DEA44 /* Public.swift in Sources */,
-				FAB657262A07CCC7005DEA44 /* Upper.swift in Sources */,
-				FAB657202A03B417005DEA44 /* Inner.swift in Sources */,
-				FAB657282A0CE21E005DEA44 /* Lower.swift in Sources */,
+				FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */,
+				FAB657B92A18CAC4005DEA44 /* CZSubscriber.swift in Sources */,
+				FAB657B72A18CAA7005DEA44 /* CZPublisher.swift in Sources */,
+				FAB657BD2A18CAF0005DEA44 /* CZSubject.swift in Sources */,
+				FAB657C02A18CB40005DEA44 /* Combine+Extension.swift in Sources */,
+				FAB657202A03B417005DEA44 /* CombineElement.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

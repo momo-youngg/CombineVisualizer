@@ -7,20 +7,20 @@
 
 import Foundation
 
-protocol Methodable {
+fileprivate protocol Methodable {
     var name: String { get }
     var parameter: String? { get }
 }
 
-extension CombineElement.PublisherMethod: Methodable {
-    var name: String {
+extension CombineElement.PublisherMethod : Methodable {
+    fileprivate var name: String {
         switch self {
         case .receiveSubscriber(_):
             return "receiveSubscriber"
         }
     }
     
-    var parameter: String? {
+    fileprivate var parameter: String? {
         switch self {
         case .receiveSubscriber(let parameter):
             return parameter
@@ -28,8 +28,8 @@ extension CombineElement.PublisherMethod: Methodable {
     }
 }
 
-extension CombineElement.SubscriberMethod: Methodable {
-    var name: String {
+extension CombineElement.SubscriberMethod : Methodable {
+    fileprivate var name: String {
         switch self {
         case .receiveSubscription(_):
             return "receiveSubscription"
@@ -40,7 +40,7 @@ extension CombineElement.SubscriberMethod: Methodable {
         }
     }
     
-    var parameter: String? {
+    fileprivate var parameter: String? {
         switch self {
         case .receiveSubscription(let parameter):
             return parameter
@@ -50,8 +50,8 @@ extension CombineElement.SubscriberMethod: Methodable {
     }
 }
 
-extension CombineElement.SubscriptionMethod: Methodable {
-    var name: String {
+extension CombineElement.SubscriptionMethod : Methodable {
+    fileprivate var name: String {
         switch self {
         case .request:
             return "request"
@@ -60,13 +60,13 @@ extension CombineElement.SubscriptionMethod: Methodable {
         }
     }
     
-    var parameter: String? {
+    fileprivate var parameter: String? {
         nil
     }
 }
 
-extension CombineElement.SubjectMethod: Methodable {
-    var name: String {
+extension CombineElement.SubjectMethod : Methodable {
+    fileprivate var name: String {
         switch self {
         case .sendOutput:
             return "sendOutput"
@@ -79,7 +79,7 @@ extension CombineElement.SubjectMethod: Methodable {
         }
     }
     
-    var parameter: String? {
+    fileprivate var parameter: String? {
         switch self {
         case .receiveSubscriber(let parameter):
             return parameter
@@ -90,7 +90,7 @@ extension CombineElement.SubjectMethod: Methodable {
 }
 
 extension CombineElement {
-    var name: String {
+    fileprivate var name: String {
         switch self {
         case .publisher(_):
             return "publisher"
@@ -103,7 +103,7 @@ extension CombineElement {
         }
     }
     
-    var method: String {
+    fileprivate var method: String {
         switch self {
         case .publisher(let publisherMethod):
             return publisherMethod.name
@@ -116,7 +116,7 @@ extension CombineElement {
         }
     }
     
-    var parameter: String? {
+    fileprivate var parameter: String? {
         switch self {
         case .publisher(let publisherMethod):
             return publisherMethod.parameter

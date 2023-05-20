@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 // MARK: - Common
-enum Element {
+enum CombineElement {
     case publisher(PublisherMethod)
     case subscriber(SubscriberMethod)
     case subscription(SubscriptionMethod)
@@ -38,7 +38,7 @@ enum Element {
     }
 }
 
-extension Element {
+extension CombineElement {
     func visualize(name: String, uuid: UUID) {
         self.sendToApplication(name: name, uuid: uuid)
     }
@@ -77,8 +77,8 @@ extension CZConnectablePublisher where Inner : ConnectablePublisher {
 }
 
 extension CZPublisher {
-    func visualize(method: Element.PublisherMethod) {
-        Element.publisher(method).visualize(
+    func visualize(method: CombineElement.PublisherMethod) {
+        CombineElement.publisher(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
             uuid: self.uuid
         )
@@ -129,8 +129,8 @@ public class CZSubscriber<Inner: Subscriber> : Subscriber {
 }
 
 extension CZSubscriber {
-    func visualize(method: Element.SubscriberMethod) {
-        Element.subscriber(method).visualize(
+    func visualize(method: CombineElement.SubscriberMethod) {
+        CombineElement.subscriber(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
             uuid: self.uuid
         )
@@ -159,8 +159,8 @@ class CZSubscription : Subscription {
 }
 
 extension CZSubscription {
-    func visualize(method: Element.SubscriptionMethod) {
-        Element.subscription(method).visualize(
+    func visualize(method: CombineElement.SubscriptionMethod) {
+        CombineElement.subscription(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
             uuid: self.uuid
         )
@@ -202,8 +202,8 @@ extension CZSubject where Inner : Subject {
 }
 
 extension CZSubject {
-    func visualize(method: Element.SubjectMethod) {
-        Element.subject(method).visualize(
+    func visualize(method: CombineElement.SubjectMethod) {
+        CombineElement.subject(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
             uuid: self.uuid
         )

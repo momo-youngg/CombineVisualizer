@@ -12,7 +12,7 @@ protocol Methodable {
     var parameter: String? { get }
 }
 
-extension Element.PublisherMethod: Methodable {
+extension CombineElement.PublisherMethod: Methodable {
     var name: String {
         switch self {
         case .receiveSubscriber(_):
@@ -28,7 +28,7 @@ extension Element.PublisherMethod: Methodable {
     }
 }
 
-extension Element.SubscriberMethod: Methodable {
+extension CombineElement.SubscriberMethod: Methodable {
     var name: String {
         switch self {
         case .receiveSubscription(_):
@@ -50,7 +50,7 @@ extension Element.SubscriberMethod: Methodable {
     }
 }
 
-extension Element.SubscriptionMethod: Methodable {
+extension CombineElement.SubscriptionMethod: Methodable {
     var name: String {
         switch self {
         case .request:
@@ -65,7 +65,7 @@ extension Element.SubscriptionMethod: Methodable {
     }
 }
 
-extension Element.SubjectMethod: Methodable {
+extension CombineElement.SubjectMethod: Methodable {
     var name: String {
         switch self {
         case .sendOutput:
@@ -89,7 +89,7 @@ extension Element.SubjectMethod: Methodable {
     }
 }
 
-extension Element {
+extension CombineElement {
     var name: String {
         switch self {
         case .publisher(_):
@@ -130,7 +130,7 @@ extension Element {
     }
 }
 
-extension Element {
+extension CombineElement {
     func sendToApplication(name: String, uuid: UUID) {
         let element = self.name
         let queue = String(cString: __dispatch_queue_get_label(nil))

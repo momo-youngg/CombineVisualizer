@@ -19,6 +19,7 @@
 		FAB657A82A1647A2005DEA44 /* CombineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657A72A1647A2005DEA44 /* CombineView.swift */; };
 		FAB657AC2A164B2A005DEA44 /* CombineGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AB2A164B2A005DEA44 /* CombineGroup.swift */; };
 		FAB657AE2A16515D005DEA44 /* SingleCombineElementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AD2A16515D005DEA44 /* SingleCombineElementView.swift */; };
+		FAB657B02A188C23005DEA44 /* CombineElementGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AF2A188C23005DEA44 /* CombineElementGroupView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		FAB657A72A1647A2005DEA44 /* CombineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineView.swift; sourceTree = "<group>"; };
 		FAB657AB2A164B2A005DEA44 /* CombineGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineGroup.swift; sourceTree = "<group>"; };
 		FAB657AD2A16515D005DEA44 /* SingleCombineElementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleCombineElementView.swift; sourceTree = "<group>"; };
+		FAB657AF2A188C23005DEA44 /* CombineElementGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineElementGroupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +173,7 @@
 			children = (
 				FAB657A72A1647A2005DEA44 /* CombineView.swift */,
 				FAB657AD2A16515D005DEA44 /* SingleCombineElementView.swift */,
+				FAB657AF2A188C23005DEA44 /* CombineElementGroupView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -348,6 +351,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAB657A82A1647A2005DEA44 /* CombineView.swift in Sources */,
+				FAB657B02A188C23005DEA44 /* CombineElementGroupView.swift in Sources */,
 				FAB6577B2A121306005DEA44 /* ContentView.swift in Sources */,
 				FAB657A52A164219005DEA44 /* CombineVisualizerServer.swift in Sources */,
 				FAB657AC2A164B2A005DEA44 /* CombineGroup.swift in Sources */,

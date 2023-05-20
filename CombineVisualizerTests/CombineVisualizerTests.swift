@@ -43,6 +43,8 @@ class CombineVisualizerTests: XCTestCase {
         let date2 = Date().timeIntervalSince1970
         while Date().timeIntervalSince1970 - date2 < 3 { }
         bag.removeAll()
+        
+        Thread.sleep(forTimeInterval: 3)
     }
 
     func testPerformanceExample() throws {

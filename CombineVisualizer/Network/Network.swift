@@ -130,31 +130,36 @@ extension CombineElement {
     }
 }
 
+fileprivate let serialQueue = DispatchQueue(label: "CombineVisualizerSerial")
+fileprivate let semaphore = DispatchSemaphore(value: 1)
+
 extension CombineElement {
     func sendToApplication(name: String, uuid: UUID) {
-        let element = self.name
-        let queue = String(cString: __dispatch_queue_get_label(nil))
-        let thread = Thread.current.description.threadNumberString
-        let method = self.method
-        let parameter = self.parameter ?? ""
         let body: [String: String] = [
             "uuid": uuid.uuidString,
-            "element": element,
+            "element": self.name,
             "elementName": name,
-            "queue": queue,
-            "thread": thread,
-            "methodName": method,
-            "methodParameter": parameter
+            "queue": String(cString: __dispatch_queue_get_label(nil)),
+            "thread": Thread.current.description.threadNumberString,
+            "methodName": self.method,
+            "methodParameter": self.parameter ?? ""
         ]
         let port = CombineVisualizerConfig.port
-        guard let data = try? JSONEncoder().encode(body),
-              let url = URL(string: "http://localhost:\(port)/add") else {
-            return
+        // request serially
+        serialQueue.async {
+            semaphore.wait()
+            guard let data = try? JSONEncoder().encode(body),
+                  let url = URL(string: "http://localhost:\(port)/add") else {
+                return
+            }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            // 요청이 하나씩 순서대로 가도록 해주어야 함.
+            URLSession.shared.uploadTask(with: request, from: data) { (_, _, _) in
+                semaphore.signal()
+            }.resume()
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        URLSession.shared.uploadTask(with: request, from: data) { (_, _, _) in }.resume()
     }
 }
 

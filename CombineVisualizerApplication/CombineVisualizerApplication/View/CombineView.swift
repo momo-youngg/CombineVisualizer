@@ -19,9 +19,10 @@ struct CombineView: View {
             }
         }
         .padding(Constants.edgeInsets)
+        .onReceive(CombineManager.shared.combineGroupsSubject) { combineGroups in
+            self.combineGroups = combineGroups
+        }
     }
-    
-    // TODO: combineGroups update binding
 }
 
 extension CombineView {

@@ -32,29 +32,40 @@ extension CombineElementGroupView {
     var combineElementGroupView: some View {
         ScrollView(.horizontal) {
             HStack(spacing: Constants.spacingBetweenElementTypes) {
-                VStack(spacing: Constants.typeNameSpacing) {
-                    Text("Subjects")
-                        .font(.title)
-                        .foregroundColor(Constants.typeNameColor(.subject))
-                    self.combineElementsView(of: self.group.subjects, direction: .fromLeftToRight)
+                if self.group.subjects.isEmpty == false {
+                    VStack(spacing: Constants.typeNameSpacing) {
+                        Text("Subjects")
+                            .font(.title)
+                            .foregroundColor(Constants.typeNameColor(.subject))
+                        self.combineElementsView(of: self.group.subjects, direction: .fromLeftToRight)
+                    }
                 }
-                VStack(spacing: Constants.typeNameSpacing) {
-                    Text("Publishers")
-                        .font(.title)
-                        .foregroundColor(Constants.typeNameColor(.publisher))
-                    self.combineElementsView(of: self.group.publishers, direction: .fromRightToLeft)
+                
+                if self.group.publishers.isEmpty == false {
+                    VStack(spacing: Constants.typeNameSpacing) {
+                        Text("Publishers")
+                            .font(.title)
+                            .foregroundColor(Constants.typeNameColor(.publisher))
+                        self.combineElementsView(of: self.group.publishers, direction: .fromRightToLeft)
+                    }
                 }
-                VStack(spacing: Constants.typeNameSpacing) {
-                    Text("Subscriptions")
-                        .font(.title)
-                        .foregroundColor(Constants.typeNameColor(.subscription))
-                    self.combineElementsView(of: self.group.subscriptions, direction: .fromRightToLeft)
+                
+                if self.group.subscriptions.isEmpty == false {
+                    VStack(spacing: Constants.typeNameSpacing) {
+                        Text("Subscriptions")
+                            .font(.title)
+                            .foregroundColor(Constants.typeNameColor(.subscription))
+                        self.combineElementsView(of: self.group.subscriptions, direction: .fromRightToLeft)
+                    }
                 }
-                VStack(spacing: Constants.typeNameSpacing) {
-                    Text("Subscribers")
-                        .font(.title)
-                        .foregroundColor(Constants.typeNameColor(.subscriber))
-                    self.combineElementsView(of: self.group.subscribers, direction: .fromLeftToRight)
+                
+                if self.group.subscribers.isEmpty == false {
+                    VStack(spacing: Constants.typeNameSpacing) {
+                        Text("Subscribers")
+                            .font(.title)
+                            .foregroundColor(Constants.typeNameColor(.subscriber))
+                        self.combineElementsView(of: self.group.subscribers, direction: .fromLeftToRight)
+                    }
                 }
             }
         }

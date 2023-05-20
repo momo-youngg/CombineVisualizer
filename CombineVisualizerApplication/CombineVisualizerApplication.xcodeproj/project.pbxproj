@@ -20,6 +20,7 @@
 		FAB657AC2A164B2A005DEA44 /* CombineGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AB2A164B2A005DEA44 /* CombineGroup.swift */; };
 		FAB657AE2A16515D005DEA44 /* SingleCombineElementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AD2A16515D005DEA44 /* SingleCombineElementView.swift */; };
 		FAB657B02A188C23005DEA44 /* CombineElementGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657AF2A188C23005DEA44 /* CombineElementGroupView.swift */; };
+		FAB657B22A18A092005DEA44 /* CombineManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657B12A18A092005DEA44 /* CombineManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		FAB657AB2A164B2A005DEA44 /* CombineGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineGroup.swift; sourceTree = "<group>"; };
 		FAB657AD2A16515D005DEA44 /* SingleCombineElementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleCombineElementView.swift; sourceTree = "<group>"; };
 		FAB657AF2A188C23005DEA44 /* CombineElementGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineElementGroupView.swift; sourceTree = "<group>"; };
+		FAB657B12A18A092005DEA44 /* CombineManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				FAB657AB2A164B2A005DEA44 /* CombineGroup.swift */,
+				FAB657B12A18A092005DEA44 /* CombineManager.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -357,6 +360,7 @@
 				FAB657AC2A164B2A005DEA44 /* CombineGroup.swift in Sources */,
 				FAB657792A121306005DEA44 /* CombineVisualizerApplicationApp.swift in Sources */,
 				FAB657AE2A16515D005DEA44 /* SingleCombineElementView.swift in Sources */,
+				FAB657B22A18A092005DEA44 /* CombineManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

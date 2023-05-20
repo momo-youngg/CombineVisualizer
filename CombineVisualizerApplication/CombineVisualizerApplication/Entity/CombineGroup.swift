@@ -29,12 +29,40 @@ struct CombineGroup: Identifiable {
     var id: UUID {
         uuid
     }
+    
+    mutating func add(
+        elementType: ElementType,
+        elementName: String,
+        edge: Edges
+    ) {
+        var isAppended = false
+        let newElements = elements.map { element in
+            if element.elementType == elementType &&  element.typeName == elementName {
+                var element = element
+                element.edges.append(edge)
+                isAppended = true
+                return element
+            } else {
+                return element
+            }
+        }
+        guard isAppended == false else {
+            self.elements = newElements
+            return
+        }
+        self.elements.append(
+            CombineElement(
+                elementType: elementType,
+                typeName: elementName,
+                edges: [edge])
+        )
+    }
 }
 
 struct CombineElement: Identifiable {
     let elementType: ElementType
     let typeName: String
-    let edges: [Edges]
+    var edges: [Edges]
     
     var id: String {
         "\(elementType)-\(typeName)"
@@ -46,6 +74,21 @@ enum ElementType {
     case publisher
     case subscription
     case subscriber
+    
+    init?(_ name: String) {
+        switch name {
+        case "subject":
+            self = .subject
+        case "publisher":
+            self = .publisher
+        case "subscription":
+            self = .subscription
+        case "subscriber":
+            self = .subscriber
+        default:
+            return nil
+        }
+    }
 }
 
 struct Edges {
@@ -69,6 +112,31 @@ enum ElementMethod {
     // Subscription
     case request
     case cancel
+    
+    init?(methodName: String, methodParameter: String) {
+        switch methodName {
+        case "receiveSubscriber":
+            self = .receiveSubscriber(methodParameter)
+        case "sendOutput":
+            self = .sendOutput
+        case "sendCompletion":
+            self = .sendCompletion
+        case "sendSubscription":
+            self = .sendSubscription
+        case "receiveSubscription":
+            self = .receiveSubscription(methodParameter)
+        case "receiveInput":
+            self = .receiveInput
+        case "receiveCompletion":
+            self = .receiveCompletion
+        case "request":
+            self = .request
+        case "cancel":
+            self = .cancel
+        default:
+            return nil
+        }
+    }
     
     var text: String {
         switch self {

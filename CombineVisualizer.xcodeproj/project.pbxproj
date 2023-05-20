@@ -17,6 +17,7 @@
 		FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */; };
 		FAB657BD2A18CAF0005DEA44 /* CZSubject.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */; };
 		FAB657C02A18CB40005DEA44 /* Combine+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */; };
+		FAB657C42A193965005DEA44 /* CombineVisualizerConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +42,7 @@
 		FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubscription.swift; sourceTree = "<group>"; };
 		FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubject.swift; sourceTree = "<group>"; };
 		FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine+Extension.swift"; sourceTree = "<group>"; };
+		FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombineVisualizerConfig.swift; path = ../../../../CombineVisualizerConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +85,7 @@
 		FAB657092A03B349005DEA44 /* CombineVisualizer */ = {
 			isa = PBXGroup;
 			children = (
+				FAB657C22A193950005DEA44 /* Config */,
 				FAB657C12A18CB86005DEA44 /* Network */,
 				FAB657BE2A18CB2D005DEA44 /* Combine+Extension */,
 				FAB657B52A18CA92005DEA44 /* CombineElement */,
@@ -125,6 +128,14 @@
 				FAB657B32A18BFEB005DEA44 /* Network.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		FAB657C22A193950005DEA44 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -238,6 +249,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAB657B42A18BFEB005DEA44 /* Network.swift in Sources */,
+				FAB657C42A193965005DEA44 /* CombineVisualizerConfig.swift in Sources */,
 				FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */,
 				FAB657B92A18CAC4005DEA44 /* CZSubscriber.swift in Sources */,
 				FAB657B72A18CAA7005DEA44 /* CZPublisher.swift in Sources */,

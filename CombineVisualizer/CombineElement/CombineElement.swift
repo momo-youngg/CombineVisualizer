@@ -40,7 +40,21 @@ enum CombineElement {
 
 extension CombineElement {
     func visualize(name: String, uuid: UUID) {
-        self.sendToApplication(name: name, uuid: uuid)
+        switch CombineVisualizerConfig.outputType {
+        case .visualize(_):
+            self.sendToApplication(name: name, uuid: uuid)
+        case .custom(let outputHandler):
+            let outputInfo = OutputType.CustomOutputInfo(
+                uuid: uuid,
+                element: self,
+                elementName: name,
+                queue: String(cString: __dispatch_queue_get_label(nil)),
+                thread: Thread.current.description.threadNumberString,
+                methodName: self.method,
+                methodParameter: self.method
+            )
+            outputHandler(outputInfo)
+        }
     }
 }
 

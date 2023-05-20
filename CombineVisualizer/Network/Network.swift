@@ -7,20 +7,20 @@
 
 import Foundation
 
-fileprivate protocol Methodable {
+protocol Methodable {
     var name: String { get }
     var parameter: String? { get }
 }
 
 extension CombineElement.PublisherMethod : Methodable {
-    fileprivate var name: String {
+    var name: String {
         switch self {
         case .receiveSubscriber(_):
             return "receiveSubscriber"
         }
     }
     
-    fileprivate var parameter: String? {
+    var parameter: String? {
         switch self {
         case .receiveSubscriber(let parameter):
             return parameter
@@ -29,7 +29,7 @@ extension CombineElement.PublisherMethod : Methodable {
 }
 
 extension CombineElement.SubscriberMethod : Methodable {
-    fileprivate var name: String {
+    var name: String {
         switch self {
         case .receiveSubscription(_):
             return "receiveSubscription"
@@ -40,7 +40,7 @@ extension CombineElement.SubscriberMethod : Methodable {
         }
     }
     
-    fileprivate var parameter: String? {
+    var parameter: String? {
         switch self {
         case .receiveSubscription(let parameter):
             return parameter
@@ -51,7 +51,7 @@ extension CombineElement.SubscriberMethod : Methodable {
 }
 
 extension CombineElement.SubscriptionMethod : Methodable {
-    fileprivate var name: String {
+    var name: String {
         switch self {
         case .request:
             return "request"
@@ -60,13 +60,13 @@ extension CombineElement.SubscriptionMethod : Methodable {
         }
     }
     
-    fileprivate var parameter: String? {
+    var parameter: String? {
         nil
     }
 }
 
 extension CombineElement.SubjectMethod : Methodable {
-    fileprivate var name: String {
+    var name: String {
         switch self {
         case .sendOutput:
             return "sendOutput"
@@ -79,7 +79,7 @@ extension CombineElement.SubjectMethod : Methodable {
         }
     }
     
-    fileprivate var parameter: String? {
+    var parameter: String? {
         switch self {
         case .receiveSubscriber(let parameter):
             return parameter
@@ -90,7 +90,7 @@ extension CombineElement.SubjectMethod : Methodable {
 }
 
 extension CombineElement {
-    fileprivate var name: String {
+    var name: String {
         switch self {
         case .publisher(_):
             return "publisher"
@@ -103,7 +103,7 @@ extension CombineElement {
         }
     }
     
-    fileprivate var method: String {
+    var method: String {
         switch self {
         case .publisher(let publisherMethod):
             return publisherMethod.name
@@ -116,7 +116,7 @@ extension CombineElement {
         }
     }
     
-    fileprivate var parameter: String? {
+    var parameter: String? {
         switch self {
         case .publisher(let publisherMethod):
             return publisherMethod.parameter
@@ -146,8 +146,9 @@ extension CombineElement {
             "methodName": method,
             "methodParameter": parameter
         ]
+        let port = CombineVisualizerConfig.port
         guard let data = try? JSONEncoder().encode(body),
-              let url = URL(string: "http://localhost:8080/add") else {
+              let url = URL(string: "http://localhost:\(port)/add") else {
             return
         }
         var request = URLRequest(url: url)
@@ -158,7 +159,7 @@ extension CombineElement {
 }
 
 extension String {
-    fileprivate var threadNumberString: String {
+    var threadNumberString: String {
         let pattern = "number = (?<threadNumber>.+),"
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: self, options: [], range: NSRange(self.startIndex..., in: self)),

@@ -26,13 +26,16 @@ class CombineVisualizerTests: XCTestCase {
         // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
         // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
         var bag = Set<AnyCancellable>()
-        let subject = CZPassthroughSubject(inner: PassthroughSubject<Int, Never>(), uuid: UUID())
+        let subject = CZPassthroughSubject(inner: PassthroughSubject<Int, Never>(), trid: UUID())
         subject
             .czSubscribe(on: DispatchQueue.global(qos: .utility))
             .czReceive(on: DispatchQueue.global(qos: .background))
             .czMap { $0 * $0 }
             .czReceive(on: DispatchQueue.global(qos: .default))
             .czFilter { $0 % 2 == 0 }
+            .czReceive(on: DispatchQueue(label: "hello"))
+            .czReceive(on: DispatchQueue(label: "world"))
+            .czReceive(on: DispatchQueue(label: "zz"))
             .sink { num in print(num) }
             .store(in: &bag)
         

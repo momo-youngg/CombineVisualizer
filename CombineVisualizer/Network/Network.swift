@@ -134,9 +134,10 @@ fileprivate let serialQueue = DispatchQueue(label: "CombineVisualizerSerial")
 fileprivate let semaphore = DispatchSemaphore(value: 1)
 
 extension CombineElement {
-    func sendToApplication(name: String, trid: UUID) {
+    func sendToApplication(name: String, trid: UUID, uuid: UUID) {
         let body: [String: String] = [
             "trid": trid.uuidString,
+            "uuid": uuid.uuidString,
             "element": self.name,
             "elementName": name,
             "queue": String(cString: __dispatch_queue_get_label(nil)),

@@ -13,6 +13,7 @@ public protocol CZSubject : Subject {
     
     var inner: Inner { get }
     var trid: UUID { get }
+    var uuid: UUID { get }
     
     init(inner: Inner, trid: UUID)
 }
@@ -45,7 +46,8 @@ extension CZSubject {
     func visualize(method: CombineElement.SubjectMethod) {
         CombineElement.subject(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
-            trid: self.trid
+            trid: self.trid,
+            uuid: self.uuid
         )
     }
 }

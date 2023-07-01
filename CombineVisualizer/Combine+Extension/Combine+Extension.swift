@@ -52,6 +52,7 @@ import Combine
     
     public let inner: AnyPublisher<Output, Failure>
     public let trid: UUID
+    public let uuid = UUID()
     
     public init(inner: AnyPublisher<Output, Failure>, trid: UUID) {
         self.inner = inner
@@ -130,6 +131,7 @@ final public class CZCurrentValueSubject<Output, Failure> : CZSubject where Fail
     
     public let inner: CurrentValueSubject<Output, Failure>
     public let trid: UUID
+    public let uuid = UUID()
     
     public init(inner: CurrentValueSubject<Output, Failure>, trid: UUID) {
         self.inner = inner
@@ -154,6 +156,7 @@ public struct CZDeferred<DeferredPublisher> : CZPublisher where DeferredPublishe
     
     public let inner: Deferred<DeferredPublisher>
     public let trid: UUID
+    public let uuid = UUID()
     
     public init(inner: Deferred<DeferredPublisher>, trid: UUID) {
         self.createPublisher = inner.createPublisher
@@ -175,7 +178,8 @@ public struct CZEmpty<Output, Failure> : CZPublisher, Equatable where Failure : 
     
     public let inner: Empty<Output, Failure>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: Empty<Output, Failure>, trid: UUID) {
         self.completeImmediately = inner.completeImmediately
         self.inner = inner
@@ -201,7 +205,8 @@ public struct CZFail<Output, Failure> : CZPublisher where Failure : Error {
     
     public let inner: Fail<Output, Failure>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: Fail<Output, Failure>, trid: UUID) {
         self.error = inner.error
         self.inner = inner
@@ -279,7 +284,8 @@ final public class CZFuture<Output, Failure> : CZPublisher where Failure : Error
     
     public let inner: Future<Output, Failure>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: Future<Output, Failure>, trid: UUID) {
         self.inner = inner
         self.trid = trid
@@ -332,7 +338,8 @@ public struct CZJust<Output> : CZPublisher {
     
     public let inner: Just<Output>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: Just<Output>, trid: UUID) {
         self.output = inner.output
         self.inner = inner
@@ -556,7 +563,8 @@ final public class CZObservableObjectPublisher : CZPublisher {
     
     public let inner: ObservableObjectPublisher
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: ObservableObjectPublisher, trid: UUID) {
         self.inner = inner
         self.trid = trid
@@ -579,7 +587,8 @@ final public class CZPassthroughSubject<Output, Failure> : CZSubject where Failu
 
     public let inner: PassthroughSubject<Output, Failure>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: PassthroughSubject<Output, Failure>, trid: UUID) {
         self.inner = inner
         self.trid = trid
@@ -3974,7 +3983,8 @@ extension Publishers {
         
         public let inner: Multicast<Upstream, SubjectType>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Multicast<Upstream, SubjectType>, trid: UUID) {
             self.upstream = inner.upstream
             self.createSubject = inner.createSubject
@@ -4018,6 +4028,7 @@ extension Publishers {
         
         public let inner: SubscribeOn<Upstream, Context>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: SubscribeOn<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4053,6 +4064,7 @@ extension Publishers {
         
         public let inner: MeasureInterval<Upstream, Context>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: MeasureInterval<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4087,6 +4099,7 @@ extension Publishers {
         
         public let inner: DropWhile<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: DropWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4117,6 +4130,7 @@ extension Publishers {
         
         public let inner: TryDropWhile<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryDropWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4151,6 +4165,7 @@ extension Publishers {
         
         public let inner: Filter<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Filter<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4181,6 +4196,7 @@ extension Publishers {
         
         public let inner: TryFilter<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryFilter<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4224,6 +4240,7 @@ extension Publishers {
         
         public let inner: Breakpoint<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Breakpoint<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4262,6 +4279,7 @@ extension Publishers {
         
         public let inner: AllSatisfy<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: AllSatisfy<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4294,6 +4312,7 @@ extension Publishers {
         
         public let inner: TryAllSatisfy<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryAllSatisfy<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4328,6 +4347,7 @@ extension Publishers {
         
         public let inner: RemoveDuplicates<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: RemoveDuplicates<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4356,6 +4376,7 @@ extension Publishers {
         
         public let inner: TryRemoveDuplicates<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryRemoveDuplicates<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4380,6 +4401,7 @@ extension Publishers {
         public let upstream: Upstream
         public let inner: Decode<Upstream, Output, Coder>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Decode<Upstream, Output, Coder>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4404,6 +4426,7 @@ extension Publishers {
         public let upstream: Upstream
         public let inner: Encode<Upstream, Coder>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Encode<Upstream, Coder>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4437,6 +4460,7 @@ extension Publishers {
         
         public let inner: Contains<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Contains<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4469,6 +4493,7 @@ extension Publishers {
         
         public let inner: CombineLatest<A, B>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: CombineLatest<A, B>, trid: UUID) {
             self.a = inner.a
@@ -4499,6 +4524,7 @@ extension Publishers {
         
         public let inner: CombineLatest3<A, B, C>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: CombineLatest3<A, B, C>, trid: UUID) {
             self.a = inner.a
@@ -4532,7 +4558,8 @@ extension Publishers {
 
         public let inner: CombineLatest4<A, B, C, D>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: CombineLatest4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
@@ -4567,7 +4594,8 @@ extension Publishers {
         
         public let inner: Autoconnect<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         required public init(inner: Autoconnect<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -4610,6 +4638,7 @@ extension Publishers {
         
         public let inner: Print<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Print<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4645,6 +4674,7 @@ extension Publishers {
         
         public let inner: PrefixWhile<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: PrefixWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4675,6 +4705,7 @@ extension Publishers {
         
         public let inner: TryPrefixWhile<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryPrefixWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4703,7 +4734,8 @@ extension Publishers {
         
         public let inner: SetFailureType<Upstream, Failure>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: SetFailureType<Upstream, Failure>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -4740,6 +4772,7 @@ extension Publishers {
         
         public let inner: ContainsWhere<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: ContainsWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4770,6 +4803,7 @@ extension Publishers {
         
         public let inner: TryContainsWhere<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryContainsWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4802,6 +4836,7 @@ extension Publishers {
         
         public let inner: MakeConnectable<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: MakeConnectable<Upstream>, trid: UUID) {
             self.inner = inner
@@ -4837,6 +4872,7 @@ extension Publishers {
         
         public let inner: CollectByTime<Upstream, Context>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: CollectByTime<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4865,6 +4901,7 @@ extension Publishers {
         
         public let inner: Collect<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Collect<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4894,6 +4931,7 @@ extension Publishers {
         
         public let inner: CollectByCount<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: CollectByCount<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4931,6 +4969,7 @@ extension Publishers {
         
         public let inner: ReceiveOn<Upstream, Context>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: ReceiveOn<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
@@ -4961,7 +5000,8 @@ extension Publishers {
         
         public let inner: MapKeyPath<Upstream, Output>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: MapKeyPath<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath = inner.keyPath
@@ -4994,7 +5034,8 @@ extension Publishers {
         
         public let inner: MapKeyPath2<Upstream, Output0, Output1>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: MapKeyPath2<Upstream, Output0, Output1>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath0 = inner.keyPath0
@@ -5031,7 +5072,8 @@ extension Publishers {
         
         public let inner: MapKeyPath3<Upstream, Output0, Output1, Output2>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: MapKeyPath3<Upstream, Output0, Output1, Output2>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath0 = inner.keyPath0
@@ -5067,6 +5109,7 @@ extension Publishers {
         
         public let inner: PrefixUntilOutput<Upstream, Other>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: PrefixUntilOutput<Upstream, Other>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5099,6 +5142,7 @@ extension Publishers {
         
         public let inner: Reduce<Upstream, Output>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Reduce<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5130,6 +5174,7 @@ extension Publishers {
         
         public let inner: TryReduce<Upstream, Output>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryReduce<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5160,6 +5205,7 @@ extension Publishers {
         
         public let inner: CompactMap<Upstream, Output>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: CompactMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5187,6 +5233,7 @@ extension Publishers {
         
         public let inner: TryCompactMap<Upstream, Output>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: TryCompactMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5221,6 +5268,7 @@ extension Publishers {
         
         public let inner: Merge<A, B>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge<A, B>, trid: UUID) {
             self.a = inner.a
@@ -5278,6 +5326,7 @@ extension Publishers {
         
         public let inner: Merge3<A, B, C>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge3<A, B, C>, trid: UUID) {
             self.a = inner.a
@@ -5335,6 +5384,7 @@ extension Publishers {
         
         public let inner: Merge4<A, B, C, D>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
@@ -5392,6 +5442,7 @@ extension Publishers {
         
         public let inner: Merge5<A, B, C, D, E>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge5<A, B, C, D, E>, trid: UUID) {
             self.a = inner.a
@@ -5449,6 +5500,7 @@ extension Publishers {
         
         public let inner: Merge6<A, B, C, D, E, F>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge6<A, B, C, D, E, F>, trid: UUID) {
             self.a = inner.a
@@ -5506,6 +5558,7 @@ extension Publishers {
         
         public let inner: Merge7<A, B, C, D, E, F, G>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge7<A, B, C, D, E, F, G>, trid: UUID) {
             self.a = inner.a
@@ -5563,6 +5616,7 @@ extension Publishers {
         
         public let inner: Merge8<A, B, C, D, E, F, G, H>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Merge8<A, B, C, D, E, F, G, H>, trid: UUID) {
             self.a = inner.a
@@ -5596,7 +5650,8 @@ extension Publishers {
         
         public let inner: MergeMany<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: MergeMany<Upstream>, trid: UUID) {
             self.publishers = inner.publishers
             self.inner = inner
@@ -5631,7 +5686,8 @@ extension Publishers {
         
         public let inner: Scan<Upstream, Output>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Scan<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initialResult = inner.initialResult
@@ -5660,7 +5716,8 @@ extension Publishers {
         
         public let inner: TryScan<Upstream, Output>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: TryScan<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initialResult = inner.initialResult
@@ -5692,6 +5749,7 @@ extension Publishers {
         
         public let inner: Count<Upstream>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Count<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
@@ -5725,7 +5783,8 @@ extension Publishers {
         
         public let inner: LastWhere<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.LastWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
@@ -5755,7 +5814,8 @@ extension Publishers {
         
         public let inner: TryLastWhere<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.TryLastWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
@@ -5786,7 +5846,8 @@ extension Publishers {
         
         public let inner: IgnoreOutput<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.IgnoreOutput<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -5821,7 +5882,8 @@ extension Publishers {
         
         public let inner: SwitchToLatest<P, Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.SwitchToLatest<P, Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -5856,7 +5918,8 @@ extension Publishers {
         
         public let inner: Retry<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Retry<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.retries = inner.retries
@@ -5885,7 +5948,8 @@ extension Publishers {
         
         public let inner: MapError<Upstream, Failure>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.MapError<Upstream, Failure>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
@@ -5927,7 +5991,8 @@ extension Publishers {
         
         public let inner: Throttle<Upstream, Context>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Throttle<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
@@ -5966,7 +6031,8 @@ extension Publishers {
         
         public let inner: Share<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Share<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -6011,7 +6077,8 @@ extension Publishers {
         
         public let inner: Comparison<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Comparison<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.areInIncreasingOrder = inner.areInIncreasingOrder
@@ -6041,7 +6108,8 @@ extension Publishers {
         
         public let inner: TryComparison<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.TryComparison<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.areInIncreasingOrder = inner.areInIncreasingOrder
@@ -6075,7 +6143,8 @@ extension Publishers {
         
         public let inner: ReplaceEmpty<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.ReplaceEmpty<Upstream>, trid: UUID) {
             self.output = inner.output
             self.upstream = inner.upstream
@@ -6105,7 +6174,8 @@ extension Publishers {
         
         public let inner: ReplaceError<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.ReplaceError<Upstream>, trid: UUID) {
             self.output = inner.output
             self.upstream = inner.upstream
@@ -6147,7 +6217,8 @@ extension Publishers {
         
         public let inner: AssertNoFailure<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.AssertNoFailure<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.prefix = inner.prefix
@@ -6183,7 +6254,8 @@ extension Publishers {
         
         public let inner: DropUntilOutput<Upstream, Other>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.DropUntilOutput<Upstream, Other>, trid: UUID) {
             self.upstream = inner.upstream
             self.other = inner.other
@@ -6229,7 +6301,8 @@ extension Publishers {
         
         public let inner: HandleEvents<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.HandleEvents<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.receiveSubscription = inner.receiveSubscription
@@ -6267,7 +6340,8 @@ extension Publishers {
         
         public let inner: Concatenate<Prefix, Suffix>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Concatenate<Prefix, Suffix>, trid: UUID) {
             self.prefix = inner.prefix
             self.suffix = inner.suffix
@@ -6307,6 +6381,7 @@ extension Publishers {
         
         public let inner: Debounce<Upstream, Context>
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Publishers.Debounce<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
@@ -6340,7 +6415,8 @@ extension Publishers {
         
         public let inner: Last<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Last<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -6368,7 +6444,8 @@ extension Publishers {
         
         public let inner: Map<Upstream, Output>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Map<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
@@ -6393,7 +6470,8 @@ extension Publishers {
         
         public let inner: TryMap<Upstream, Output>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.TryMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
@@ -6436,7 +6514,8 @@ extension Publishers {
         
         public let inner: Timeout<Upstream, Context>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Timeout<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
@@ -6479,7 +6558,8 @@ extension Publishers {
         
         public let inner: Buffer<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Buffer<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.size = inner.size
@@ -6507,7 +6587,8 @@ extension Publishers {
         
         public let inner: Sequence<Elements, Failure>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Sequence<Elements, Failure>, trid: UUID) {
             self.sequence = inner.sequence
             self.inner = inner
@@ -6546,7 +6627,8 @@ extension Publishers {
         
         public let inner: Zip<A, B>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Zip<A, B>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
@@ -6583,7 +6665,8 @@ extension Publishers {
         
         public let inner: Zip3<A, B, C>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Zip3<A, B, C>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
@@ -6624,7 +6707,8 @@ extension Publishers {
         
         public let inner: Zip4<A, B, C, D>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Zip4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
@@ -6660,7 +6744,8 @@ extension Publishers {
         
         public let inner: Publishers.Output<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Output<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.range = inner.range
@@ -6694,7 +6779,8 @@ extension Publishers {
         
         public let inner: Catch<Upstream, NewPublisher>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Catch<Upstream, NewPublisher>, trid: UUID) {
             self.upstream = inner.upstream
             self.handler = inner.handler
@@ -6726,7 +6812,8 @@ extension Publishers {
         
         public let inner: TryCatch<Upstream, NewPublisher>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.TryCatch<Upstream, NewPublisher>, trid: UUID) {
             self.upstream = inner.upstream
             self.handler = inner.handler
@@ -6763,7 +6850,8 @@ extension Publishers {
         
         public let inner: FlatMap<NewPublisher, Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.FlatMap<NewPublisher, Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.maxPublishers = inner.maxPublishers
@@ -6807,7 +6895,8 @@ extension Publishers {
         
         public let inner: Delay<Upstream, Context>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Delay<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
@@ -6844,7 +6933,8 @@ extension Publishers {
         
         public let inner: Drop<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.Drop<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.count = inner.count
@@ -6875,7 +6965,8 @@ extension Publishers {
         
         public let inner: First<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.First<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
@@ -6904,7 +6995,8 @@ extension Publishers {
         
         public let inner: FirstWhere<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.FirstWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
@@ -6934,7 +7026,8 @@ extension Publishers {
         
         public let inner: TryFirstWhere<Upstream>
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Publishers.TryFirstWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
@@ -7659,7 +7752,8 @@ public struct CZRecord<Output, Failure> : CZPublisher where Failure : Error {
     
     public let inner: Record<Output, Failure>
     public let trid: UUID
-    
+    public let uuid = UUID()
+
     public init(inner: Record<Output, Failure>, trid: UUID) {
         self.recording = inner.recording
         self.inner = inner
@@ -7696,6 +7790,7 @@ extension Optional {
         
         public let inner: Optional<Wrapped>.Publisher
         public let trid: UUID
+        public let uuid = UUID()
 
         public init(inner: Optional<Wrapped>.Publisher, trid: UUID) {
             self.output = inner.output
@@ -7750,7 +7845,8 @@ extension Result {
         
         public let inner: Result<Success, Failure>.Publisher
         public let trid: UUID
-        
+        public let uuid = UUID()
+
         public init(inner: Result<Success, Failure>.Publisher, trid: UUID) {
             self.result = inner.result
             self.inner = inner

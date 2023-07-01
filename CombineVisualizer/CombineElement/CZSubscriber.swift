@@ -14,10 +14,12 @@ public class CZSubscriber<Inner: Subscriber> : Subscriber {
     
     let inner: Inner
     let trid: UUID
+    let uuid: UUID
     
     init(_ inner: Inner, trid: UUID) {
         self.inner = inner
         self.trid = trid
+        self.uuid = UUID()
     }
     
     public func receive(subscription: Subscription) {
@@ -41,7 +43,8 @@ extension CZSubscriber {
     func visualize(method: CombineElement.SubscriberMethod) {
         CombineElement.subscriber(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
-            trid: self.trid
+            trid: self.trid,
+            uuid: self.uuid
         )
     }
 }

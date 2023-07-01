@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA420BE12A508CC0007273D1 /* CombineVisualizerConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA420BE02A508CC0007273D1 /* CombineVisualizerConfig.swift */; };
 		FAB657102A03B34A005DEA44 /* CombineVisualizer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAB657072A03B349005DEA44 /* CombineVisualizer.framework */; };
 		FAB657152A03B34A005DEA44 /* CombineVisualizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657142A03B34A005DEA44 /* CombineVisualizerTests.swift */; };
 		FAB657162A03B34A005DEA44 /* CombineVisualizer.h in Headers */ = {isa = PBXBuildFile; fileRef = FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -17,7 +18,6 @@
 		FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */; };
 		FAB657BD2A18CAF0005DEA44 /* CZSubject.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */; };
 		FAB657C02A18CB40005DEA44 /* Combine+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */; };
-		FAB657C42A193965005DEA44 /* CombineVisualizerConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA420BE02A508CC0007273D1 /* CombineVisualizerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineVisualizerConfig.swift; sourceTree = "<group>"; };
 		FAB657072A03B349005DEA44 /* CombineVisualizer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineVisualizer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAB6570A2A03B349005DEA44 /* CombineVisualizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CombineVisualizer.h; sourceTree = "<group>"; };
 		FAB6570F2A03B34A005DEA44 /* CombineVisualizerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CombineVisualizerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,7 +43,6 @@
 		FAB657BA2A18CAD9005DEA44 /* CZSubscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubscription.swift; sourceTree = "<group>"; };
 		FAB657BC2A18CAF0005DEA44 /* CZSubject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CZSubject.swift; sourceTree = "<group>"; };
 		FAB657BF2A18CB40005DEA44 /* Combine+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Combine+Extension.swift"; sourceTree = "<group>"; };
-		FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombineVisualizerConfig.swift; path = ../../../../CombineVisualizerConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +64,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA420BDF2A508CAB007273D1 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				FA420BE02A508CC0007273D1 /* CombineVisualizerConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		FAB656FD2A03B349005DEA44 = {
 			isa = PBXGroup;
 			children = (
@@ -85,7 +93,7 @@
 		FAB657092A03B349005DEA44 /* CombineVisualizer */ = {
 			isa = PBXGroup;
 			children = (
-				FAB657C22A193950005DEA44 /* Config */,
+				FA420BDF2A508CAB007273D1 /* Config */,
 				FAB657C12A18CB86005DEA44 /* Network */,
 				FAB657BE2A18CB2D005DEA44 /* Combine+Extension */,
 				FAB657B52A18CA92005DEA44 /* CombineElement */,
@@ -128,14 +136,6 @@
 				FAB657B32A18BFEB005DEA44 /* Network.swift */,
 			);
 			path = Network;
-			sourceTree = "<group>";
-		};
-		FAB657C22A193950005DEA44 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				FAB657C32A193965005DEA44 /* CombineVisualizerConfig.swift */,
-			);
-			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,10 +249,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAB657B42A18BFEB005DEA44 /* Network.swift in Sources */,
-				FAB657C42A193965005DEA44 /* CombineVisualizerConfig.swift in Sources */,
 				FAB657BB2A18CAD9005DEA44 /* CZSubscription.swift in Sources */,
 				FAB657B92A18CAC4005DEA44 /* CZSubscriber.swift in Sources */,
 				FAB657B72A18CAA7005DEA44 /* CZPublisher.swift in Sources */,
+				FA420BE12A508CC0007273D1 /* CombineVisualizerConfig.swift in Sources */,
 				FAB657BD2A18CAF0005DEA44 /* CZSubject.swift in Sources */,
 				FAB657C02A18CB40005DEA44 /* Combine+Extension.swift in Sources */,
 				FAB657202A03B417005DEA44 /* CombineElement.swift in Sources */,

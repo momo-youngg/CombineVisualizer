@@ -12,14 +12,14 @@ public protocol CZPublisher : Publisher {
     associatedtype Inner
 
     var inner: Inner { get }
-    var uuid: UUID { get }
+    var trid: UUID { get }
     
-    init(inner: Inner, uuid: UUID)
+    init(inner: Inner, trid: UUID)
 }
 
 extension CZPublisher where Inner : Publisher {
     public func receive<S>(subscriber: S) where S : Subscriber, Inner.Failure == S.Failure, Inner.Output == S.Input {
-        let czSubscriber = CZSubscriber(subscriber, uuid: self.uuid)
+        let czSubscriber = CZSubscriber(subscriber, trid: trid)
         self.visualize(method: .receiveSubscriber(String(describing: subscriber).simpleTypeName))
         self.inner.receive(subscriber: czSubscriber)
     }
@@ -35,7 +35,7 @@ extension CZConnectablePublisher where Inner : ConnectablePublisher {
     }
     
     public func autoconnect() -> Publishers.CZAutoconnect<Inner> {
-        return Publishers.CZAutoconnect<Inner>(inner: self.inner.autoconnect(), uuid: self.uuid)
+        return Publishers.CZAutoconnect<Inner>(inner: self.inner.autoconnect(), trid: self.trid)
     }
 }
 
@@ -43,18 +43,18 @@ extension CZPublisher {
     func visualize(method: CombineElement.PublisherMethod) {
         CombineElement.publisher(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
-            uuid: self.uuid
+            trid: self.trid
         )
     }
 }
 
 extension Publisher {
     /// 현재 Publisher가 CZPublisher면 UUID 그대로 이어서, 아니라면 UUID 새로 받아서
-    func generateUUID() -> UUID {
+    func generateTrid() -> UUID {
         if let czPublisher = self as? any CZPublisher {
-            return czPublisher.uuid
+            return czPublisher.trid
         } else if let czSubject = self as? any CZSubject {
-            return czSubject.uuid
+            return czSubject.trid
         } else {
             return UUID()
         }

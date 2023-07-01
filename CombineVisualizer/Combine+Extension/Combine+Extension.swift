@@ -51,11 +51,11 @@ import Combine
     }
     
     public let inner: AnyPublisher<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: AnyPublisher<Output, Failure>, uuid: UUID) {
+    public init(inner: AnyPublisher<Output, Failure>, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -110,8 +110,8 @@ public class CZAnySubscriber<Input, Failure> : CZSubscriber<AnySubscriber<Input,
         self.inner.playgroundDescription
     }
     
-    public override init(_ inner: AnySubscriber<Input, Failure>, uuid: UUID) {
-        super.init(inner, uuid: uuid)
+    public override init(_ inner: AnySubscriber<Input, Failure>, trid: UUID) {
+        super.init(inner, trid: trid)
     }
 }
 
@@ -129,11 +129,11 @@ final public class CZCurrentValueSubject<Output, Failure> : CZSubject where Fail
     }
     
     public let inner: CurrentValueSubject<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: CurrentValueSubject<Output, Failure>, uuid: UUID) {
+    public init(inner: CurrentValueSubject<Output, Failure>, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -153,12 +153,12 @@ public struct CZDeferred<DeferredPublisher> : CZPublisher where DeferredPublishe
     public let createPublisher: () -> DeferredPublisher
     
     public let inner: Deferred<DeferredPublisher>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Deferred<DeferredPublisher>, uuid: UUID) {
+    public init(inner: Deferred<DeferredPublisher>, trid: UUID) {
         self.createPublisher = inner.createPublisher
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -174,12 +174,12 @@ public struct CZEmpty<Output, Failure> : CZPublisher, Equatable where Failure : 
     public let completeImmediately: Bool
     
     public let inner: Empty<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Empty<Output, Failure>, uuid: UUID) {
+    public init(inner: Empty<Output, Failure>, trid: UUID) {
         self.completeImmediately = inner.completeImmediately
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 
     /// Returns a Boolean value that indicates whether two publishers are equivalent.
@@ -200,12 +200,12 @@ public struct CZFail<Output, Failure> : CZPublisher where Failure : Error {
     public let error: Failure
     
     public let inner: Fail<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Fail<Output, Failure>, uuid: UUID) {
+    public init(inner: Fail<Output, Failure>, trid: UUID) {
         self.error = inner.error
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -278,11 +278,11 @@ final public class CZFuture<Output, Failure> : CZPublisher where Failure : Error
     public typealias Promise = (Result<Output, Failure>) -> Void
     
     public let inner: Future<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Future<Output, Failure>, uuid: UUID) {
+    public init(inner: Future<Output, Failure>, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -331,12 +331,12 @@ public struct CZJust<Output> : CZPublisher {
     public let output: Output
     
     public let inner: Just<Output>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Just<Output>, uuid: UUID) {
+    public init(inner: Just<Output>, trid: UUID) {
         self.output = inner.output
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -357,11 +357,11 @@ extension CZJust : Equatable where Output : Equatable {
 extension CZJust where Output : Comparable {
 
     public func min() -> CZJust<Output> {
-        return CZJust(inner: self.inner.min(), uuid: self.uuid)
+        return CZJust(inner: self.inner.min(), trid: self.trid)
     }
 
     public func max() -> CZJust<Output> {
-        return CZJust(inner: self.inner.max(), uuid: self.uuid)
+        return CZJust(inner: self.inner.max(), trid: self.trid)
     }
 }
 
@@ -369,11 +369,11 @@ extension CZJust where Output : Comparable {
 extension CZJust where Output : Equatable {
     
     public func contains(_ output: Output) -> CZJust<Bool> {
-        return CZJust<Bool>(inner: self.inner.contains(output), uuid: self.uuid)
+        return CZJust<Bool>(inner: self.inner.contains(output), trid: self.trid)
     }
     
     public func removeDuplicates() -> CZJust<Output> {
-        return CZJust(inner: self.inner.removeDuplicates(), uuid: self.uuid)
+        return CZJust(inner: self.inner.removeDuplicates(), trid: self.trid)
     }
 }
 
@@ -381,155 +381,155 @@ extension CZJust where Output : Equatable {
 extension CZJust {
 
     public func allSatisfy(_ predicate: (Output) -> Bool) -> CZJust<Bool> {
-        return CZJust<Bool>(inner: self.inner.allSatisfy(predicate), uuid: self.uuid)
+        return CZJust<Bool>(inner: self.inner.allSatisfy(predicate), trid: self.trid)
     }
 
     public func tryAllSatisfy(_ predicate: (Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
-        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryAllSatisfy(predicate), uuid: self.uuid)
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryAllSatisfy(predicate), trid: self.trid)
     }
 
     public func collect() -> CZJust<[Output]> {
-        return CZJust<[Output]>(inner: self.inner.collect(), uuid: self.uuid)
+        return CZJust<[Output]>(inner: self.inner.collect(), trid: self.trid)
     }
 
     public func compactMap<T>(_ transform: (Output) -> T?) -> Optional<T>.CZPublisher {
-        return Optional<T>.CZPublisher(inner: self.inner.compactMap(transform), uuid: self.uuid)
+        return Optional<T>.CZPublisher(inner: self.inner.compactMap(transform), trid: self.trid)
     }
 
     public func min(by areInIncreasingOrder: (Output, Output) -> Bool) -> CZJust<Output> {
-        return CZJust(inner: self.inner.min(by: areInIncreasingOrder), uuid: self.uuid)
+        return CZJust(inner: self.inner.min(by: areInIncreasingOrder), trid: self.trid)
     }
 
     public func max(by areInIncreasingOrder: (Output, Output) -> Bool) -> CZJust<Output> {
-        return CZJust(inner: self.inner.max(by: areInIncreasingOrder), uuid: self.uuid)
+        return CZJust(inner: self.inner.max(by: areInIncreasingOrder), trid: self.trid)
     }
 
     public func prepend(_ elements: Output...) -> Publishers.CZSequence<[Output], Just<Output>.Failure> {
-        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), trid: self.trid)
     }
 
     public func prepend<S>(_ elements: S) -> Publishers.CZSequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence {
-        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.prepend(elements), trid: self.trid)
     }
 
     public func append(_ elements: Output...) -> Publishers.CZSequence<[Output], Just<Output>.Failure> {
-        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), trid: self.trid)
     }
 
     public func append<S>(_ elements: S) -> Publishers.CZSequence<[Output], Just<Output>.Failure> where Output == S.Element, S : Sequence {
-        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+        return Publishers.CZSequence<[Output], Just<Output>.Failure>(inner: self.inner.append(elements), trid: self.trid)
     }
 
     public func contains(where predicate: (Output) -> Bool) -> CZJust<Bool> {
-        return CZJust<Bool>(inner: self.inner.contains(where: predicate), uuid: self.uuid)
+        return CZJust<Bool>(inner: self.inner.contains(where: predicate), trid: self.trid)
     }
 
     public func tryContains(where predicate: (Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
-        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryContains(where: predicate), uuid: self.uuid)
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryContains(where: predicate), trid: self.trid)
     }
 
     public func count() -> CZJust<Int> {
-        return CZJust<Int>(inner: self.inner.count(), uuid: self.uuid)
+        return CZJust<Int>(inner: self.inner.count(), trid: self.trid)
     }
 
     public func dropFirst(_ count: Int = 1) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.dropFirst(count), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.dropFirst(count), trid: self.trid)
     }
 
     public func drop(while predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.drop(while: predicate), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.drop(while: predicate), trid: self.trid)
     }
 
     public func first() -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.first(), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.first(), trid: self.trid)
     }
 
     public func first(where predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.first(where: predicate), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.first(where: predicate), trid: self.trid)
     }
 
     public func last() -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.last(), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.last(), trid: self.trid)
     }
 
     public func last(where predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.last(where: predicate), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.last(where: predicate), trid: self.trid)
     }
 
     public func filter(_ isIncluded: (Output) -> Bool) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.filter(isIncluded), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.filter(isIncluded), trid: self.trid)
     }
 
     public func ignoreOutput() -> CZEmpty<Output, Just<Output>.Failure> {
-        return CZEmpty<Output, Just<Output>.Failure>(inner: self.inner.ignoreOutput(), uuid: self.uuid)
+        return CZEmpty<Output, Just<Output>.Failure>(inner: self.inner.ignoreOutput(), trid: self.trid)
     }
 
     public func map<T>(_ transform: (Output) -> T) -> CZJust<T> {
-        return CZJust<T>(inner: self.inner.map(transform), uuid: self.uuid)
+        return CZJust<T>(inner: self.inner.map(transform), trid: self.trid)
     }
 
     public func tryMap<T>(_ transform: (Output) throws -> T) -> Result<T, Error>.CZPublisher {
-        return  Result<T, Error>.CZPublisher(inner: self.inner.tryMap(transform), uuid: self.uuid)
+        return  Result<T, Error>.CZPublisher(inner: self.inner.tryMap(transform), trid: self.trid)
     }
 
     public func mapError<E>(_ transform: (Just<Output>.Failure) -> E) -> Result<Output, E>.CZPublisher where E : Error {
-        return Result<Output, E>.CZPublisher(inner: self.inner.mapError(transform), uuid: self.uuid)
+        return Result<Output, E>.CZPublisher(inner: self.inner.mapError(transform), trid: self.trid)
     }
 
     public func output(at index: Int) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.output(at: index), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.output(at: index), trid: self.trid)
     }
 
     public func output<R>(in range: R) -> Optional<Output>.CZPublisher where R : RangeExpression, R.Bound == Int {
-        return Optional<Output>.CZPublisher(inner: self.inner.output(in: range), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.output(in: range), trid: self.trid)
     }
 
     public func prefix(_ maxLength: Int) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.prefix(maxLength), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.prefix(maxLength), trid: self.trid)
     }
 
     public func prefix(while predicate: (Output) -> Bool) -> Optional<Output>.CZPublisher {
-        return Optional<Output>.CZPublisher(inner: self.inner.prefix(while: predicate), uuid: self.uuid)
+        return Optional<Output>.CZPublisher(inner: self.inner.prefix(while: predicate), trid: self.trid)
     }
 
     public func reduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.CZPublisher {
-        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.reduce(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.reduce(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func tryReduce<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.CZPublisher {
-        return Result<T, Error>.CZPublisher(inner: self.inner.tryReduce(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Error>.CZPublisher(inner: self.inner.tryReduce(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func removeDuplicates(by predicate: (Output, Output) -> Bool) -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.removeDuplicates(by: predicate), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.removeDuplicates(by: predicate), trid: self.trid)
     }
 
     public func tryRemoveDuplicates(by predicate: (Output, Output) throws -> Bool) -> Result<Output, Error>.CZPublisher {
-        return Result<Output, Error>.CZPublisher(inner: self.inner.tryRemoveDuplicates(by: predicate), uuid: self.uuid)
+        return Result<Output, Error>.CZPublisher(inner: self.inner.tryRemoveDuplicates(by: predicate), trid: self.trid)
     }
 
     public func replaceError(with output: Output) -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.replaceError(with: output), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.replaceError(with: output), trid: self.trid)
     }
 
     public func replaceEmpty(with output: Output) -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.replaceEmpty(with: output), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.replaceEmpty(with: output), trid: self.trid)
     }
 
     public func retry(_ times: Int) -> CZJust<Output> {
-        return CZJust<Output>(inner: self.inner.retry(times), uuid: self.uuid)
+        return CZJust<Output>(inner: self.inner.retry(times), trid: self.trid)
     }
 
     public func scan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) -> T) -> Result<T, Just<Output>.Failure>.CZPublisher {
-        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.scan(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Just<Output>.Failure>.CZPublisher(inner: self.inner.scan(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func tryScan<T>(_ initialResult: T, _ nextPartialResult: (T, Output) throws -> T) -> Result<T, Error>.CZPublisher {
-        return Result<T, Error>.CZPublisher(inner: self.inner.tryScan(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Error>.CZPublisher(inner: self.inner.tryScan(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func setFailureType<E>(to failureType: E.Type) -> Result<Output, E>.CZPublisher where E : Error {
-        return Result<Output, E>.CZPublisher(inner: self.inner.setFailureType(to: failureType), uuid: self.uuid)
+        return Result<Output, E>.CZPublisher(inner: self.inner.setFailureType(to: failureType), trid: self.trid)
     }
 }
 
@@ -538,7 +538,7 @@ extension ObservableObject where Self.ObjectWillChangePublisher == ObservableObj
 
     /// A publisher that emits before the object has changed.
     public var czObjectWillChange: CZObservableObjectPublisher {
-        return CZObservableObjectPublisher(inner: self.objectWillChange, uuid: UUID())
+        return CZObservableObjectPublisher(inner: self.objectWillChange, trid: UUID())
     }
 }
 
@@ -555,11 +555,11 @@ final public class CZObservableObjectPublisher : CZPublisher {
     public typealias Failure = Never
     
     public let inner: ObservableObjectPublisher
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: ObservableObjectPublisher, uuid: UUID) {
+    public init(inner: ObservableObjectPublisher, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 
     /// Sends the changed value to the downstream subscriber.
@@ -578,11 +578,11 @@ final public class CZObservableObjectPublisher : CZPublisher {
 final public class CZPassthroughSubject<Output, Failure> : CZSubject where Failure : Error {
 
     public let inner: PassthroughSubject<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: PassthroughSubject<Output, Failure>, uuid: UUID) {
+    public init(inner: PassthroughSubject<Output, Failure>, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -624,7 +624,7 @@ extension Publisher {
     ///
     /// - Parameter createSubject: A closure to create a new ``Subject`` each time a subscriber attaches to the multicast publisher.
     public func czMulticast<S>(_ createSubject: @escaping () -> S) -> Publishers.CZMulticast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output {
-        return Publishers.CZMulticast(inner: self.multicast(createSubject), uuid: self.generateUUID())
+        return Publishers.CZMulticast(inner: self.multicast(createSubject), trid: self.generateTrid())
     }
 
     /// Provides a subject to deliver elements to multiple subscribers.
@@ -662,7 +662,7 @@ extension Publisher {
     ///
     /// - Parameter subject: A subject to deliver elements to downstream subscribers.
     public func czMulticast<S>(subject: S) -> Publishers.CZMulticast<Self, S> where S : Subject, Self.Failure == S.Failure, Self.Output == S.Output {
-        return Publishers.CZMulticast(inner: self.multicast(subject: subject), uuid: self.generateUUID())
+        return Publishers.CZMulticast(inner: self.multicast(subject: subject), trid: self.generateTrid())
     }
 }
 
@@ -691,7 +691,7 @@ extension Publisher {
     ///   - options: Options that customize the delivery of elements.
     /// - Returns: A publisher which performs upstream operations on the specified scheduler.
     public func czSubscribe<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZSubscribeOn<Self, S> where S : Scheduler {
-        return Publishers.CZSubscribeOn(inner: self.subscribe(on: scheduler, options: options), uuid: self.generateUUID())
+        return Publishers.CZSubscribeOn(inner: self.subscribe(on: scheduler, options: options), trid: self.generateTrid())
     }
 }
 
@@ -722,7 +722,7 @@ extension Publisher {
     ///   - options: Options that customize the delivery of elements.
     /// - Returns: A publisher that emits elements representing the time interval between the elements it receives.
     public func czMeasureInterval<S>(using scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZMeasureInterval<Self, S> where S : Scheduler {
-        return Publishers.CZMeasureInterval(inner: self.measureInterval(using: scheduler, options: options), uuid: self.generateUUID())
+        return Publishers.CZMeasureInterval(inner: self.measureInterval(using: scheduler, options: options), trid: self.generateTrid())
     }
 }
 
@@ -746,7 +746,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value indicating whether to drop the element from the publisher’s output.
     /// - Returns: A publisher that skips over elements until the provided closure returns `false`.
     public func czDrop(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZDropWhile<Self> {
-        return Publishers.CZDropWhile(inner: self.drop(while: predicate), uuid: self.generateUUID())
+        return Publishers.CZDropWhile(inner: self.drop(while: predicate), trid: self.generateTrid())
     }
 
     /// Omits elements from the upstream publisher until an error-throwing closure returns false, before republishing all remaining elements.
@@ -774,7 +774,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value indicating whether to drop the element from the publisher’s output.
     /// - Returns: A publisher that skips over elements until the provided closure returns `false`, and then republishes all remaining elements. If the predicate closure throws, the publisher fails with an error.
     public func czTryDrop(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryDropWhile<Self> {
-        return Publishers.CZTryDropWhile(inner: self.tryDrop(while: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryDropWhile(inner: self.tryDrop(while: predicate), trid: self.generateTrid())
     }
 }
 
@@ -797,7 +797,7 @@ extension Publisher {
     /// - Parameter isIncluded: A closure that takes one element and returns a Boolean value indicating whether to republish the element.
     /// - Returns: A publisher that republishes all elements that satisfy the closure.
     public func czFilter(_ isIncluded: @escaping (Self.Output) -> Bool) -> Publishers.CZFilter<Self> {
-        return Publishers.CZFilter(inner: self.filter(isIncluded), uuid: self.generateUUID())
+        return Publishers.CZFilter(inner: self.filter(isIncluded), trid: self.generateTrid())
     }
 
     /// Republishes all elements that match a provided error-throwing closure.
@@ -827,7 +827,7 @@ extension Publisher {
     /// - Parameter isIncluded: A closure that takes one element and returns a Boolean value that indicated whether to republish the element or throws an error.
     /// - Returns: A publisher that republishes all elements that satisfy the closure.
     public func czTryFilter(_ isIncluded: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryFilter<Self> {
-        return Publishers.CZTryFilter(inner: self.tryFilter(isIncluded), uuid: self.generateUUID())
+        return Publishers.CZTryFilter(inner: self.tryFilter(isIncluded), trid: self.generateTrid())
     }
 }
 
@@ -859,7 +859,7 @@ extension Publisher {
     ///   - receiveCompletion: A closure that executes when the publisher receives a completion. Return `true` from this closure to raise `SIGTRAP`, or false to continue.
     /// - Returns: A publisher that raises a debugger signal when one of the provided closures returns `true`.
     public func czBreakpoint(receiveSubscription: ((Subscription) -> Bool)? = nil, receiveOutput: ((Self.Output) -> Bool)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Bool)? = nil) -> Publishers.CZBreakpoint<Self> {
-        return Publishers.CZBreakpoint(inner: self.breakpoint(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion), uuid: self.generateUUID())
+        return Publishers.CZBreakpoint(inner: self.breakpoint(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion), trid: self.generateTrid())
     }
 
     /// Raises a debugger signal upon receiving a failure.
@@ -888,7 +888,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that raises a debugger signal upon receiving a failure.
     public func czBreakpointOnError() -> Publishers.CZBreakpoint<Self> {
-        return Publishers.CZBreakpoint(inner: self.breakpointOnError(), uuid: self.generateUUID())
+        return Publishers.CZBreakpoint(inner: self.breakpointOnError(), trid: self.generateTrid())
     }
 }
 
@@ -916,7 +916,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that evaluates each received element. Return `true` to continue, or `false` to cancel the upstream and complete.
     /// - Returns: A publisher that publishes a Boolean value that indicates whether all received elements pass a given predicate.
     public func czAllSatisfy(_ predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZAllSatisfy<Self> {
-        return Publishers.CZAllSatisfy(inner: self.allSatisfy(predicate), uuid: self.generateUUID())
+        return Publishers.CZAllSatisfy(inner: self.allSatisfy(predicate), trid: self.generateTrid())
     }
 
     /// Publishes a single Boolean value that indicates whether all received elements pass a given error-throwing predicate.
@@ -947,7 +947,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that evaluates each received element. Return `true` to continue, or `false` to cancel the upstream and complete. The closure may throw an error, in which case the publisher cancels the upstream publisher and fails with the thrown error.
     /// - Returns: A publisher that publishes a Boolean value that indicates whether all received elements pass a given predicate.
     public func czTryAllSatisfy(_ predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryAllSatisfy<Self> {
-        return Publishers.CZTryAllSatisfy(inner: self.tryAllSatisfy(predicate), uuid: self.generateUUID())
+        return Publishers.CZTryAllSatisfy(inner: self.tryAllSatisfy(predicate), trid: self.generateTrid())
     }
 }
 
@@ -969,7 +969,7 @@ extension Publisher where Self.Output : Equatable {
     ///
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
     public func czRemoveDuplicates() -> Publishers.CZRemoveDuplicates<Self> {
-        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(), uuid: self.generateUUID())
+        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(), trid: self.generateTrid())
     }
 }
 
@@ -1004,7 +1004,7 @@ extension Publisher {
     /// - Parameter predicate: A closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first.
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
     public func czRemoveDuplicates(by predicate: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZRemoveDuplicates<Self> {
-        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(by: predicate), uuid: self.generateUUID())
+        return Publishers.CZRemoveDuplicates(inner: self.removeDuplicates(by: predicate), trid: self.generateTrid())
     }
 
     /// Publishes only elements that don’t match the previous element, as evaluated by a provided error-throwing closure.
@@ -1033,7 +1033,7 @@ extension Publisher {
     /// - Parameter predicate: A closure to evaluate whether two elements are equivalent, for purposes of filtering. Return `true` from this closure to indicate that the second element is a duplicate of the first. If this closure throws an error, the publisher terminates with the thrown error.
     /// - Returns: A publisher that consumes — rather than publishes — duplicate elements.
     public func czTryRemoveDuplicates(by predicate: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryRemoveDuplicates<Self> {
-        return Publishers.CZTryRemoveDuplicates(inner: self.tryRemoveDuplicates(by: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryRemoveDuplicates(inner: self.tryRemoveDuplicates(by: predicate), trid: self.generateTrid())
     }
 }
 
@@ -1067,7 +1067,7 @@ extension Publisher {
     ///   - decoder:  A decoder that implements the ``TopLevelDecoder`` protocol.
     /// - Returns: A publisher that decodes a given type using a specified decoder and publishes the result.
     public func czDecode<Item, Coder>(type: Item.Type, decoder: Coder) -> Publishers.CZDecode<Self, Item, Coder> where Item : Decodable, Coder : TopLevelDecoder, Self.Output == Coder.Input {
-        return Publishers.CZDecode(inner: self.decode(type: type, decoder: decoder), uuid: self.generateUUID())
+        return Publishers.CZDecode(inner: self.decode(type: type, decoder: decoder), trid: self.generateTrid())
     }
 }
 
@@ -1102,7 +1102,7 @@ extension Publisher where Self.Output : Encodable {
     /// - Parameter encoder: An encoder that implements the ``TopLevelEncoder`` protocol.
     /// - Returns: A publisher that encodes received elements using a specified encoder, and publishes the resulting data.
     public func czEncode<Coder>(encoder: Coder) -> Publishers.CZEncode<Self, Coder> where Coder : TopLevelEncoder {
-        return Publishers.CZEncode(inner: self.encode(encoder: encoder), uuid: self.generateUUID())
+        return Publishers.CZEncode(inner: self.encode(encoder: encoder), trid: self.generateTrid())
     }
 }
 
@@ -1125,7 +1125,7 @@ extension Publisher where Self.Output : Equatable {
     /// - Parameter output: An element to match against.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream publisher emits a matching value.
     public func czContains(_ output: Self.Output) -> Publishers.CZContains<Self> {
-        return Publishers.CZContains(inner: self.contains(output), uuid: self.generateUUID())
+        return Publishers.CZContains(inner: self.contains(output), trid: self.generateTrid())
     }
 }
 
@@ -1167,7 +1167,7 @@ extension Publisher {
     /// - Parameter other: Another publisher to combine with this one.
     /// - Returns: A publisher that receives and combines elements from this and another publisher.
     public func czCombineLatest<P>(_ other: P) -> Publishers.CZCombineLatest<Self, P> where P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZCombineLatest(inner: self.combineLatest(other), uuid: self.generateUUID())
+        return Publishers.CZCombineLatest(inner: self.combineLatest(other), trid: self.generateTrid())
     }
 
     ///     cancellable = pub1
@@ -1199,7 +1199,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this and another publisher.
     public func czCombineLatest<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest<Self, P>, T> where P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZMap(inner: self.combineLatest(other, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.combineLatest(other, transform), trid: self.generateTrid())
     }
 
     /// Subscribes to two additional publishers and publishes a tuple upon receiving output from any of the publishers.
@@ -1245,7 +1245,7 @@ extension Publisher {
     ///   - publisher2: A third publisher to combine with the first publisher.
     /// - Returns: A publisher that receives and combines elements from this publisher and two other publishers.
     public func czCombineLatest<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.CZCombineLatest3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
-        return Publishers.CZCombineLatest3(inner: self.combineLatest(publisher1, publisher2), uuid: self.generateUUID())
+        return Publishers.CZCombineLatest3(inner: self.combineLatest(publisher1, publisher2), trid: self.generateTrid())
     }
 
     /// Subscribes to two additional publishers and invokes a closure upon receiving output from any of the publishers.
@@ -1291,7 +1291,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this publisher and two other publishers.
     public func czCombineLatest<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
-        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, transform), trid: self.generateTrid())
     }
 
     /// Subscribes to three additional publishers and publishes a tuple upon receiving output from any of the publishers.
@@ -1341,7 +1341,7 @@ extension Publisher {
     ///   - publisher3: A fourth publisher to combine with the first publisher.
     /// - Returns: A publisher that receives and combines elements from this publisher and three other publishers.
     public func czCombineLatest<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.CZCombineLatest4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
-        return Publishers.CZCombineLatest4(inner: self.combineLatest(publisher1, publisher2, publisher3), uuid: self.generateUUID())
+        return Publishers.CZCombineLatest4(inner: self.combineLatest(publisher1, publisher2, publisher3), trid: self.generateTrid())
     }
 
     /// Subscribes to three additional publishers and invokes a closure upon receiving output from any of the publishers.
@@ -1392,7 +1392,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that receives and combines elements from this publisher and three other publishers.
     public func czCombineLatest<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.CZMap<Publishers.CombineLatest4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
-        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, publisher3, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.combineLatest(publisher1, publisher2, publisher3, transform), trid: self.generateTrid())
     }
 }
 
@@ -1415,7 +1415,7 @@ extension Publisher {
     /// - Parameter maxLength: The maximum number of elements to republish.
     /// - Returns: A publisher that publishes up to the specified number of elements.
     public func czPrefix(_ maxLength: Int) -> Publishers.CZOutput<Self> {
-        return Publishers.CZOutput(inner: self.prefix(maxLength), uuid: self.generateUUID())
+        return Publishers.CZOutput(inner: self.prefix(maxLength), trid: self.generateTrid())
     }
 }
 
@@ -1444,7 +1444,7 @@ extension Publisher {
     ///   - stream: A stream for text output that receives messages, and which directs output to the console by default.  A custom stream can be used to log messages to other destinations.
     /// - Returns: A publisher that prints log messages for all publishing events.
     public func czPrint(_ prefix: String = "", to stream: TextOutputStream? = nil) -> Publishers.CZPrint<Self> {
-        return Publishers.CZPrint(inner: self.print(prefix, to: stream), uuid: self.generateUUID())
+        return Publishers.CZPrint(inner: self.print(prefix, to: stream), trid: self.generateTrid())
     }
 }
 
@@ -1467,7 +1467,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether publishing should continue.
     /// - Returns: A publisher that passes through elements until the predicate indicates publishing should finish.
     public func czPrefix(while predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZPrefixWhile<Self> {
-        return Publishers.CZPrefixWhile(inner: self.prefix(while: predicate), uuid: self.generateUUID())
+        return Publishers.CZPrefixWhile(inner: self.prefix(while: predicate), trid: self.generateTrid())
     }
 
     /// Republishes elements while an error-throwing predicate closure indicates publishing should continue.
@@ -1493,7 +1493,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value indicating whether publishing should continue.
     /// - Returns: A publisher that passes through elements until the predicate throws or indicates publishing should finish.
     public func czTryPrefix(while predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryPrefixWhile<Self> {
-        return Publishers.CZTryPrefixWhile(inner: self.tryPrefix(while: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryPrefixWhile(inner: self.tryPrefix(while: predicate), trid: self.generateTrid())
     }
 }
 
@@ -1523,7 +1523,7 @@ extension Publisher where Self.Failure == Never {
     /// - Parameter failureType: The `Failure` type presented by this publisher.
     /// - Returns: A publisher that appears to send the specified failure type.
     public func czSetFailureType<E>(to failureType: E.Type) -> Publishers.CZSetFailureType<Self, E> where E : Error {
-        return Publishers.CZSetFailureType(inner: self.setFailureType(to: failureType), uuid: self.generateUUID())
+        return Publishers.CZSetFailureType(inner: self.setFailureType(to: failureType), trid: self.generateTrid())
     }
 }
 
@@ -1548,7 +1548,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether the element satisfies the closure’s comparison logic.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream  publisher emits a matching value.
     public func czContains(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZContainsWhere<Self> {
-        return Publishers.CZContainsWhere(inner: self.contains(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZContainsWhere(inner: self.contains(where: predicate), trid: self.generateTrid())
     }
 
     /// Publishes a Boolean value upon receiving an element that satisfies the throwing predicate closure.
@@ -1584,7 +1584,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether the element satisfies the closure’s comparison logic.
     /// - Returns: A publisher that emits the Boolean value `true` when the upstream publisher emits a matching value.
     public func czTryContains(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryContainsWhere<Self> {
-        return Publishers.CZTryContainsWhere(inner: self.tryContains(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryContainsWhere(inner: self.tryContains(where: predicate), trid: self.generateTrid())
     }
 }
 
@@ -1617,7 +1617,7 @@ extension Publisher where Self.Failure == Never {
     ///
     /// - Returns: A ``ConnectablePublisher`` wrapping this publisher.
     public func czMakeConnectable() -> Publishers.CZMakeConnectable<Self> {
-        return Publishers.CZMakeConnectable(inner: self.makeConnectable(), uuid: self.generateUUID())
+        return Publishers.CZMakeConnectable(inner: self.makeConnectable(), trid: self.generateTrid())
     }
 }
 
@@ -1645,7 +1645,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that collects all received items and returns them as an array upon completion.
     public func czCollect() -> Publishers.CZCollect<Self> {
-        return Publishers.CZCollect(inner: self.collect(), uuid: self.generateUUID())
+        return Publishers.CZCollect(inner: self.collect(), trid: self.generateTrid())
     }
 
     /// Collects up to the specified number of elements, and then emits a single array of the collection.
@@ -1668,7 +1668,7 @@ extension Publisher {
     /// - Parameter count: The maximum number of received elements to buffer before publishing.
     /// - Returns: A publisher that collects up to the specified number of elements, and then publishes them as an array.
     public func czCollect(_ count: Int) -> Publishers.CZCollectByCount<Self> {
-        return Publishers.CZCollectByCount(inner: self.collect(count), uuid: self.generateUUID())
+        return Publishers.CZCollectByCount(inner: self.collect(count), trid: self.generateTrid())
     }
 
     /// Collects elements by a given time-grouping strategy, and emits a single array of the collection.
@@ -1695,7 +1695,7 @@ extension Publisher {
     ///   - options: Scheduler options to use for the strategy.
     /// - Returns: A publisher that collects elements by a given strategy, and emits a single array of the collection.
     public func czCollect<S>(_ strategy: Publishers.TimeGroupingStrategy<S>, options: S.SchedulerOptions? = nil) -> Publishers.CZCollectByTime<Self, S> where S : Scheduler {
-        return Publishers.CZCollectByTime(inner: self.collect(strategy, options: options), uuid: self.generateUUID())
+        return Publishers.CZCollectByTime(inner: self.collect(strategy, options: options), trid: self.generateTrid())
     }
 }
 
@@ -1739,7 +1739,7 @@ extension Publisher {
     ///   - options: Scheduler options used to customize element delivery.
     /// - Returns: A publisher that delivers elements using the specified scheduler.
     public func czReceive<S>(on scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZReceiveOn<Self, S> where S : Scheduler {
-        return Publishers.CZReceiveOn(inner: self.receive(on: scheduler, options: options), uuid: self.generateUUID())
+        return Publishers.CZReceiveOn(inner: self.receive(on: scheduler, options: options), trid: self.generateTrid())
     }
 }
 
@@ -1766,7 +1766,7 @@ extension Publisher {
     /// - Parameter keyPath: The key path of a property on `Output`.
     /// - Returns: A publisher that publishes the value of the key path.
     public func czMap<T>(_ keyPath: KeyPath<Self.Output, T>) -> Publishers.CZMapKeyPath<Self, T> {
-        return Publishers.CZMapKeyPath(inner: self.map(keyPath), uuid: self.generateUUID())
+        return Publishers.CZMapKeyPath(inner: self.map(keyPath), trid: self.generateTrid())
     }
 
     /// Publishes the values of two key paths as a tuple.
@@ -1793,7 +1793,7 @@ extension Publisher {
     ///   - keyPath1: The key path of another property on `Output`.
     /// - Returns: A publisher that publishes the values of two key paths as a tuple.
     public func czMap<T0, T1>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>) -> Publishers.CZMapKeyPath2<Self, T0, T1> {
-        return Publishers.CZMapKeyPath2(inner: self.map(keyPath0, keyPath1), uuid: self.generateUUID())
+        return Publishers.CZMapKeyPath2(inner: self.map(keyPath0, keyPath1), trid: self.generateTrid())
     }
 
     /// Publishes the values of three key paths as a tuple.
@@ -1823,7 +1823,7 @@ extension Publisher {
     ///   - keyPath2: The key path of a third property on `Output`.
     /// - Returns: A publisher that publishes the values of three key paths as a tuple.
     public func czMap<T0, T1, T2>(_ keyPath0: KeyPath<Self.Output, T0>, _ keyPath1: KeyPath<Self.Output, T1>, _ keyPath2: KeyPath<Self.Output, T2>) -> Publishers.CZMapKeyPath3<Self, T0, T1, T2> {
-        return Publishers.CZMapKeyPath3(inner: self.map(keyPath0, keyPath1, keyPath2), uuid: self.generateUUID())
+        return Publishers.CZMapKeyPath3(inner: self.map(keyPath0, keyPath1, keyPath2), trid: self.generateTrid())
     }
 }
 
@@ -1837,7 +1837,7 @@ extension Publisher {
     /// - Parameter publisher: A second publisher.
     /// - Returns: A publisher that republishes elements until the second publisher publishes an element.
     public func czPrefix<P>(untilOutputFrom publisher: P) -> Publishers.CZPrefixUntilOutput<Self, P> where P : Publisher {
-        return Publishers.CZPrefixUntilOutput(inner: self.prefix(untilOutputFrom: publisher), uuid: self.generateUUID())
+        return Publishers.CZPrefixUntilOutput(inner: self.prefix(untilOutputFrom: publisher), trid: self.generateTrid())
     }
 }
 
@@ -1862,7 +1862,7 @@ extension Publisher {
     ///   - nextPartialResult: A closure that produces a new value by taking the previously-accumulated value and the next element it receives from the upstream publisher.
     /// - Returns: A publisher that applies the closure to all received elements and produces an accumulated value when the upstream publisher finishes. If ``Publisher/reduce(_:_:)`` receives an error from the upstream publisher, the operator delivers it to the downstream subscriber, the publisher terminates and publishes no value.
     public func czReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.CZReduce<Self, T> {
-        return Publishers.CZReduce(inner: self.reduce(initialResult, nextPartialResult), uuid: self.generateUUID())
+        return Publishers.CZReduce(inner: self.reduce(initialResult, nextPartialResult), trid: self.generateTrid())
     }
 
     /// Applies an error-throwing closure that collects each element of a stream and publishes a final result upon completion.
@@ -1890,7 +1890,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that applies the closure to all received elements and produces an accumulated value when the upstream publisher finishes.
     public func czTryReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.CZTryReduce<Self, T> {
-        return Publishers.CZTryReduce(inner: self.tryReduce(initialResult, nextPartialResult), uuid: self.generateUUID())
+        return Publishers.CZTryReduce(inner: self.tryReduce(initialResult, nextPartialResult), trid: self.generateTrid())
     }
 }
 
@@ -1916,7 +1916,7 @@ extension Publisher {
     /// - Parameter transform: A closure that receives a value and returns an optional value.
     /// - Returns: Any non-`nil` optional results of the calling the supplied closure.
     public func czCompactMap<T>(_ transform: @escaping (Self.Output) -> T?) -> Publishers.CZCompactMap<Self, T> {
-        return Publishers.CZCompactMap(inner: self.compactMap(transform), uuid: self.generateUUID())
+        return Publishers.CZCompactMap(inner: self.compactMap(transform), trid: self.generateTrid())
     }
 
     /// Calls an error-throwing closure with each received element and publishes any returned optional that has a value.
@@ -1949,7 +1949,7 @@ extension Publisher {
     /// - Parameter transform: An error-throwing closure that receives a value and returns an optional value.
     /// - Returns: Any non-`nil` optional results of calling the supplied closure.
     public func czTryCompactMap<T>(_ transform: @escaping (Self.Output) throws -> T?) -> Publishers.CZTryCompactMap<Self, T> {
-        return Publishers.CZTryCompactMap(inner: self.tryCompactMap(transform), uuid: self.generateUUID())
+        return Publishers.CZTryCompactMap(inner: self.tryCompactMap(transform), trid: self.generateTrid())
     }
 }
 
@@ -1986,7 +1986,7 @@ extension Publisher {
     /// - Parameter other: Another publisher.
     /// - Returns: A publisher that emits an event when either upstream publisher emits an event.
     public func czMerge<P>(with other: P) -> Publishers.CZMerge<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
-        return Publishers.CZMerge(inner: self.merge(with: other), uuid: self.generateUUID())
+        return Publishers.CZMerge(inner: self.merge(with: other), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from two other publishers, delivering an interleaved sequence of elements.
@@ -2021,7 +2021,7 @@ extension Publisher {
     ///   - c: A third publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C>(with b: B, _ c: C) -> Publishers.CZMerge3<Self, B, C> where B : Publisher, C : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output {
-        return Publishers.CZMerge3(inner: self.merge(with: b, c), uuid: self.generateUUID())
+        return Publishers.CZMerge3(inner: self.merge(with: b, c), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from three other publishers, delivering an interleaved sequence of elements.
@@ -2060,7 +2060,7 @@ extension Publisher {
     ///   - d: A fourth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C, D>(with b: B, _ c: C, _ d: D) -> Publishers.CZMerge4<Self, B, C, D> where B : Publisher, C : Publisher, D : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output {
-        return Publishers.CZMerge4(inner: self.merge(with: b, c, d), uuid: self.generateUUID())
+        return Publishers.CZMerge4(inner: self.merge(with: b, c, d), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from four other publishers, delivering an interleaved sequence of elements.
@@ -2104,7 +2104,7 @@ extension Publisher {
     ///   - e: A fifth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C, D, E>(with b: B, _ c: C, _ d: D, _ e: E) -> Publishers.CZMerge5<Self, B, C, D, E> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output {
-        Publishers.CZMerge5(inner: self.merge(with: b, c, d, e), uuid: self.generateUUID())
+        Publishers.CZMerge5(inner: self.merge(with: b, c, d, e), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from five other publishers, delivering an interleaved sequence of elements.
@@ -2152,7 +2152,7 @@ extension Publisher {
     ///   - f: A sixth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C, D, E, F>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F) -> Publishers.CZMerge6<Self, B, C, D, E, F> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output {
-        return Publishers.CZMerge6(inner: self.merge(with: b, c, d, e, f), uuid: self.generateUUID())
+        return Publishers.CZMerge6(inner: self.merge(with: b, c, d, e, f), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from six other publishers, delivering an interleaved sequence of elements.
@@ -2205,7 +2205,7 @@ extension Publisher {
     ///   - g: A seventh publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C, D, E, F, G>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G) -> Publishers.CZMerge7<Self, B, C, D, E, F, G> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output {
-        Publishers.CZMerge7(inner: self.merge(with: b, c, d, e, f, g), uuid: self.generateUUID())
+        Publishers.CZMerge7(inner: self.merge(with: b, c, d, e, f, g), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from seven other publishers, delivering an interleaved sequence of elements.
@@ -2261,7 +2261,7 @@ extension Publisher {
     ///   - h: An eighth publisher.
     /// - Returns: A publisher that emits an event when any upstream publisher emits an event.
     public func czMerge<B, C, D, E, F, G, H>(with b: B, _ c: C, _ d: D, _ e: E, _ f: F, _ g: G, _ h: H) -> Publishers.CZMerge8<Self, B, C, D, E, F, G, H> where B : Publisher, C : Publisher, D : Publisher, E : Publisher, F : Publisher, G : Publisher, H : Publisher, Self.Failure == B.Failure, Self.Output == B.Output, B.Failure == C.Failure, B.Output == C.Output, C.Failure == D.Failure, C.Output == D.Output, D.Failure == E.Failure, D.Output == E.Output, E.Failure == F.Failure, E.Output == F.Output, F.Failure == G.Failure, F.Output == G.Output, G.Failure == H.Failure, G.Output == H.Output {
-        Publishers.CZMerge8(inner: self.merge(with: b, c, d, e, f, g, h), uuid: self.generateUUID())
+        Publishers.CZMerge8(inner: self.merge(with: b, c, d, e, f, g, h), trid: self.generateTrid())
     }
 
     /// Combines elements from this publisher with those from another publisher of the same type, delivering an interleaved sequence of elements.
@@ -2269,7 +2269,7 @@ extension Publisher {
     /// - Parameter other: Another publisher of this publisher’s type.
     /// - Returns: A publisher that emits an event when either upstream publisher emits an event.
     public func czMerge(with other: Self) -> Publishers.CZMergeMany<Self> {
-        return Publishers.CZMergeMany(inner: self.merge(with: other), uuid: self.generateUUID())
+        return Publishers.CZMergeMany(inner: self.merge(with: other), trid: self.generateTrid())
     }
 }
 
@@ -2296,7 +2296,7 @@ extension Publisher {
     ///   - nextPartialResult: A closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
     /// - Returns: A publisher that transforms elements by applying a closure that receives its previous return value and the next element from the upstream publisher.
     public func czScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) -> T) -> Publishers.CZScan<Self, T> {
-        return Publishers.CZScan(inner: self.scan(initialResult, nextPartialResult), uuid: self.generateUUID())
+        return Publishers.CZScan(inner: self.scan(initialResult, nextPartialResult), trid: self.generateTrid())
     }
 
     /// Transforms elements from the upstream publisher by providing the current element to an error-throwing closure along with the last value returned by the closure.
@@ -2331,7 +2331,7 @@ extension Publisher {
     ///   - nextPartialResult: An error-throwing closure that takes as its arguments the previous value returned by the closure and the next element emitted from the upstream publisher.
     /// - Returns: A publisher that transforms elements by applying a closure that receives its previous return value and the next element from the upstream publisher.
     public func czTryScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Self.Output) throws -> T) -> Publishers.CZTryScan<Self, T> {
-        return Publishers.CZTryScan(inner: self.tryScan(initialResult, nextPartialResult), uuid: self.generateUUID())
+        return Publishers.CZTryScan(inner: self.tryScan(initialResult, nextPartialResult), trid: self.generateTrid())
     }
 }
 
@@ -2351,7 +2351,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that consumes all elements until the upstream publisher finishes, then emits a single value with the total number of elements received.
     public func czCount() -> Publishers.CZCount<Self> {
-        return Publishers.CZCount(inner: self.count(), uuid: self.generateUUID())
+        return Publishers.CZCount(inner: self.count(), trid: self.generateTrid())
     }
 }
 
@@ -2374,7 +2374,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the last element satisfying the given predicate.
     public func czLast(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZLastWhere<Self> {
-        return Publishers.CZLastWhere(inner: self.last(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZLastWhere(inner: self.last(where: predicate), trid: self.generateTrid())
     }
 
     /// Publishes the last element of a stream that satisfies an error-throwing predicate closure, after the stream finishes.
@@ -2401,7 +2401,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as its parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the last element satisfying the given predicate.
     public func czTryLast(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryLastWhere<Self> {
-        return Publishers.CZTryLastWhere(inner: self.tryLast(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryLastWhere(inner: self.tryLast(where: predicate), trid: self.generateTrid())
     }
 }
 
@@ -2431,7 +2431,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that ignores all upstream elements.
     public func czIgnoreOutput() -> Publishers.CZIgnoreOutput<Self> {
-        return Publishers.CZIgnoreOutput(inner: self.ignoreOutput(), uuid: self.generateUUID())
+        return Publishers.CZIgnoreOutput(inner: self.ignoreOutput(), trid: self.generateTrid())
     }
 }
 
@@ -2472,7 +2472,7 @@ extension Publisher where Self.Failure == Self.Output.Failure, Self.Output : Pub
     ///
     /// The exact behavior of this example depends on the value of `asyncAfter` and the speed of the network connection. If the delay value is longer, or the network connection is fast, the earlier data tasks may complete before `switchToLatest()` can cancel them. If this happens, the output includes multiple URLs whose tasks complete before cancellation.
     public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Self> {
-        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), trid: self.generateTrid())
     }
 }
 
@@ -2485,7 +2485,7 @@ extension Publisher where Self.Failure == Never, Self.Output : Publisher {
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
     public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Publishers.SetFailureType<Self, Self.Output.Failure>> {
-        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), trid: self.generateTrid())
     }
 }
 
@@ -2498,7 +2498,7 @@ extension Publisher where Self.Failure == Never, Self.Output : Publisher, Self.O
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
     public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Self.Output, Self> {
-        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), trid: self.generateTrid())
     }
 }
 
@@ -2511,7 +2511,7 @@ extension Publisher where Self.Output : Publisher, Self.Output.Failure == Never 
     ///
     /// When this operator receives a new publisher from the upstream publisher, it cancels its previous subscription. Use this feature to prevent earlier publishers from performing unnecessary work, such as creating network request publishers from frequently updating user interface publishers.
     public func czSwitchToLatest() -> Publishers.CZSwitchToLatest<Publishers.SetFailureType<Self.Output, Self.Failure>, Publishers.Map<Self, Publishers.SetFailureType<Self.Output, Self.Failure>>> {
-        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), uuid: self.generateUUID())
+        return Publishers.CZSwitchToLatest(inner: self.switchToLatest(), trid: self.generateTrid())
     }
 }
 
@@ -2549,7 +2549,7 @@ extension Publisher {
     /// - Parameter retries: The number of times to attempt to recreate the subscription.
     /// - Returns: A publisher that attempts to recreate its subscription to a failed upstream publisher.
     public func czRetry(_ retries: Int) -> Publishers.CZRetry<Self> {
-        return Publishers.CZRetry(inner: self.retry(retries), uuid: self.generateUUID())
+        return Publishers.CZRetry(inner: self.retry(retries), trid: self.generateTrid())
     }
 }
 
@@ -2585,7 +2585,7 @@ extension Publisher {
     /// - Parameter transform: A closure that takes the upstream failure as a parameter and returns a new error for the publisher to terminate with.
     /// - Returns: A publisher that replaces any upstream failure with a new error produced by the `transform` closure.
     public func czMapError<E>(_ transform: @escaping (Self.Failure) -> E) -> Publishers.CZMapError<Self, E> where E : Error {
-        return Publishers.CZMapError(inner: self.mapError(transform), uuid: self.generateUUID())
+        return Publishers.CZMapError(inner: self.mapError(transform), trid: self.generateTrid())
     }
 }
 
@@ -2622,7 +2622,7 @@ extension Publisher {
     ///   - latest: A Boolean value that indicates whether to publish the most recent element. If `false`, the publisher emits the first element received during the interval.
     /// - Returns: A publisher that emits either the most-recent or first element received during the specified interval.
     public func czThrottle<S>(for interval: S.SchedulerTimeType.Stride, scheduler: S, latest: Bool) -> Publishers.CZThrottle<Self, S> where S : Scheduler {
-        return Publishers.CZThrottle(inner: self.throttle(for: interval, scheduler: scheduler, latest: latest), uuid: self.generateUUID())
+        return Publishers.CZThrottle(inner: self.throttle(for: interval, scheduler: scheduler, latest: latest), trid: self.generateTrid())
     }
 }
 
@@ -2665,7 +2665,7 @@ extension Publisher {
     /// Also note that ``Publishers/Share`` is a class rather than a structure like most other publishers. This means you can use this operator to create a publisher instance that uses reference semantics.
     /// - Returns: A class instance that shares elements received from its upstream to multiple subscribers.
     public func czShare() -> Publishers.CZShare<Self> {
-        return Publishers.CZShare(inner: self.share(), uuid: self.generateUUID())
+        return Publishers.CZShare(inner: self.share(), trid: self.generateTrid())
     }
 }
 
@@ -2688,7 +2688,7 @@ extension Publisher where Self.Output : Comparable {
     /// After this publisher receives a request for more than 0 items, it requests unlimited items from its upstream publisher.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
     public func czMin() -> Publishers.CZComparison<Self> {
-        return Publishers.CZComparison(inner: self.min(), uuid: self.generateUUID())
+        return Publishers.CZComparison(inner: self.min(), trid: self.generateTrid())
     }
 
     /// Publishes the maximum value received from the upstream publisher, after it finishes.
@@ -2707,7 +2707,7 @@ extension Publisher where Self.Output : Comparable {
     /// After this publisher receives a request for more than 0 items, it requests unlimited items from its upstream publisher.
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
     public func czMax() -> Publishers.CZComparison<Self> {
-        return Publishers.CZComparison(inner: self.max(), uuid: self.generateUUID())
+        return Publishers.CZComparison(inner: self.max(), trid: self.generateTrid())
     }
 }
 
@@ -2740,7 +2740,7 @@ extension Publisher {
     /// - Parameter areInIncreasingOrder: A closure that receives two elements and returns true if they’re in increasing order.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
     public func czMin(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZComparison<Self> {
-        return Publishers.CZComparison(inner: self.min(by: areInIncreasingOrder), uuid: self.generateUUID())
+        return Publishers.CZComparison(inner: self.min(by: areInIncreasingOrder), trid: self.generateTrid())
     }
 
     /// Publishes the minimum value received from the upstream publisher, using the provided error-throwing closure to order the items.
@@ -2771,7 +2771,7 @@ extension Publisher {
     /// - Parameter areInIncreasingOrder: A throwing closure that receives two elements and returns `true` if they’re in increasing order. If this closure throws, the publisher terminates with a ``Subscribers/Completion/failure(_:)``.
     /// - Returns: A publisher that publishes the minimum value received from the upstream publisher, after the upstream publisher finishes.
     public func czTryMin(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryComparison<Self> {
-        return Publishers.CZTryComparison(inner: self.tryMin(by: areInIncreasingOrder), uuid: self.generateUUID())
+        return Publishers.CZTryComparison(inner: self.tryMin(by: areInIncreasingOrder), trid: self.generateTrid())
     }
 
     /// Publishes the maximum value received from the upstream publisher, using the provided ordering closure.
@@ -2798,7 +2798,7 @@ extension Publisher {
     /// - Parameter areInIncreasingOrder: A closure that receives two elements and returns true if they’re in increasing order.
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
     public func czMax(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) -> Bool) -> Publishers.CZComparison<Self> {
-        return Publishers.CZComparison(inner: self.max(by: areInIncreasingOrder), uuid: self.generateUUID())
+        return Publishers.CZComparison(inner: self.max(by: areInIncreasingOrder), trid: self.generateTrid())
     }
 
     /// Publishes the maximum value received from the upstream publisher, using the provided error-throwing closure to order the items.
@@ -2830,7 +2830,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that publishes the maximum value received from the upstream publisher, after the upstream publisher finishes.
     public func czTryMax(by areInIncreasingOrder: @escaping (Self.Output, Self.Output) throws -> Bool) -> Publishers.CZTryComparison<Self> {
-        return Publishers.CZTryComparison(inner: self.tryMax(by: areInIncreasingOrder), uuid: self.generateUUID())
+        return Publishers.CZTryComparison(inner: self.tryMax(by: areInIncreasingOrder), trid: self.generateTrid())
     }
 }
 
@@ -2851,7 +2851,7 @@ extension Publisher {
     /// - Parameter output: The element to use when replacing `nil`.
     /// - Returns: A publisher that replaces `nil` elements from the upstream publisher with the provided element.
     public func czReplaceNil<T>(with output: T) -> Publishers.CZMap<Self, T> where Self.Output == T? {
-        return Publishers.CZMap(inner: self.replaceNil(with: output), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.replaceNil(with: output), trid: self.generateTrid())
     }
 }
 
@@ -2880,7 +2880,7 @@ extension Publisher {
     /// - Parameter output: An element to emit when the upstream publisher fails.
     /// - Returns: A publisher that replaces an error from the upstream publisher with the provided output element.
     public func czReplaceError(with output: Self.Output) -> Publishers.CZReplaceError<Self> {
-        return Publishers.CZReplaceError(inner: self.replaceError(with: output), uuid: self.generateUUID())
+        return Publishers.CZReplaceError(inner: self.replaceError(with: output), trid: self.generateTrid())
     }
 
     /// Replaces an empty stream with the provided element.
@@ -2908,7 +2908,7 @@ extension Publisher {
     /// - Parameter output: An element to emit when the upstream publisher finishes without emitting any elements.
     /// - Returns: A publisher that replaces an empty stream with the provided output element.
     public func czReplaceEmpty(with output: Self.Output) -> Publishers.CZReplaceEmpty<Self> {
-        return Publishers.CZReplaceEmpty(inner: self.replaceEmpty(with: output), uuid: self.generateUUID())
+        return Publishers.CZReplaceEmpty(inner: self.replaceEmpty(with: output), trid: self.generateTrid())
     }
 }
 
@@ -2946,7 +2946,7 @@ extension Publisher {
     ///   - line: A line number used in the error message. This defaults to `#line`.
     /// - Returns: A publisher that raises a fatal error when its upstream publisher fails.
     public func czAssertNoFailure(_ prefix: String = "", file: StaticString = #file, line: UInt = #line) -> Publishers.CZAssertNoFailure<Self> {
-        return Publishers.CZAssertNoFailure(inner: self.assertNoFailure(prefix, file: file, line: line), uuid: self.generateUUID())
+        return Publishers.CZAssertNoFailure(inner: self.assertNoFailure(prefix, file: file, line: line), trid: self.generateTrid())
     }
 }
 
@@ -2978,7 +2978,7 @@ extension Publisher {
     /// - Parameter publisher: A publisher to monitor for its first emitted element.
     /// - Returns: A publisher that drops elements from the upstream publisher until the `other` publisher produces a value.
     public func czDrop<P>(untilOutputFrom publisher: P) -> Publishers.CZDropUntilOutput<Self, P> where P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZDropUntilOutput(inner: self.drop(untilOutputFrom: publisher), uuid: self.generateUUID())
+        return Publishers.CZDropUntilOutput(inner: self.drop(untilOutputFrom: publisher), trid: self.generateTrid())
     }
 }
 
@@ -3023,7 +3023,7 @@ extension Publisher {
     ///   - receiveRequest: An optional closure that executes when the publisher receives a request for more elements. This value defaults to `nil`.
     /// - Returns: A publisher that performs the specified closures when publisher events occur.
     public func czHandleEvents(receiveSubscription: ((Subscription) -> Void)? = nil, receiveOutput: ((Self.Output) -> Void)? = nil, receiveCompletion: ((Subscribers.Completion<Self.Failure>) -> Void)? = nil, receiveCancel: (() -> Void)? = nil, receiveRequest: ((Subscribers.Demand) -> Void)? = nil) -> Publishers.CZHandleEvents<Self> {
-        return Publishers.CZHandleEvents(inner: self.handleEvents(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion, receiveCancel: receiveCancel, receiveRequest: receiveRequest), uuid: self.generateUUID())
+        return Publishers.CZHandleEvents(inner: self.handleEvents(receiveSubscription: receiveSubscription, receiveOutput: receiveOutput, receiveCompletion: receiveCompletion, receiveCancel: receiveCancel, receiveRequest: receiveRequest), trid: self.generateTrid())
     }
 }
 
@@ -3046,7 +3046,7 @@ extension Publisher {
     /// - Parameter elements: The elements to publish before this publisher’s elements.
     /// - Returns: A publisher that prefixes the specified elements prior to this publisher’s elements.
     public func czPrepend(_ elements: Self.Output...) -> Publishers.CZConcatenate<Publishers.Sequence<[Self.Output], Self.Failure>, Self> {
-        return Publishers.CZConcatenate(inner: self.prepend(elements), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.prepend(elements), trid: self.generateTrid())
     }
 
     /// Prefixes a publisher’s output with the specified sequence.
@@ -3066,7 +3066,7 @@ extension Publisher {
     /// - Parameter elements: A sequence of elements to publish before this publisher’s elements.
     /// - Returns: A publisher that prefixes the sequence of elements prior to this publisher’s elements.
     public func czPrepend<S>(_ elements: S) -> Publishers.CZConcatenate<Publishers.Sequence<S, Self.Failure>, Self> where S : Sequence, Self.Output == S.Element {
-        return Publishers.CZConcatenate(inner: self.prepend(elements), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.prepend(elements), trid: self.generateTrid())
     }
 
     /// Prefixes the output of this publisher with the elements emitted by the given publisher.
@@ -3086,7 +3086,7 @@ extension Publisher {
     /// - Parameter publisher: The prefixing publisher.
     /// - Returns: A publisher that prefixes the prefixing publisher’s elements prior to this publisher’s elements.
     public func czPrepend<P>(_ publisher: P) -> Publishers.CZConcatenate<P, Self> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
-        return Publishers.CZConcatenate(inner: self.prepend(publisher), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.prepend(publisher), trid: self.generateTrid())
     }
 
     /// Appends a publisher’s output with the specified elements.
@@ -3106,7 +3106,7 @@ extension Publisher {
     /// - Parameter elements: Elements to publish after this publisher’s elements.
     /// - Returns: A publisher that appends the specifiecd elements after this publisher’s elements.
     public func czAppend(_ elements: Self.Output...) -> Publishers.CZConcatenate<Self, Publishers.Sequence<[Self.Output], Self.Failure>> {
-        return Publishers.CZConcatenate(inner: self.append(elements), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.append(elements), trid: self.generateTrid())
     }
 
     /// Appends a publisher’s output with the specified sequence.
@@ -3126,7 +3126,7 @@ extension Publisher {
     /// - Parameter elements: A sequence of elements to publish after this publisher’s elements.
     /// - Returns: A publisher that appends the sequence of elements after this publisher’s elements.
     public func czAppend<S>(_ elements: S) -> Publishers.CZConcatenate<Self, Publishers.Sequence<S, Self.Failure>> where S : Sequence, Self.Output == S.Element {
-        return Publishers.CZConcatenate(inner: self.append(elements), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.append(elements), trid: self.generateTrid())
     }
 
     /// Appends the output of this publisher with the elements emitted by the given publisher.
@@ -3146,7 +3146,7 @@ extension Publisher {
     /// - Parameter publisher: The appending publisher.
     /// - Returns: A publisher that appends the appending publisher’s elements after this publisher’s elements.
     public func czAppend<P>(_ publisher: P) -> Publishers.CZConcatenate<Self, P> where P : Publisher, Self.Failure == P.Failure, Self.Output == P.Output {
-        return Publishers.CZConcatenate(inner: self.append(publisher), uuid: self.generateUUID())
+        return Publishers.CZConcatenate(inner: self.append(publisher), trid: self.generateTrid())
     }
 }
 
@@ -3203,7 +3203,7 @@ extension Publisher {
     ///   - options: Scheduler options that customize this publisher’s delivery of elements.
     /// - Returns: A publisher that publishes events only after a specified time elapses.
     public func czDebounce<S>(for dueTime: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZDebounce<Self, S> where S : Scheduler {
-        return Publishers.CZDebounce(inner: self.debounce(for: dueTime, scheduler: scheduler, options: options), uuid: self.generateUUID())
+        return Publishers.CZDebounce(inner: self.debounce(for: dueTime, scheduler: scheduler, options: options), trid: self.generateTrid())
     }
 }
 
@@ -3225,7 +3225,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that only publishes the last element of a stream.
     public func czLast() -> Publishers.CZLast<Self> {
-        return Publishers.CZLast(inner: self.last(), uuid: self.generateUUID())
+        return Publishers.CZLast(inner: self.last(), trid: self.generateTrid())
     }
 }
 
@@ -3253,7 +3253,7 @@ extension Publisher {
     /// - Parameter transform: A closure that takes one element as its parameter and returns a new element.
     /// - Returns: A publisher that uses the provided closure to map elements from the upstream publisher to new elements that it then publishes.
     public func czMap<T>(_ transform: @escaping (Self.Output) -> T) -> Publishers.CZMap<Self, T> {
-        return Publishers.CZMap(inner: self.map(transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.map(transform), trid: self.generateTrid())
     }
 
     /// Transforms all elements from the upstream publisher with a provided error-throwing closure.
@@ -3287,7 +3287,7 @@ extension Publisher {
     /// - Parameter transform: A closure that takes one element as its parameter and returns a new element. If the closure throws an error, the publisher fails with the thrown error.
     /// - Returns: A publisher that uses the provided closure to map elements from the upstream publisher to new elements that it then publishes.
     public func czTryMap<T>(_ transform: @escaping (Self.Output) throws -> T) -> Publishers.CZTryMap<Self, T> {
-        return Publishers.CZTryMap(inner: self.tryMap(transform), uuid: self.generateUUID())
+        return Publishers.CZTryMap(inner: self.tryMap(transform), trid: self.generateTrid())
     }
 }
 
@@ -3327,7 +3327,7 @@ extension Publisher {
     ///   - customError: A closure that executes if the publisher times out. The publisher sends the failure returned by this closure to the subscriber as the reason for termination.
     /// - Returns: A publisher that terminates if the specified interval elapses with no events received from the upstream publisher.
     public func czTimeout<S>(_ interval: S.SchedulerTimeType.Stride, scheduler: S, options: S.SchedulerOptions? = nil, customError: (() -> Self.Failure)? = nil) -> Publishers.CZTimeout<Self, S> where S : Scheduler {
-        return Publishers.CZTimeout(inner: self.timeout(interval, scheduler: scheduler, options: options, customError: customError), uuid: self.generateUUID())
+        return Publishers.CZTimeout(inner: self.timeout(interval, scheduler: scheduler, options: options, customError: customError), trid: self.generateTrid())
     }
 }
 
@@ -3346,7 +3346,7 @@ extension Publisher {
     ///   - whenFull: The action to take when the buffer becomes full.
     /// - Returns: A publisher that buffers elements received from an upstream publisher.
     public func czBuffer(size: Int, prefetch: Publishers.PrefetchStrategy, whenFull: Publishers.BufferingStrategy<Self.Failure>) -> Publishers.CZBuffer<Self> {
-        return Publishers.CZBuffer(inner: self.buffer(size: size, prefetch: prefetch, whenFull: whenFull), uuid: self.generateUUID())
+        return Publishers.CZBuffer(inner: self.buffer(size: size, prefetch: prefetch, whenFull: whenFull), trid: self.generateTrid())
     }
 }
 
@@ -3382,7 +3382,7 @@ extension Publisher {
     /// - Parameter other: Another publisher.
     /// - Returns: A publisher that emits pairs of elements from the upstream publishers as tuples.
     public func czZip<P>(_ other: P) -> Publishers.CZZip<Self, P> where P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZZip(inner: self.zip(other), uuid: self.generateUUID())
+        return Publishers.CZZip(inner: self.zip(other), trid: self.generateTrid())
     }
 
     /// Combines elements from another publisher and delivers a transformed output.
@@ -3414,7 +3414,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from two upstream publishers.
     public func czZip<P, T>(_ other: P, _ transform: @escaping (Self.Output, P.Output) -> T) -> Publishers.CZMap<Publishers.Zip<Self, P>, T> where P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZMap(inner: self.zip(other, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.zip(other, transform), trid: self.generateTrid())
     }
 
     /// Combines elements from two other publishers and delivers groups of elements as tuples.
@@ -3450,7 +3450,7 @@ extension Publisher {
     ///   - publisher2: A third publisher.
     /// - Returns: A publisher that emits groups of elements from the upstream publishers as tuples.
     public func czZip<P, Q>(_ publisher1: P, _ publisher2: Q) -> Publishers.CZZip3<Self, P, Q> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
-        return Publishers.CZZip3(inner: self.zip(publisher1, publisher2), uuid: self.generateUUID())
+        return Publishers.CZZip3(inner: self.zip(publisher1, publisher2), trid: self.generateTrid())
     }
 
     /// Combines elements from two other publishers and delivers a transformed output.
@@ -3489,7 +3489,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from three upstream publishers.
     public func czZip<P, Q, T>(_ publisher1: P, _ publisher2: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> T) -> Publishers.CZMap<Publishers.Zip3<Self, P, Q>, T> where P : Publisher, Q : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure {
-        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, transform), trid: self.generateTrid())
     }
 
     /// Combines elements from three other publishers and delivers groups of elements as tuples.
@@ -3528,7 +3528,7 @@ extension Publisher {
     ///   - publisher3: A fourth publisher.
     /// - Returns: A publisher that emits groups of elements from the upstream publishers as tuples.
     public func czZip<P, Q, R>(_ publisher1: P, _ publisher2: Q, _ publisher3: R) -> Publishers.CZZip4<Self, P, Q, R> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
-        return Publishers.CZZip4(inner: self.zip(publisher1, publisher2, publisher3), uuid: self.generateUUID())
+        return Publishers.CZZip4(inner: self.zip(publisher1, publisher2, publisher3), trid: self.generateTrid())
     }
 
     /// Combines elements from three other publishers and delivers a transformed output.
@@ -3571,7 +3571,7 @@ extension Publisher {
     ///   - transform: A closure that receives the most-recent value from each publisher and returns a new value to publish.
     /// - Returns: A publisher that uses the `transform` closure to emit new elements, produced by combining the most recent value from four upstream publishers.
     public func czZip<P, Q, R, T>(_ publisher1: P, _ publisher2: Q, _ publisher3: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> T) -> Publishers.CZMap<Publishers.Zip4<Self, P, Q, R>, T> where P : Publisher, Q : Publisher, R : Publisher, Self.Failure == P.Failure, P.Failure == Q.Failure, Q.Failure == R.Failure {
-        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, publisher3, transform), uuid: self.generateUUID())
+        return Publishers.CZMap(inner: self.zip(publisher1, publisher2, publisher3, transform), trid: self.generateTrid())
     }
 }
 
@@ -3594,7 +3594,7 @@ extension Publisher {
     /// - Parameter index: The index that indicates the element to publish.
     /// - Returns: A publisher that publishes a specific indexed element.
     public func czOutput(at index: Int) -> Publishers.CZOutput<Self> {
-        return Publishers.CZOutput(inner: self.output(at: index), uuid: self.generateUUID())
+        return Publishers.CZOutput(inner: self.output(at: index), trid: self.generateTrid())
     }
 
     /// Publishes elements specified by their range in the sequence of published elements.
@@ -3613,7 +3613,7 @@ extension Publisher {
     /// - Parameter range: A range that indicates which elements to publish.
     /// - Returns: A publisher that publishes elements specified by a range.
     public func czOutput<R>(in range: R) -> Publishers.CZOutput<Self> where R : RangeExpression, R.Bound == Int {
-        return Publishers.CZOutput(inner: self.output(in: range), uuid: self.generateUUID())
+        return Publishers.CZOutput(inner: self.output(in: range), trid: self.generateTrid())
     }
 }
 
@@ -3644,7 +3644,7 @@ extension Publisher {
     /// - Parameter handler: A closure that accepts the upstream failure as input and returns a publisher to replace the upstream publisher.
     /// - Returns: A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher.
     public func czCatch<P>(_ handler: @escaping (Self.Failure) -> P) -> Publishers.CZCatch<Self, P> where P : Publisher, Self.Output == P.Output {
-        return Publishers.CZCatch(inner: self.catch(handler), uuid: self.generateUUID())
+        return Publishers.CZCatch(inner: self.catch(handler), trid: self.generateTrid())
     }
 
     /// Handles errors from an upstream publisher by either replacing it with another publisher or throwing a new error.
@@ -3682,7 +3682,7 @@ extension Publisher {
     /// - Parameter handler: A throwing closure that accepts the upstream failure as input. This closure can either replace the upstream publisher with a new one, or throw a new error to the downstream subscriber.
     /// - Returns: A publisher that handles errors from an upstream publisher by replacing the failed publisher with another publisher, or an error.
     public func czTryCatch<P>(_ handler: @escaping (Self.Failure) throws -> P) -> Publishers.CZTryCatch<Self, P> where P : Publisher, Self.Output == P.Output {
-        return Publishers.CZTryCatch(inner: self.tryCatch(handler), uuid: self.generateUUID())
+        return Publishers.CZTryCatch(inner: self.tryCatch(handler), trid: self.generateTrid())
     }
 }
 
@@ -3723,7 +3723,7 @@ extension Publisher {
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
     public func czFlatMap<T, P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Self> where T == P.Output, P : Publisher, Self.Failure == P.Failure {
-        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), trid: self.generateTrid())
     }
 }
 
@@ -3737,7 +3737,7 @@ extension Publisher where Self.Failure == Never {
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
     public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Publishers.SetFailureType<Self, P.Failure>> where P : Publisher {
-        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), trid: self.generateTrid())
     }
 }
 
@@ -3751,7 +3751,7 @@ extension Publisher where Self.Failure == Never {
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
     public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<P, Self> where P : Publisher, P.Failure == Never {
-        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), trid: self.generateTrid())
     }
 }
 
@@ -3765,7 +3765,7 @@ extension Publisher {
     ///   - transform: A closure that takes an element as a parameter and returns a publisher that produces elements of that type.
     /// - Returns: A publisher that transforms elements from an upstream  publisher into a publisher of that element’s type.
     public func czFlatMap<P>(maxPublishers: Subscribers.Demand = .unlimited, _ transform: @escaping (Self.Output) -> P) -> Publishers.CZFlatMap<Publishers.SetFailureType<P, Self.Failure>, Self> where P : Publisher, P.Failure == Never {
-        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), uuid: self.generateUUID())
+        return Publishers.CZFlatMap(inner: self.flatMap(maxPublishers: maxPublishers, transform), trid: self.generateTrid())
     }
 }
 
@@ -3815,7 +3815,7 @@ extension Publisher {
     ///   - options: Options relevant to the scheduler’s behavior.
     /// - Returns: A publisher that delays delivery of elements and completion to the downstream receiver.
     public func czDelay<S>(for interval: S.SchedulerTimeType.Stride, tolerance: S.SchedulerTimeType.Stride? = nil, scheduler: S, options: S.SchedulerOptions? = nil) -> Publishers.CZDelay<Self, S> where S : Scheduler {
-        return Publishers.CZDelay(inner: self.delay(for: interval, tolerance: tolerance, scheduler: scheduler, options: options), uuid: self.generateUUID())
+        return Publishers.CZDelay(inner: self.delay(for: interval, tolerance: tolerance, scheduler: scheduler, options: options), trid: self.generateTrid())
     }
 }
 
@@ -3838,7 +3838,7 @@ extension Publisher {
     /// - Parameter count: The number of elements to omit. The default is `1`.
     /// - Returns: A publisher that doesn’t republish the first `count` elements.
     public func czDropFirst(_ count: Int = 1) -> Publishers.CZDrop<Self> {
-        return Publishers.CZDrop(inner: self.dropFirst(count), uuid: self.generateUUID())
+        return Publishers.CZDrop(inner: self.dropFirst(count), trid: self.generateTrid())
     }
 }
 
@@ -3875,7 +3875,7 @@ extension Publisher {
     ///
     /// - Returns: An ``AnyPublisher`` wrapping this publisher.
     public func czEraseToAnyPublisher() -> CZAnyPublisher<Self.Output, Self.Failure> {
-        return CZAnyPublisher(inner: self.eraseToAnyPublisher(), uuid: self.generateUUID())
+        return CZAnyPublisher(inner: self.eraseToAnyPublisher(), trid: self.generateTrid())
     }
 }
 
@@ -3897,7 +3897,7 @@ extension Publisher {
     ///
     /// - Returns: A publisher that only publishes the first element of a stream.
     public func czFirst() -> Publishers.CZFirst<Self> {
-        return Publishers.CZFirst(inner: self.first(), uuid: self.generateUUID())
+        return Publishers.CZFirst(inner: self.first(), trid: self.generateTrid())
     }
 
     /// Publishes the first element of a stream to satisfy a predicate closure, then finishes normally.
@@ -3917,7 +3917,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the first element of a stream that satisfies the predicate.
     public func czFirst(where predicate: @escaping (Self.Output) -> Bool) -> Publishers.CZFirstWhere<Self> {
-        return Publishers.CZFirstWhere(inner: self.first(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZFirstWhere(inner: self.first(where: predicate), trid: self.generateTrid())
     }
 
     /// Publishes the first element of a stream to satisfy a throwing predicate closure, then finishes normally.
@@ -3944,7 +3944,7 @@ extension Publisher {
     /// - Parameter predicate: A closure that takes an element as a parameter and returns a Boolean value that indicates whether to publish the element.
     /// - Returns: A publisher that only publishes the first element of a stream that satisfies the predicate.
     public func czTryFirst(where predicate: @escaping (Self.Output) throws -> Bool) -> Publishers.CZTryFirstWhere<Self> {
-        return Publishers.CZTryFirstWhere(inner: self.tryFirst(where: predicate), uuid: self.generateUUID())
+        return Publishers.CZTryFirstWhere(inner: self.tryFirst(where: predicate), trid: self.generateTrid())
     }
 }
 
@@ -3973,13 +3973,13 @@ extension Publishers {
         final public let createSubject: () -> SubjectType
         
         public let inner: Multicast<Upstream, SubjectType>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Multicast<Upstream, SubjectType>, uuid: UUID) {
+        public init(inner: Publishers.Multicast<Upstream, SubjectType>, trid: UUID) {
             self.upstream = inner.upstream
             self.createSubject = inner.createSubject
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
         
         /// Connects to the publisher, allowing it to produce elements, and returns an instance with which to cancel publishing.
@@ -4017,14 +4017,14 @@ extension Publishers {
         public let options: Context.SchedulerOptions?
         
         public let inner: SubscribeOn<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: SubscribeOn<Upstream, Context>, uuid: UUID) {
+        public init(inner: SubscribeOn<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.scheduler = inner.scheduler
             self.options = inner.options
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4052,13 +4052,13 @@ extension Publishers {
         public let scheduler: Context
         
         public let inner: MeasureInterval<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: MeasureInterval<Upstream, Context>, uuid: UUID) {
+        public init(inner: MeasureInterval<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.scheduler = inner.scheduler
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4086,13 +4086,13 @@ extension Publishers {
         public let predicate: (Publishers.DropWhile<Upstream>.Output) -> Bool
         
         public let inner: DropWhile<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: DropWhile<Upstream>, uuid: UUID) {
+        public init(inner: DropWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4116,13 +4116,13 @@ extension Publishers {
         public let predicate: (Publishers.TryDropWhile<Upstream>.Output) throws -> Bool
         
         public let inner: TryDropWhile<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryDropWhile<Upstream>, uuid: UUID) {
+        public init(inner: TryDropWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4150,13 +4150,13 @@ extension Publishers {
         public let isIncluded: (Upstream.Output) -> Bool
         
         public let inner: Filter<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Filter<Upstream>, uuid: UUID) {
+        public init(inner: Filter<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.isIncluded = inner.isIncluded
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4180,13 +4180,13 @@ extension Publishers {
         public let isIncluded: (Upstream.Output) throws -> Bool
         
         public let inner: TryFilter<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryFilter<Upstream>, uuid: UUID) {
+        public init(inner: TryFilter<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.isIncluded = inner.isIncluded
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4223,15 +4223,15 @@ extension Publishers {
         public let receiveCompletion: ((Subscribers.Completion<Publishers.Breakpoint<Upstream>.Failure>) -> Bool)?
         
         public let inner: Breakpoint<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Breakpoint<Upstream>, uuid: UUID) {
+        public init(inner: Breakpoint<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.receiveSubscription = inner.receiveSubscription
             self.receiveOutput = inner.receiveOutput
             self.receiveCompletion = inner.receiveCompletion
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4261,13 +4261,13 @@ extension Publishers {
         public let predicate: (Upstream.Output) -> Bool
         
         public let inner: AllSatisfy<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: AllSatisfy<Upstream>, uuid: UUID) {
+        public init(inner: AllSatisfy<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4293,13 +4293,13 @@ extension Publishers {
         public let predicate: (Upstream.Output) throws -> Bool
         
         public let inner: TryAllSatisfy<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryAllSatisfy<Upstream>, uuid: UUID) {
+        public init(inner: TryAllSatisfy<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4327,13 +4327,13 @@ extension Publishers {
         public let predicate: (Publishers.RemoveDuplicates<Upstream>.Output, Publishers.RemoveDuplicates<Upstream>.Output) -> Bool
         
         public let inner: RemoveDuplicates<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: RemoveDuplicates<Upstream>, uuid: UUID) {
+        public init(inner: RemoveDuplicates<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4355,13 +4355,13 @@ extension Publishers {
         public let predicate: (Publishers.TryRemoveDuplicates<Upstream>.Output, Publishers.TryRemoveDuplicates<Upstream>.Output) throws -> Bool
         
         public let inner: TryRemoveDuplicates<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryRemoveDuplicates<Upstream>, uuid: UUID) {
+        public init(inner: TryRemoveDuplicates<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4379,12 +4379,12 @@ extension Publishers {
 
         public let upstream: Upstream
         public let inner: Decode<Upstream, Output, Coder>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Decode<Upstream, Output, Coder>, uuid: UUID) {
+        public init(inner: Decode<Upstream, Output, Coder>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4403,12 +4403,12 @@ extension Publishers {
 
         public let upstream: Upstream
         public let inner: Encode<Upstream, Coder>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Encode<Upstream, Coder>, uuid: UUID) {
+        public init(inner: Encode<Upstream, Coder>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4436,13 +4436,13 @@ extension Publishers {
         public let output: Upstream.Output
         
         public let inner: Contains<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Contains<Upstream>, uuid: UUID) {
+        public init(inner: Contains<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.output = inner.output
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4468,13 +4468,13 @@ extension Publishers {
         public let b: B
         
         public let inner: CombineLatest<A, B>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: CombineLatest<A, B>, uuid: UUID) {
+        public init(inner: CombineLatest<A, B>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4498,14 +4498,14 @@ extension Publishers {
         public let c: C
         
         public let inner: CombineLatest3<A, B, C>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: CombineLatest3<A, B, C>, uuid: UUID) {
+        public init(inner: CombineLatest3<A, B, C>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4531,15 +4531,15 @@ extension Publishers {
         public let d: D
 
         public let inner: CombineLatest4<A, B, C, D>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: CombineLatest4<A, B, C, D>, uuid: UUID) {
+        public init(inner: CombineLatest4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.d = inner.d
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4566,12 +4566,12 @@ extension Publishers {
         final public let upstream: Upstream
         
         public let inner: Autoconnect<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        required public init(inner: Autoconnect<Upstream>, uuid: UUID) {
+        required public init(inner: Autoconnect<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4609,14 +4609,14 @@ extension Publishers {
         public let stream: TextOutputStream?
         
         public let inner: Print<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Print<Upstream>, uuid: UUID) {
+        public init(inner: Print<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.prefix = inner.prefix
             self.stream = inner.stream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4644,13 +4644,13 @@ extension Publishers {
         public let predicate: (Publishers.PrefixWhile<Upstream>.Output) -> Bool
         
         public let inner: PrefixWhile<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: PrefixWhile<Upstream>, uuid: UUID) {
+        public init(inner: PrefixWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4674,13 +4674,13 @@ extension Publishers {
         public let predicate: (Publishers.TryPrefixWhile<Upstream>.Output) throws -> Bool
         
         public let inner: TryPrefixWhile<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryPrefixWhile<Upstream>, uuid: UUID) {
+        public init(inner: TryPrefixWhile<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4702,16 +4702,16 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: SetFailureType<Upstream, Failure>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: SetFailureType<Upstream, Failure>, uuid: UUID) {
+        public init(inner: SetFailureType<Upstream, Failure>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func setFailureType<E>(to failure: E.Type) -> Publishers.CZSetFailureType<Upstream, E> where E : Error {
-            return Publishers.CZSetFailureType(inner: self.inner.setFailureType(to: failure), uuid: self.uuid)
+            return Publishers.CZSetFailureType(inner: self.inner.setFailureType(to: failure), trid: self.trid)
         }
     }
 }
@@ -4739,13 +4739,13 @@ extension Publishers {
         public let predicate: (Upstream.Output) -> Bool
         
         public let inner: ContainsWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: ContainsWhere<Upstream>, uuid: UUID) {
+        public init(inner: ContainsWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4769,13 +4769,13 @@ extension Publishers {
         public let predicate: (Upstream.Output) throws -> Bool
         
         public let inner: TryContainsWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryContainsWhere<Upstream>, uuid: UUID) {
+        public init(inner: TryContainsWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4801,11 +4801,11 @@ extension Publishers {
         public typealias Failure = Upstream.Failure
         
         public let inner: MakeConnectable<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: MakeConnectable<Upstream>, uuid: UUID) {
+        public init(inner: MakeConnectable<Upstream>, trid: UUID) {
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4836,14 +4836,14 @@ extension Publishers {
         public let options: Context.SchedulerOptions?
         
         public let inner: CollectByTime<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: CollectByTime<Upstream, Context>, uuid: UUID) {
+        public init(inner: CollectByTime<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.strategy = inner.strategy
             self.options = inner.options
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4864,12 +4864,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: Collect<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Collect<Upstream>, uuid: UUID) {
+        public init(inner: Collect<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4893,13 +4893,13 @@ extension Publishers {
         public let count: Int
         
         public let inner: CollectByCount<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: CollectByCount<Upstream>, uuid: UUID) {
+        public init(inner: CollectByCount<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.count = inner.count
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4930,14 +4930,14 @@ extension Publishers {
         public let options: Context.SchedulerOptions?
         
         public let inner: ReceiveOn<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: ReceiveOn<Upstream, Context>, uuid: UUID) {
+        public init(inner: ReceiveOn<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.scheduler = inner.scheduler
             self.options = inner.options
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -4960,13 +4960,13 @@ extension Publishers {
         public let keyPath: KeyPath<Upstream.Output, Output>
         
         public let inner: MapKeyPath<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: MapKeyPath<Upstream, Output>, uuid: UUID) {
+        public init(inner: MapKeyPath<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath = inner.keyPath
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -4993,14 +4993,14 @@ extension Publishers {
         public let keyPath1: KeyPath<Upstream.Output, Output1>
         
         public let inner: MapKeyPath2<Upstream, Output0, Output1>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: MapKeyPath2<Upstream, Output0, Output1>, uuid: UUID) {
+        public init(inner: MapKeyPath2<Upstream, Output0, Output1>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath0 = inner.keyPath0
             self.keyPath1 = inner.keyPath1
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5030,15 +5030,15 @@ extension Publishers {
         public let keyPath2: KeyPath<Upstream.Output, Output2>
         
         public let inner: MapKeyPath3<Upstream, Output0, Output1, Output2>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: MapKeyPath3<Upstream, Output0, Output1, Output2>, uuid: UUID) {
+        public init(inner: MapKeyPath3<Upstream, Output0, Output1, Output2>, trid: UUID) {
             self.upstream = inner.upstream
             self.keyPath0 = inner.keyPath0
             self.keyPath1 = inner.keyPath1
             self.keyPath2 = inner.keyPath2
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5066,13 +5066,13 @@ extension Publishers {
         public let other: Other
         
         public let inner: PrefixUntilOutput<Upstream, Other>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: PrefixUntilOutput<Upstream, Other>, uuid: UUID) {
+        public init(inner: PrefixUntilOutput<Upstream, Other>, trid: UUID) {
             self.upstream = inner.upstream
             self.other = inner.other
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5098,14 +5098,14 @@ extension Publishers {
         public let nextPartialResult: (Output, Upstream.Output) -> Output
         
         public let inner: Reduce<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Reduce<Upstream, Output>, uuid: UUID) {
+        public init(inner: Reduce<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initial = inner.initial
             self.nextPartialResult = inner.nextPartialResult
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5129,14 +5129,14 @@ extension Publishers {
         public let nextPartialResult: (Output, Upstream.Output) throws -> Output
         
         public let inner: TryReduce<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryReduce<Upstream, Output>, uuid: UUID) {
+        public init(inner: TryReduce<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initial = inner.initial
             self.nextPartialResult = inner.nextPartialResult
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5159,13 +5159,13 @@ extension Publishers {
         public let transform: (Upstream.Output) -> Output?
         
         public let inner: CompactMap<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: CompactMap<Upstream, Output>, uuid: UUID) {
+        public init(inner: CompactMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5186,13 +5186,13 @@ extension Publishers {
         public let transform: (Upstream.Output) throws -> Output?
         
         public let inner: TryCompactMap<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: TryCompactMap<Upstream, Output>, uuid: UUID) {
+        public init(inner: TryCompactMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5220,37 +5220,37 @@ extension Publishers {
         public let b: B
         
         public let inner: Merge<A, B>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge<A, B>, uuid: UUID) {
+        public init(inner: Merge<A, B>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge3<A, B, P> where P : Publisher, B.Failure == P.Failure, B.Output == P.Output {
-            return CZMerge3(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge3(inner: inner.merge(with: other), trid: self.trid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge4<A, B, Z, Y> where Z : Publisher, Y : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            return CZMerge4(inner: inner.merge(with: z, y), uuid: self.uuid)
+            return CZMerge4(inner: inner.merge(with: z, y), trid: self.trid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge5<A, B, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            return CZMerge5(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+            return CZMerge5(inner: inner.merge(with: z, y, x), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge6<A, B, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            return CZMerge6(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+            return CZMerge6(inner: inner.merge(with: z, y, x, w), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge7<A, B, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
-            return CZMerge7(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
+            return CZMerge7(inner: inner.merge(with: z, y, x, w, v), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W, V, U>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V, _ u: U) -> Publishers.CZMerge8<A, B, Z, Y, X, W, V, U> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, U : Publisher, B.Failure == Z.Failure, B.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output, V.Failure == U.Failure, V.Output == U.Output {
-            return CZMerge8(inner: inner.merge(with: z, y, x, w, v, u), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: z, y, x, w, v, u), trid: self.trid)
         }
     }
 
@@ -5277,34 +5277,34 @@ extension Publishers {
         public let c: C
         
         public let inner: Merge3<A, B, C>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge3<A, B, C>, uuid: UUID) {
+        public init(inner: Merge3<A, B, C>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
         
         public func merge<P>(with other: P) -> Publishers.CZMerge4<A, B, C, P> where P : Publisher, C.Failure == P.Failure, C.Output == P.Output {
-            return CZMerge4(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge4(inner: inner.merge(with: other), trid: self.trid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge5<A, B, C, Z, Y> where Z : Publisher, Y : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            return CZMerge5(inner: inner.merge(with: z, y), uuid: self.uuid)
+            return CZMerge5(inner: inner.merge(with: z, y), trid: self.trid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge6<A, B, C, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            return CZMerge6(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+            return CZMerge6(inner: inner.merge(with: z, y, x), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge7<A, B, C, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            return CZMerge7(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+            return CZMerge7(inner: inner.merge(with: z, y, x, w), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W, V>(with z: Z, _ y: Y, _ x: X, _ w: W, _ v: V) -> Publishers.CZMerge8<A, B, C, Z, Y, X, W, V> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, V : Publisher, C.Failure == Z.Failure, C.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output, W.Failure == V.Failure, W.Output == V.Output {
-            return CZMerge8(inner: inner.merge(with: z, y, x, w, v), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: z, y, x, w, v), trid: self.trid)
         }
     }
 
@@ -5334,31 +5334,31 @@ extension Publishers {
         public let d: D
         
         public let inner: Merge4<A, B, C, D>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge4<A, B, C, D>, uuid: UUID) {
+        public init(inner: Merge4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.d = inner.d
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge5<A, B, C, D, P> where P : Publisher, D.Failure == P.Failure, D.Output == P.Output {
-            return CZMerge5(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge5(inner: inner.merge(with: other), trid: self.trid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge6<A, B, C, D, Z, Y> where Z : Publisher, Y : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            return CZMerge6(inner: inner.merge(with: z, y), uuid: self.uuid)
+            return CZMerge6(inner: inner.merge(with: z, y), trid: self.trid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge7<A, B, C, D, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            return CZMerge7(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+            return CZMerge7(inner: inner.merge(with: z, y, x), trid: self.trid)
         }
 
         public func merge<Z, Y, X, W>(with z: Z, _ y: Y, _ x: X, _ w: W) -> Publishers.CZMerge8<A, B, C, D, Z, Y, X, W> where Z : Publisher, Y : Publisher, X : Publisher, W : Publisher, D.Failure == Z.Failure, D.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output, X.Failure == W.Failure, X.Output == W.Output {
-            return CZMerge8(inner: inner.merge(with: z, y, x, w), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: z, y, x, w), trid: self.trid)
         }
     }
 
@@ -5391,28 +5391,28 @@ extension Publishers {
         public let e: E
         
         public let inner: Merge5<A, B, C, D, E>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge5<A, B, C, D, E>, uuid: UUID) {
+        public init(inner: Merge5<A, B, C, D, E>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.d = inner.d
             self.e = inner.e
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge6<A, B, C, D, E, P> where P : Publisher, E.Failure == P.Failure, E.Output == P.Output {
-            return CZMerge6(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge6(inner: inner.merge(with: other), trid: self.trid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge7<A, B, C, D, E, Z, Y> where Z : Publisher, Y : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            return CZMerge7(inner: inner.merge(with: z, y), uuid: self.uuid)
+            return CZMerge7(inner: inner.merge(with: z, y), trid: self.trid)
         }
 
         public func merge<Z, Y, X>(with z: Z, _ y: Y, _ x: X) -> Publishers.CZMerge8<A, B, C, D, E, Z, Y, X> where Z : Publisher, Y : Publisher, X : Publisher, E.Failure == Z.Failure, E.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output, Y.Failure == X.Failure, Y.Output == X.Output {
-            return CZMerge8(inner: inner.merge(with: z, y, x), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: z, y, x), trid: self.trid)
         }
     }
 
@@ -5448,9 +5448,9 @@ extension Publishers {
         public let f: F
         
         public let inner: Merge6<A, B, C, D, E, F>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge6<A, B, C, D, E, F>, uuid: UUID) {
+        public init(inner: Merge6<A, B, C, D, E, F>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
@@ -5458,15 +5458,15 @@ extension Publishers {
             self.e = inner.e
             self.f = inner.f
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge7<A, B, C, D, E, F, P> where P : Publisher, F.Failure == P.Failure, F.Output == P.Output {
-            return CZMerge7(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge7(inner: inner.merge(with: other), trid: self.trid)
         }
 
         public func merge<Z, Y>(with z: Z, _ y: Y) -> Publishers.CZMerge8<A, B, C, D, E, F, Z, Y> where Z : Publisher, Y : Publisher, F.Failure == Z.Failure, F.Output == Z.Output, Z.Failure == Y.Failure, Z.Output == Y.Output {
-            return CZMerge8(inner: inner.merge(with: z, y), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: z, y), trid: self.trid)
         }
     }
 
@@ -5505,9 +5505,9 @@ extension Publishers {
         public let g: G
         
         public let inner: Merge7<A, B, C, D, E, F, G>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge7<A, B, C, D, E, F, G>, uuid: UUID) {
+        public init(inner: Merge7<A, B, C, D, E, F, G>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
@@ -5516,11 +5516,11 @@ extension Publishers {
             self.f = inner.f
             self.g = inner.g
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge<P>(with other: P) -> Publishers.CZMerge8<A, B, C, D, E, F, G, P> where P : Publisher, G.Failure == P.Failure, G.Output == P.Output {
-            return CZMerge8(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMerge8(inner: inner.merge(with: other), trid: self.trid)
         }
     }
 
@@ -5562,9 +5562,9 @@ extension Publishers {
         public let h: H
         
         public let inner: Merge8<A, B, C, D, E, F, G, H>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Merge8<A, B, C, D, E, F, G, H>, uuid: UUID) {
+        public init(inner: Merge8<A, B, C, D, E, F, G, H>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
@@ -5574,7 +5574,7 @@ extension Publishers {
             self.g = inner.g
             self.h = inner.h
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5595,16 +5595,16 @@ extension Publishers {
         public let publishers: [Upstream]
         
         public let inner: MergeMany<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: MergeMany<Upstream>, uuid: UUID) {
+        public init(inner: MergeMany<Upstream>, trid: UUID) {
             self.publishers = inner.publishers
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         public func merge(with other: Upstream) -> Publishers.CZMergeMany<Upstream> {
-            return CZMergeMany(inner: inner.merge(with: other), uuid: self.uuid)
+            return CZMergeMany(inner: inner.merge(with: other), trid: self.trid)
         }
     }
 }
@@ -5630,14 +5630,14 @@ extension Publishers {
         public let nextPartialResult: (Output, Upstream.Output) -> Output
         
         public let inner: Scan<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Scan<Upstream, Output>, uuid: UUID) {
+        public init(inner: Publishers.Scan<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initialResult = inner.initialResult
             self.nextPartialResult = inner.nextPartialResult
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5659,14 +5659,14 @@ extension Publishers {
         public let nextPartialResult: (Output, Upstream.Output) throws -> Output
         
         public let inner: TryScan<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: TryScan<Upstream, Output>, uuid: UUID) {
+        public init(inner: TryScan<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.initialResult = inner.initialResult
             self.nextPartialResult = inner.nextPartialResult
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5691,12 +5691,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: Count<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Count<Upstream>, uuid: UUID) {
+        public init(inner: Count<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5724,13 +5724,13 @@ extension Publishers {
         public let predicate: (Publishers.LastWhere<Upstream>.Output) -> Bool
         
         public let inner: LastWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.LastWhere<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.LastWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -5754,13 +5754,13 @@ extension Publishers {
         public let predicate: (Publishers.TryLastWhere<Upstream>.Output) throws -> Bool
         
         public let inner: TryLastWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.TryLastWhere<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.TryLastWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5785,12 +5785,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: IgnoreOutput<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.IgnoreOutput<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.IgnoreOutput<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5820,12 +5820,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: SwitchToLatest<P, Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.SwitchToLatest<P, Upstream>, uuid: UUID) {
+        public init(inner: Publishers.SwitchToLatest<P, Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5855,13 +5855,13 @@ extension Publishers {
         public let retries: Int?
         
         public let inner: Retry<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Retry<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Retry<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.retries = inner.retries
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5884,13 +5884,13 @@ extension Publishers {
         public let transform: (Upstream.Failure) -> Failure
         
         public let inner: MapError<Upstream, Failure>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.MapError<Upstream, Failure>, uuid: UUID) {
+        public init(inner: Publishers.MapError<Upstream, Failure>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5926,15 +5926,15 @@ extension Publishers {
         public let latest: Bool
         
         public let inner: Throttle<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Throttle<Upstream, Context>, uuid: UUID) {
+        public init(inner: Publishers.Throttle<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
             self.scheduler = inner.scheduler
             self.latest = inner.latest
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -5965,12 +5965,12 @@ extension Publishers {
         final public let upstream: Upstream
         
         public let inner: Share<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Share<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Share<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
 
         /// Returns a Boolean value that indicates whether two publishers are equivalent.
@@ -5979,7 +5979,7 @@ extension Publishers {
         ///   - rhs: Another `Share` publisher to compare for equality.
         /// - Returns: `true` if the publishers have reference equality (`===`); otherwise `false`.
         public static func == (lhs: Publishers.CZShare<Upstream>, rhs: Publishers.CZShare<Upstream>) -> Bool {
-            guard lhs.uuid == rhs.uuid else {
+            guard lhs.trid == rhs.trid else {
                 return false
             }
             return lhs.inner == rhs.inner
@@ -6010,13 +6010,13 @@ extension Publishers {
         public let areInIncreasingOrder: (Upstream.Output, Upstream.Output) -> Bool
         
         public let inner: Comparison<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Comparison<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Comparison<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.areInIncreasingOrder = inner.areInIncreasingOrder
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6040,13 +6040,13 @@ extension Publishers {
         public let areInIncreasingOrder: (Upstream.Output, Upstream.Output) throws -> Bool
         
         public let inner: TryComparison<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.TryComparison<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.TryComparison<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.areInIncreasingOrder = inner.areInIncreasingOrder
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6074,13 +6074,13 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: ReplaceEmpty<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.ReplaceEmpty<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.ReplaceEmpty<Upstream>, trid: UUID) {
             self.output = inner.output
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6104,13 +6104,13 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: ReplaceError<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.ReplaceError<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.ReplaceError<Upstream>, trid: UUID) {
             self.output = inner.output
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6146,15 +6146,15 @@ extension Publishers {
         public let line: UInt
         
         public let inner: AssertNoFailure<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.AssertNoFailure<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.AssertNoFailure<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.prefix = inner.prefix
             self.file = inner.file
             self.line = inner.line
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6182,13 +6182,13 @@ extension Publishers {
         public let other: Other
         
         public let inner: DropUntilOutput<Upstream, Other>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.DropUntilOutput<Upstream, Other>, uuid: UUID) {
+        public init(inner: Publishers.DropUntilOutput<Upstream, Other>, trid: UUID) {
             self.upstream = inner.upstream
             self.other = inner.other
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6228,9 +6228,9 @@ extension Publishers {
         public var receiveRequest: ((Subscribers.Demand) -> Void)?
         
         public let inner: HandleEvents<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.HandleEvents<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.HandleEvents<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.receiveSubscription = inner.receiveSubscription
             self.receiveOutput = inner.receiveOutput
@@ -6238,7 +6238,7 @@ extension Publishers {
             self.receiveCancel = inner.receiveCancel
             self.receiveRequest = inner.receiveRequest
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6266,13 +6266,13 @@ extension Publishers {
         public let suffix: Suffix
         
         public let inner: Concatenate<Prefix, Suffix>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Concatenate<Prefix, Suffix>, uuid: UUID) {
+        public init(inner: Publishers.Concatenate<Prefix, Suffix>, trid: UUID) {
             self.prefix = inner.prefix
             self.suffix = inner.suffix
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6306,15 +6306,15 @@ extension Publishers {
         public let options: Context.SchedulerOptions?
         
         public let inner: Debounce<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Publishers.Debounce<Upstream, Context>, uuid: UUID) {
+        public init(inner: Publishers.Debounce<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.dueTime = inner.dueTime
             self.scheduler = inner.scheduler
             self.options = inner.options
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6339,12 +6339,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: Last<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Last<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Last<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6367,13 +6367,13 @@ extension Publishers {
         public let transform: (Upstream.Output) -> Output
         
         public let inner: Map<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Map<Upstream, Output>, uuid: UUID) {
+        public init(inner: Publishers.Map<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6392,13 +6392,13 @@ extension Publishers {
         public let transform: (Upstream.Output) throws -> Output
         
         public let inner: TryMap<Upstream, Output>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.TryMap<Upstream, Output>, uuid: UUID) {
+        public init(inner: Publishers.TryMap<Upstream, Output>, trid: UUID) {
             self.upstream = inner.upstream
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6435,16 +6435,16 @@ extension Publishers {
         public let customError: (() -> Publishers.Timeout<Upstream, Context>.Failure)?
         
         public let inner: Timeout<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Timeout<Upstream, Context>, uuid: UUID) {
+        public init(inner: Publishers.Timeout<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
             self.scheduler = inner.scheduler
             self.options = inner.options
             self.customError = inner.customError
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6478,15 +6478,15 @@ extension Publishers {
         public let whenFull: Publishers.BufferingStrategy<Publishers.Buffer<Upstream>.Failure>
         
         public let inner: Buffer<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Buffer<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Buffer<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.size = inner.size
             self.prefetch = inner.prefetch
             self.whenFull = inner.whenFull
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6506,12 +6506,12 @@ extension Publishers {
         public let sequence: Elements
         
         public let inner: Sequence<Elements, Failure>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Sequence<Elements, Failure>, uuid: UUID) {
+        public init(inner: Publishers.Sequence<Elements, Failure>, trid: UUID) {
             self.sequence = inner.sequence
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6545,13 +6545,13 @@ extension Publishers {
         public let b: B
         
         public let inner: Zip<A, B>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Zip<A, B>, uuid: UUID) {
+        public init(inner: Publishers.Zip<A, B>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6582,14 +6582,14 @@ extension Publishers {
         public let c: C
         
         public let inner: Zip3<A, B, C>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Zip3<A, B, C>, uuid: UUID) {
+        public init(inner: Publishers.Zip3<A, B, C>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6623,15 +6623,15 @@ extension Publishers {
         public let d: D
         
         public let inner: Zip4<A, B, C, D>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Zip4<A, B, C, D>, uuid: UUID) {
+        public init(inner: Publishers.Zip4<A, B, C, D>, trid: UUID) {
             self.a = inner.a
             self.b = inner.b
             self.c = inner.c
             self.d = inner.d
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6659,13 +6659,13 @@ extension Publishers {
         public let range: CountableRange<Int>
         
         public let inner: Publishers.Output<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Output<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Output<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.range = inner.range
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6693,13 +6693,13 @@ extension Publishers {
         public let handler: (Upstream.Failure) -> NewPublisher
         
         public let inner: Catch<Upstream, NewPublisher>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Catch<Upstream, NewPublisher>, uuid: UUID) {
+        public init(inner: Publishers.Catch<Upstream, NewPublisher>, trid: UUID) {
             self.upstream = inner.upstream
             self.handler = inner.handler
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6725,13 +6725,13 @@ extension Publishers {
         public let handler: (Upstream.Failure) throws -> NewPublisher
         
         public let inner: TryCatch<Upstream, NewPublisher>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.TryCatch<Upstream, NewPublisher>, uuid: UUID) {
+        public init(inner: Publishers.TryCatch<Upstream, NewPublisher>, trid: UUID) {
             self.upstream = inner.upstream
             self.handler = inner.handler
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6762,14 +6762,14 @@ extension Publishers {
         public let transform: (Upstream.Output) -> NewPublisher
         
         public let inner: FlatMap<NewPublisher, Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.FlatMap<NewPublisher, Upstream>, uuid: UUID) {
+        public init(inner: Publishers.FlatMap<NewPublisher, Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.maxPublishers = inner.maxPublishers
             self.transform = inner.transform
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6806,16 +6806,16 @@ extension Publishers {
         public let options: Context.SchedulerOptions?
         
         public let inner: Delay<Upstream, Context>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Delay<Upstream, Context>, uuid: UUID) {
+        public init(inner: Publishers.Delay<Upstream, Context>, trid: UUID) {
             self.upstream = inner.upstream
             self.interval = inner.interval
             self.tolerance = inner.tolerance
             self.scheduler = inner.scheduler
             self.options = inner.options
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6843,13 +6843,13 @@ extension Publishers {
         public let count: Int
         
         public let inner: Drop<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.Drop<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.Drop<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.count = inner.count
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6874,12 +6874,12 @@ extension Publishers {
         public let upstream: Upstream
         
         public let inner: First<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.First<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.First<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6903,13 +6903,13 @@ extension Publishers {
         public let predicate: (Publishers.FirstWhere<Upstream>.Output) -> Bool
         
         public let inner: FirstWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.FirstWhere<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.FirstWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 
@@ -6933,13 +6933,13 @@ extension Publishers {
         public let predicate: (Publishers.TryFirstWhere<Upstream>.Output) throws -> Bool
         
         public let inner: TryFirstWhere<Upstream>
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Publishers.TryFirstWhere<Upstream>, uuid: UUID) {
+        public init(inner: Publishers.TryFirstWhere<Upstream>, trid: UUID) {
             self.upstream = inner.upstream
             self.predicate = inner.predicate
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -6948,11 +6948,11 @@ extension Publishers {
 extension Publishers.CZFilter {
 
     public func czFilter(_ isIncluded: @escaping (Publishers.Filter<Upstream>.Output) -> Bool) -> Publishers.CZFilter<Upstream> {
-        return Publishers.CZFilter(inner: self.inner.filter(isIncluded), uuid: self.uuid)
+        return Publishers.CZFilter(inner: self.inner.filter(isIncluded), trid: self.trid)
     }
 
     public func czTryFilter(_ isIncluded: @escaping (Publishers.Filter<Upstream>.Output) throws -> Bool) -> Publishers.CZTryFilter<Upstream> {
-        return Publishers.CZTryFilter(inner: self.inner.tryFilter(isIncluded), uuid: self.uuid)
+        return Publishers.CZTryFilter(inner: self.inner.tryFilter(isIncluded), trid: self.trid)
     }
 }
 
@@ -6960,11 +6960,11 @@ extension Publishers.CZFilter {
 extension Publishers.CZTryFilter {
 
     public func czFilter(_ isIncluded: @escaping (Publishers.TryFilter<Upstream>.Output) -> Bool) -> Publishers.CZTryFilter<Upstream> {
-        return Publishers.CZTryFilter(inner: self.inner.filter(isIncluded), uuid: self.uuid)
+        return Publishers.CZTryFilter(inner: self.inner.filter(isIncluded), trid: self.trid)
     }
 
     public func czTryFilter(_ isIncluded: @escaping (Publishers.TryFilter<Upstream>.Output) throws -> Bool) -> Publishers.CZTryFilter<Upstream> {
-        return Publishers.CZTryFilter(inner: self.inner.tryFilter(isIncluded), uuid: self.uuid)
+        return Publishers.CZTryFilter(inner: self.inner.tryFilter(isIncluded), trid: self.trid)
     }
 }
 
@@ -7083,11 +7083,11 @@ extension Publishers.CZCollectByCount : Equatable where Upstream : Equatable {
 extension Publishers.CZCompactMap {
 
     public func czCompactMap<T>(_ transform: @escaping (Output) -> T?) -> Publishers.CZCompactMap<Upstream, T> {
-        return Publishers.CZCompactMap(inner: self.inner.compactMap(transform), uuid: self.uuid)
+        return Publishers.CZCompactMap(inner: self.inner.compactMap(transform), trid: self.trid)
     }
 
     public func czMap<T>(_ transform: @escaping (Output) -> T) -> Publishers.CZCompactMap<Upstream, T> {
-        return Publishers.CZCompactMap(inner: self.inner.map(transform), uuid: self.uuid)
+        return Publishers.CZCompactMap(inner: self.inner.map(transform), trid: self.trid)
     }
 }
 
@@ -7095,7 +7095,7 @@ extension Publishers.CZCompactMap {
 extension Publishers.CZTryCompactMap {
 
     public func czCompactMap<T>(_ transform: @escaping (Output) throws -> T?) -> Publishers.CZTryCompactMap<Upstream, T> {
-        return Publishers.CZTryCompactMap(inner: self.inner.compactMap(transform), uuid: self.uuid)
+        return Publishers.CZTryCompactMap(inner: self.inner.compactMap(transform), trid: self.trid)
     }
 }
 
@@ -7323,11 +7323,11 @@ extension Publishers.CZLast : Equatable where Upstream : Equatable {
 extension Publishers.CZMap {
 
     public func czMap<T>(_ transform: @escaping (Output) -> T) -> Publishers.CZMap<Upstream, T> {
-        return Publishers.CZMap(inner: self.inner.map(transform), uuid: self.uuid)
+        return Publishers.CZMap(inner: self.inner.map(transform), trid: self.trid)
     }
 
     public func czTryMap<T>(_ transform: @escaping (Output) throws -> T) -> Publishers.CZTryMap<Upstream, T> {
-        return Publishers.CZTryMap(inner: self.inner.tryMap(transform), uuid: self.uuid)
+        return Publishers.CZTryMap(inner: self.inner.tryMap(transform), trid: self.trid)
     }
 }
 
@@ -7335,11 +7335,11 @@ extension Publishers.CZMap {
 extension Publishers.CZTryMap {
 
     public func czMap<T>(_ transform: @escaping (Output) -> T) -> Publishers.CZTryMap<Upstream, T>{
-        return Publishers.CZTryMap(inner: self.inner.map(transform), uuid: self.uuid)
+        return Publishers.CZTryMap(inner: self.inner.map(transform), trid: self.trid)
     }
 
     public func czTryMap<T>(_ transform: @escaping (Output) throws -> T) -> Publishers.CZTryMap<Upstream, T> {
-        return Publishers.CZTryMap(inner: self.inner.tryMap(transform), uuid: self.uuid)
+        return Publishers.CZTryMap(inner: self.inner.tryMap(transform), trid: self.trid)
     }
 }
 
@@ -7347,15 +7347,15 @@ extension Publishers.CZTryMap {
 extension Publishers.CZSequence where Failure == Never {
 
     public func czMin(by areInIncreasingOrder: (Publishers.Sequence<Elements, Failure>.Output, Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.min(by: areInIncreasingOrder), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.min(by: areInIncreasingOrder), trid: self.trid)
     }
 
     public func czMax(by areInIncreasingOrder: (Publishers.Sequence<Elements, Failure>.Output, Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.max(by: areInIncreasingOrder), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.max(by: areInIncreasingOrder), trid: self.trid)
     }
 
     public func czFirst(where predicate: (Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.first(where: predicate), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.first(where: predicate), trid: self.trid)
     }
 }
 
@@ -7363,75 +7363,75 @@ extension Publishers.CZSequence where Failure == Never {
 extension Publishers.CZSequence {
 
     public func czAllSatisfy(_ predicate: (Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Result<Bool, Failure>.CZPublisher {
-        return Result<Bool, Failure>.CZPublisher(inner: self.inner.allSatisfy(predicate), uuid: self.uuid)
+        return Result<Bool, Failure>.CZPublisher(inner: self.inner.allSatisfy(predicate), trid: self.trid)
     }
 
     public func czTryAllSatisfy(_ predicate: (Publishers.Sequence<Elements, Failure>.Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
-        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryAllSatisfy(predicate), uuid: self.uuid)
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryAllSatisfy(predicate), trid: self.trid)
     }
 
     public func czCollect() -> Result<[Publishers.Sequence<Elements, Failure>.Output], Failure>.CZPublisher {
-        return Result<[Publishers.Sequence<Elements, Failure>.Output], Failure>.CZPublisher(inner: self.inner.collect(), uuid: self.uuid)
+        return Result<[Publishers.Sequence<Elements, Failure>.Output], Failure>.CZPublisher(inner: self.inner.collect(), trid: self.trid)
     }
 
     public func czCompactMap<T>(_ transform: (Publishers.Sequence<Elements, Failure>.Output) -> T?) -> Publishers.CZSequence<[T], Failure> {
-        return Publishers.CZSequence<[T], Failure>(inner: self.inner.compactMap(transform), uuid: self.uuid)
+        return Publishers.CZSequence<[T], Failure>(inner: self.inner.compactMap(transform), trid: self.trid)
     }
 
     public func czContains(where predicate: (Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Result<Bool, Failure>.CZPublisher {
-        return Result<Bool, Failure>.CZPublisher(inner: self.inner.contains(where: predicate), uuid: self.uuid)
+        return Result<Bool, Failure>.CZPublisher(inner: self.inner.contains(where: predicate), trid: self.trid)
     }
 
     public func czTryContains(where predicate: (Publishers.Sequence<Elements, Failure>.Output) throws -> Bool) -> Result<Bool, Error>.CZPublisher {
-        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryContains(where: predicate), uuid: self.uuid)
+        return Result<Bool, Error>.CZPublisher(inner: self.inner.tryContains(where: predicate), trid: self.trid)
     }
 
     public func czDrop(while predicate: (Elements.Element) -> Bool) -> Publishers.CZSequence<DropWhileSequence<Elements>, Failure> {
-        return Publishers.CZSequence<DropWhileSequence<Elements>, Failure>(inner: self.inner.drop(while: predicate), uuid: self.uuid)
+        return Publishers.CZSequence<DropWhileSequence<Elements>, Failure>(inner: self.inner.drop(while: predicate), trid: self.trid)
     }
 
     public func czDropFirst(_ count: Int = 1) -> Publishers.CZSequence<DropFirstSequence<Elements>, Failure> {
-        return Publishers.CZSequence<DropFirstSequence<Elements>, Failure>(inner: self.inner.dropFirst(count), uuid: self.uuid)
+        return Publishers.CZSequence<DropFirstSequence<Elements>, Failure>(inner: self.inner.dropFirst(count), trid: self.trid)
     }
 
     public func czFilter(_ isIncluded: (Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure> {
-        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.filter(isIncluded), uuid: self.uuid)
+        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.filter(isIncluded), trid: self.trid)
     }
 
     public func czIgnoreOutput() -> CZEmpty<Publishers.Sequence<Elements, Failure>.Output, Failure> {
-        return CZEmpty<Publishers.Sequence<Elements, Failure>.Output, Failure>(inner: self.inner.ignoreOutput(), uuid: self.uuid)
+        return CZEmpty<Publishers.Sequence<Elements, Failure>.Output, Failure>(inner: self.inner.ignoreOutput(), trid: self.trid)
     }
 
     public func czMap<T>(_ transform: (Elements.Element) -> T) -> Publishers.CZSequence<[T], Failure> {
-        return Publishers.CZSequence<[T], Failure>(inner: self.inner.map(transform), uuid: self.uuid)
+        return Publishers.CZSequence<[T], Failure>(inner: self.inner.map(transform), trid: self.trid)
     }
 
     public func czPrefix(_ maxLength: Int) -> Publishers.CZSequence<PrefixSequence<Elements>, Failure> {
-        return Publishers.CZSequence<PrefixSequence<Elements>, Failure>(inner: self.inner.prefix(maxLength), uuid: self.uuid)
+        return Publishers.CZSequence<PrefixSequence<Elements>, Failure>(inner: self.inner.prefix(maxLength), trid: self.trid)
     }
 
     public func czPrefix(while predicate: (Elements.Element) -> Bool) -> Publishers.CZSequence<[Elements.Element], Failure> {
-        return Publishers.CZSequence<[Elements.Element], Failure>(inner: self.inner.prefix(while: predicate), uuid: self.uuid)
+        return Publishers.CZSequence<[Elements.Element], Failure>(inner: self.inner.prefix(while: predicate), trid: self.trid)
     }
 
     public func czReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Publishers.Sequence<Elements, Failure>.Output) -> T) -> Result<T, Failure>.CZPublisher {
-        return Result<T, Failure>.CZPublisher(inner: self.inner.reduce(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Failure>.CZPublisher(inner: self.inner.reduce(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func czTryReduce<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Publishers.Sequence<Elements, Failure>.Output) throws -> T) -> Result<T, Error>.CZPublisher {
-        return Result<T, Error>.CZPublisher(inner: self.inner.tryReduce(initialResult, nextPartialResult), uuid: self.uuid)
+        return Result<T, Error>.CZPublisher(inner: self.inner.tryReduce(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func czReplaceNil<T>(with output: T) -> Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure> where Elements.Element == T? {
-        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.replaceNil(with: output), uuid: self.uuid)
+        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.replaceNil(with: output), trid: self.trid)
     }
 
     public func czScan<T>(_ initialResult: T, _ nextPartialResult: @escaping (T, Publishers.Sequence<Elements, Failure>.Output) -> T) -> Publishers.CZSequence<[T], Failure> {
-        return Publishers.CZSequence<[T], Failure>(inner: self.inner.scan(initialResult, nextPartialResult), uuid: self.uuid)
+        return Publishers.CZSequence<[T], Failure>(inner: self.inner.scan(initialResult, nextPartialResult), trid: self.trid)
     }
 
     public func czSetFailureType<E>(to error: E.Type) -> Publishers.CZSequence<Elements, E> where E : Error {
-        return Publishers.CZSequence<Elements, E>(inner: self.inner.setFailureType(to: error), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, E>(inner: self.inner.setFailureType(to: error), trid: self.trid)
     }
 }
 
@@ -7439,11 +7439,11 @@ extension Publishers.CZSequence {
 extension Publishers.CZSequence where Elements.Element : Equatable {
 
     public func czRemoveDuplicates() -> Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure> {
-        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.removeDuplicates(), uuid: self.uuid)
+        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.removeDuplicates(), trid: self.trid)
     }
 
     public func czContains(_ output: Elements.Element) -> Result<Bool, Failure>.CZPublisher {
-        return Result<Bool, Failure>.CZPublisher(inner: self.inner.contains(output), uuid: self.uuid)
+        return Result<Bool, Failure>.CZPublisher(inner: self.inner.contains(output), trid: self.trid)
     }
 }
 
@@ -7451,11 +7451,11 @@ extension Publishers.CZSequence where Elements.Element : Equatable {
 extension Publishers.CZSequence where Failure == Never, Elements.Element : Comparable {
 
     public func czMin() -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.min(), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.min(), trid: self.trid)
     }
 
     public func czMax() -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.max(), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.max(), trid: self.trid)
     }
 }
 
@@ -7463,11 +7463,11 @@ extension Publishers.CZSequence where Failure == Never, Elements.Element : Compa
 extension Publishers.CZSequence where Elements : Collection, Failure == Never {
 
     public func czFirst() -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.first(), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.first(), trid: self.trid)
     }
 
     public func czOutput(at index: Elements.Index) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.output(at: index), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.output(at: index), trid: self.trid)
     }
 }
 
@@ -7475,11 +7475,11 @@ extension Publishers.CZSequence where Elements : Collection, Failure == Never {
 extension Publishers.CZSequence where Elements : Collection {
 
     public func czCount() -> Result<Int, Failure>.CZPublisher {
-        return Result<Int, Failure>.CZPublisher(inner: self.inner.count(), uuid: self.uuid)
+        return Result<Int, Failure>.CZPublisher(inner: self.inner.count(), trid: self.trid)
     }
 
     public func czOutput(in range: Range<Elements.Index>) -> Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure> {
-        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.output(in: range), uuid: self.uuid)
+        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.output(in: range), trid: self.trid)
     }
 }
 
@@ -7487,11 +7487,11 @@ extension Publishers.CZSequence where Elements : Collection {
 extension Publishers.CZSequence where Elements : BidirectionalCollection, Failure == Never {
 
     public func czLast() -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.last(), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.last(), trid: self.trid)
     }
 
     public func czLast(where predicate: (Publishers.Sequence<Elements, Failure>.Output) -> Bool) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.last(where: predicate), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.last(where: predicate), trid: self.trid)
     }
 }
 
@@ -7499,7 +7499,7 @@ extension Publishers.CZSequence where Elements : BidirectionalCollection, Failur
 extension Publishers.CZSequence where Elements : RandomAccessCollection, Failure == Never {
 
     public func czOutput(at index: Elements.Index) -> Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher {
-        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.output(at: index), uuid: self.uuid)
+        return Optional<Publishers.Sequence<Elements, Failure>.Output>.CZPublisher(inner: self.inner.output(at: index), trid: self.trid)
     }
 }
 
@@ -7507,7 +7507,7 @@ extension Publishers.CZSequence where Elements : RandomAccessCollection, Failure
 extension Publishers.CZSequence where Elements : RandomAccessCollection {
 
     public func czOutput(in range: Range<Elements.Index>) -> Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure> {
-        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.output(in: range), uuid: self.uuid)
+        return Publishers.CZSequence<[Publishers.Sequence<Elements, Failure>.Output], Failure>(inner: self.inner.output(in: range), trid: self.trid)
     }
 }
 
@@ -7515,7 +7515,7 @@ extension Publishers.CZSequence where Elements : RandomAccessCollection {
 extension Publishers.CZSequence where Elements : RandomAccessCollection, Failure == Never {
 
     public func czCount() -> CZJust<Int> {
-        return CZJust<Int>(inner: self.inner.count(), uuid: self.uuid)
+        return CZJust<Int>(inner: self.inner.count(), trid: self.trid)
     }
 }
 
@@ -7523,7 +7523,7 @@ extension Publishers.CZSequence where Elements : RandomAccessCollection, Failure
 extension Publishers.CZSequence where Elements : RandomAccessCollection {
 
     public func czCount() -> Result<Int, Failure>.CZPublisher {
-        return Result<Int, Failure>.CZPublisher(inner: self.inner.count(), uuid: self.uuid)
+        return Result<Int, Failure>.CZPublisher(inner: self.inner.count(), trid: self.trid)
     }
 }
 
@@ -7531,27 +7531,27 @@ extension Publishers.CZSequence where Elements : RandomAccessCollection {
 extension Publishers.CZSequence where Elements : RangeReplaceableCollection {
 
     public func czPrepend(_ elements: Publishers.Sequence<Elements, Failure>.Output...) -> Publishers.CZSequence<Elements, Failure> {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(elements), trid: self.trid)
     }
 
     public func czPrepend<S>(_ elements: S) -> Publishers.CZSequence<Elements, Failure> where S : Sequence, Elements.Element == S.Element {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(elements), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(elements), trid: self.trid)
     }
 
     public func czPrepend(_ publisher: Publishers.Sequence<Elements, Failure>) -> Publishers.CZSequence<Elements, Failure> {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(publisher), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.prepend(publisher), trid: self.trid)
     }
 
     public func czAppend(_ elements: Publishers.Sequence<Elements, Failure>.Output...) -> Publishers.CZSequence<Elements, Failure> {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(elements), trid: self.trid)
     }
 
     public func czAppend<S>(_ elements: S) -> Publishers.CZSequence<Elements, Failure> where S : Sequence, Elements.Element == S.Element {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(elements), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(elements), trid: self.trid)
     }
 
     public func czAppend(_ publisher: Publishers.Sequence<Elements, Failure>) -> Publishers.CZSequence<Elements, Failure> {
-        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(publisher), uuid: self.uuid)
+        return Publishers.CZSequence<Elements, Failure>(inner: self.inner.append(publisher), trid: self.trid)
     }
 }
 
@@ -7658,12 +7658,12 @@ public struct CZRecord<Output, Failure> : CZPublisher where Failure : Error {
     public let recording: Record<Output, Failure>.Recording
     
     public let inner: Record<Output, Failure>
-    public let uuid: UUID
+    public let trid: UUID
     
-    public init(inner: Record<Output, Failure>, uuid: UUID) {
+    public init(inner: Record<Output, Failure>, trid: UUID) {
         self.recording = inner.recording
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
 }
 
@@ -7672,7 +7672,7 @@ extension Optional {
 
     @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public var czPublisher: Optional<Wrapped>.CZPublisher {
-        return CZPublisher(inner: self.publisher, uuid: UUID())
+        return CZPublisher(inner: self.publisher, trid: UUID())
     }
 
     /// The type of a Combine publisher that publishes the value of a Swift optional instance to each subscriber exactly once, if the instance has any value at all.
@@ -7695,12 +7695,12 @@ extension Optional {
         public let output: Optional<Wrapped>.Publisher.Output?
         
         public let inner: Optional<Wrapped>.Publisher
-        public let uuid: UUID
+        public let trid: UUID
 
-        public init(inner: Optional<Wrapped>.Publisher, uuid: UUID) {
+        public init(inner: Optional<Wrapped>.Publisher, trid: UUID) {
             self.output = inner.output
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -7733,7 +7733,7 @@ extension Result {
     ///      // badResult done: failure(MyError)
     ///
     public var czPublisher: Result<Success, Failure>.CZPublisher {
-        return CZPublisher(inner: self.publisher, uuid: UUID())
+        return CZPublisher(inner: self.publisher, trid: UUID())
     }
 
     /// The type of a Combine publisher that publishes this instance’s result to each subscriber exactly once, or fails immediately if the result indicates failure.
@@ -7749,12 +7749,12 @@ extension Result {
         public let result: Result<Result<Success, Failure>.Publisher.Output, Failure>
         
         public let inner: Result<Success, Failure>.Publisher
-        public let uuid: UUID
+        public let trid: UUID
         
-        public init(inner: Result<Success, Failure>.Publisher, uuid: UUID) {
+        public init(inner: Result<Success, Failure>.Publisher, trid: UUID) {
             self.result = inner.result
             self.inner = inner
-            self.uuid = uuid
+            self.trid = trid
         }
     }
 }
@@ -7763,6 +7763,6 @@ extension Result {
 extension Sequence {
 
     public var czPublisher: Publishers.CZSequence<Self, Never> {
-        return Publishers.CZSequence(inner: self.publisher, uuid: self.publisher.generateUUID())
+        return Publishers.CZSequence(inner: self.publisher, trid: self.publisher.generateTrid())
     }
 }

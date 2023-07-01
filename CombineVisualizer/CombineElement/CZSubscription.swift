@@ -10,11 +10,11 @@ import Combine
 
 class CZSubscription : Subscription {
     let inner: Subscription
-    let uuid: UUID
+    let trid: UUID
     
-    init(_ inner: Subscription, uuid: UUID) {
+    init(_ inner: Subscription, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
     
     func request(_ demand: Subscribers.Demand) {
@@ -32,7 +32,7 @@ extension CZSubscription {
     func visualize(method: CombineElement.SubscriptionMethod) {
         CombineElement.subscription(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
-            uuid: self.uuid
+            trid: self.trid
         )
     }
 }

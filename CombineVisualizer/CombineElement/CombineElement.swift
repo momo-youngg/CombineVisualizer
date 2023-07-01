@@ -39,13 +39,13 @@ enum CombineElement {
 }
 
 extension CombineElement {
-    func visualize(name: String, uuid: UUID) {
+    func visualize(name: String, trid: UUID) {
         switch CombineVisualizerConfig.outputType {
         case .visualize(_):
-            self.sendToApplication(name: name, uuid: uuid)
+            self.sendToApplication(name: name, trid: trid)
         case .custom(let outputHandler):
             let outputInfo = OutputType.CustomOutputInfo(
-                uuid: uuid,
+                trid: trid,
                 element: self,
                 elementName: name,
                 queue: String(cString: __dispatch_queue_get_label(nil)),

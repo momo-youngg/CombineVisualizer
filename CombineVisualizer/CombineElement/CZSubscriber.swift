@@ -13,16 +13,16 @@ public class CZSubscriber<Inner: Subscriber> : Subscriber {
     public typealias Failure = Inner.Failure
     
     let inner: Inner
-    let uuid: UUID
+    let trid: UUID
     
-    init(_ inner: Inner, uuid: UUID) {
+    init(_ inner: Inner, trid: UUID) {
         self.inner = inner
-        self.uuid = uuid
+        self.trid = trid
     }
     
     public func receive(subscription: Subscription) {
         self.visualize(method: .receiveSubscription(String(describing: subscription).simpleTypeName))
-        let subscription = CZSubscription(subscription, uuid: self.uuid)
+        let subscription = CZSubscription(subscription, trid: self.trid)
         self.inner.receive(subscription: subscription)
     }
     
@@ -41,7 +41,7 @@ extension CZSubscriber {
     func visualize(method: CombineElement.SubscriberMethod) {
         CombineElement.subscriber(method).visualize(
             name: String(describing: self.inner.self).simpleTypeName,
-            uuid: self.uuid
+            trid: self.trid
         )
     }
 }

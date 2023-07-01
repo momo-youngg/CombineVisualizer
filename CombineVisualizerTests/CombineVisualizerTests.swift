@@ -30,6 +30,9 @@ class CombineVisualizerTests: XCTestCase {
         subject
             .czSubscribe(on: DispatchQueue.global(qos: .utility))
             .czReceive(on: DispatchQueue.global(qos: .background))
+            .czMap { $0 * $0 }
+            .czReceive(on: DispatchQueue.global(qos: .default))
+            .czFilter { $0 % 2 == 0 }
             .sink { num in print(num) }
             .store(in: &bag)
         

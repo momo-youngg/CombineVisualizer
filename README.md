@@ -1,3 +1,3 @@
-# CombineVisualizer2
+# CombineVisualizer
 
 A description of this package.

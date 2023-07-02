@@ -10,7 +10,7 @@ import Foundation
 public final class CombineVisualizerConfig {
     static var outputType: OutputType = .visualize(port: "8080")
     static var port: String = "8080"
-    public func setOutputType(_ outputType: OutputType) {
+    public static func setOutputType(_ outputType: OutputType) {
         Self.outputType = outputType
         if case .visualize(port: let port) = outputType {
             Self.port = port

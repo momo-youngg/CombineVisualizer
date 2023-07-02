@@ -13,19 +13,20 @@ To incorporate CombineVisualizer into your project, replace the standard Combine
 To use CombineVisualizer in your Combine-based project, follow these steps:
 
 - Import the CombineVisualizer library into your Xcode project.
+- Setting the port that will be used in [CombineVisualizerApplication](https://github.com/momo-youngg/CombineVisualizerApplication)
+```swift
+CombineVisualizerConfig.setOutputType(.visualize(port: "8080"))
+        
+// or you can set the custom handlers
+CombineVisualizerConfig.setOutputType(.custom({ info in
+    // do whatever you want
+}))
+```
 - Replace the standard Combine operators with their corresponding "cz" prefixed custom operators.
 - Build and run your project.
-- Observe the visual output on the screen, which will display the method invocation information in a clear and informative manner.
-- Example:
 ```swift
-Copy code
-import Combine
-import CombineVisualizer
-
-let publisher = // Create your publisher
-let subscriber = // Create your subscriber
-
 let cancellable = publisher
+    .czSubscribe(on: DispatchQueue.main)
     .czFilter { value in
         // Custom operator implementation
         return value > 0
@@ -34,15 +35,14 @@ let cancellable = publisher
         // Custom operator implementation
         return value * 2
     }
+    .czReceive(on: DispatchQueue.global())
     .sink(receiveCompletion: { completion in
         // Handle completion
     }, receiveValue: { value in
         // Handle value
     })
-
-// Perform operations with the Combine pipeline
-
-cancellable.cancel()
 ```
+- Observe the visual output on the screen(macOS application [CombineVisualizerApplication](https://github.com/momo-youngg/CombineVisualizerApplication)), which will display the method invocation information in a clear and informative manner.
+
 By using the custom operators provided by CombineVisualizer, you can observe the order and thread of method invocations as they occur during the execution of your Combine pipeline.
 

@@ -46,3 +46,5 @@ let cancellable = publisher
 
 By using the custom operators provided by CombineVisualizer, you can observe the order and thread of method invocations as they occur during the execution of your Combine pipeline.
 
+## Contact
+Any comments on this project are welcome. Feel free to register for the issue.

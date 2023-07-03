@@ -25,7 +25,12 @@ CombineVisualizerConfig.setOutputType(.custom({ info in
 - Replace the standard Combine operators with their corresponding "cz" prefixed custom operators.
 - Build and run your project.
 ```swift
-let cancellable = publisher
+let subject = CZPassthroughSubject(
+    inner: PassthroughSubject<Int, Never>(),
+    trid: UUID()
+)
+
+let cancellable = subject
     .czSubscribe(on: DispatchQueue.main)
     .czFilter { value in
         // Custom operator implementation
@@ -41,6 +46,9 @@ let cancellable = publisher
     }, receiveValue: { value in
         // Handle value
     })
+
+subject.send(1)
+subject.send(2)
 ```
 - Observe the visual output on the screen(macOS application [CombineVisualizerApplication](https://github.com/momo-youngg/CombineVisualizerApplication)), which will display the method invocation information in a clear and informative manner.
 
